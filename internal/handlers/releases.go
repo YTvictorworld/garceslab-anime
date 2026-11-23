@@ -27,6 +27,10 @@ func (h *Handler) HandleInstallLatestUpdate(c echo.Context) error {
 		return h.RespondWithError(c, errors.New("self-updating is not supported on mobile platforms"))
 	}
 
+	if h.App.Updater.IsDisabled() {
+		return h.RespondWithError(c, errors.New("self-updating is disabled in Garceslab Anime"))
+	}
+
 	if err := h.guardPrivilegedLocalExecution(c); err != nil {
 		return err
 	}

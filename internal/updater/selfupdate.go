@@ -77,6 +77,10 @@ func (su *SelfUpdater) Started() <-chan struct{} {
 }
 
 func (su *SelfUpdater) StartSelfUpdate(fallbackDestination string, releaseChannel string) {
+	if su.updater.IsDisabled() {
+		su.logger.Warn().Msg("selfupdate: Self-update is disabled in this build")
+		return
+	}
 	su.fallbackDest = fallbackDestination
 	if releaseChannel != "" {
 		su.updater.UpdateChannel = releaseChannel

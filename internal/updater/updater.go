@@ -11,6 +11,11 @@ import (
 	"github.com/samber/mo"
 )
 
+// UpdatesDisabled turns off update checks and self-updates in Garceslab Anime
+// (a fork of Seanime). Seanime's releases would replace the fork's binary, so
+// the updater never looks for them.
+const UpdatesDisabled = true
+
 const (
 	PatchRelease = "patch"
 	MinorRelease = "minor"
@@ -24,6 +29,9 @@ type (
 		LatestRelease       *Release
 		checkForUpdate      bool
 		UpdateChannel       string
+		// disabled is set in Garceslab Anime: the fork doesn't check for or
+		// install Seanime releases, so nobody "updates" to upstream by mistake.
+		disabled bool
 
 		logger         *zerolog.Logger
 		client         *http.Client
@@ -44,6 +52,7 @@ func New(currVersion string, logger *zerolog.Logger, wsEventManager events.WSEve
 		hasCheckedForUpdate: false,
 		checkForUpdate:      true,
 		UpdateChannel:       "github",
+		disabled:            UpdatesDisabled,
 
 		logger: logger,
 		client: &http.Client{
@@ -60,7 +69,7 @@ func New(currVersion string, logger *zerolog.Logger, wsEventManager events.WSEve
 }
 
 func (u *Updater) GetLatestUpdate() (*Update, error) {
-	if !u.checkForUpdate {
+	if u.disabled || !u.checkForUpdate {
 		return nil, nil
 	}
 
@@ -106,6 +115,11 @@ func (u *Updater) ShouldRefetchReleases() {
 		// Tell the client to send a request to fetch the latest release
 		u.wsEventManager.MustGet().SendEvent(events.CheckForUpdates, nil)
 	}
+}
+
+// IsDisabled reports whether update checks and self-updates are turned off in this build.
+func (u *Updater) IsDisabled() bool {
+	return u.disabled
 }
 
 func (u *Updater) SetEnabled(checkForUpdate bool) {

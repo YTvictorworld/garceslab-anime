@@ -136,6 +136,8 @@ func newUpdaterTestFixture(t *testing.T) *updaterTestFixture {
 func (f *updaterTestFixture) newUpdater(currVersion string, wsEventManager events.WSEventManagerInterface) *Updater {
 	updater := New(currVersion, util.NewLogger(), wsEventManager)
 	updater.client = f.server.Client()
+	// The tests exercise the update check itself, which the fork turns off.
+	updater.disabled = false
 	return updater
 }
 
