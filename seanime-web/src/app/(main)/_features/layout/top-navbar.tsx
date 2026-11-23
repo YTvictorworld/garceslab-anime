@@ -1,6 +1,7 @@
 import { LayoutHeaderBackground } from "@/app/(main)/_features/layout/_components/layout-header-background"
 import { TopMenu } from "@/app/(main)/_features/navigation/top-menu"
 import { OfflineTopMenu } from "@/app/(main)/_features/offline/_components/offline-top-menu"
+import { ProfileMenu } from "@/app/(main)/_features/profiles/profile-menu"
 import { ManualProgressTrackingButton } from "@/app/(main)/_features/progress-tracking/manual-progress-tracking"
 import { PlaybackManagerProgressTrackingButton } from "@/app/(main)/_features/progress-tracking/playback-manager-progress-tracking"
 import { useServerStatus } from "@/app/(main)/_hooks/use-server-status"
@@ -62,6 +63,7 @@ export function TopNavbar(props: TopNavbarProps) {
                         <div data-top-navbar-content-separator className="flex flex-1"></div>
                         <PluginSidebarTray place="top" />
                         {!isOffline && <ChapterDownloadsButton />}
+                        <ProfileMenu />
                         {/*{!isOffline && <RefreshAnilistButton />}*/}
                     </div>
                 </div>

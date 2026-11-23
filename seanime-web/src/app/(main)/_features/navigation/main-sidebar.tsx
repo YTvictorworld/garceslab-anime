@@ -1,10 +1,9 @@
 import { useRefreshAnimeCollection } from "@/api/hooks/anilist.hooks"
-import { useLogout } from "@/api/hooks/auth.hooks"
 import { useGetExtensionUpdateData as useGetExtensionUpdateData, usePluginWithIssuesCount } from "@/api/hooks/extensions.hooks"
-import { isLoginModalOpenAtom } from "@/app/(main)/_atoms/server-status.atoms"
 import { useSyncIsActive } from "@/app/(main)/_atoms/sync.atoms"
 import { ElectronUpdateModal } from "@/app/(main)/_electron/electron-update-modal"
 import { SidebarNavbar } from "@/app/(main)/_features/layout/top-navbar"
+import { ProfileMenu, useCurrentProfile, useSwitchProfile } from "@/app/(main)/_features/profiles/profile-menu"
 import { usePluginSidebarItems } from "@/app/(main)/_features/plugin/webview/plugin-sidebar"
 import { useSeaCommand } from "@/app/(main)/_features/sea-command/sea-command"
 import { UpdateModal } from "@/app/(main)/_features/update/update-modal"
@@ -12,32 +11,25 @@ import { useAutoDownloaderQueueCount } from "@/app/(main)/_hooks/autodownloader-
 import { useWebsocketMessageListener } from "@/app/(main)/_hooks/handle-websockets"
 import { useMissingEpisodeCount } from "@/app/(main)/_hooks/missing-episodes-loader"
 import { useCurrentUser, useServerStatus } from "@/app/(main)/_hooks/use-server-status"
-import { ConfirmationDialog, useConfirmationDialog } from "@/components/shared/confirmation-dialog"
-import { SeaLink } from "@/components/shared/sea-link"
 import { AppSidebar, useAppSidebarContext } from "@/components/ui/app-layout"
 import { Avatar } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Button, IconButton } from "@/components/ui/button"
+import { IconButton } from "@/components/ui/button"
 import { cn } from "@/components/ui/core/styling"
-import { DropdownMenu, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { defineSchema, Field, Form } from "@/components/ui/form"
 import { HoverCard } from "@/components/ui/hover-card"
-import { Modal } from "@/components/ui/modal"
 import { VerticalMenu, VerticalMenuItem } from "@/components/ui/vertical-menu"
-import { openTab } from "@/lib/helpers/browser"
 import { usePathname, useRouter } from "@/lib/navigation"
-import { ANILIST_OAUTH_URL, ANILIST_PIN_URL } from "@/lib/server/config"
 import { TORRENT_CLIENT, TORRENT_PROVIDER } from "@/lib/server/settings"
 import { WSEvents } from "@/lib/server/ws-events"
 import { useThemeSettings } from "@/lib/theme/theme-hooks"
 import { __isDesktop__, __isElectronDesktop__ } from "@/types/constants"
 import { useAtom } from "jotai"
 import React from "react"
-import { BiChevronRight, BiExtension, BiLogIn, BiLogOut } from "react-icons/bi"
-import { FiLogIn, FiSearch } from "react-icons/fi"
+import { BiChevronRight, BiExtension } from "react-icons/bi"
+import { FiSearch } from "react-icons/fi"
 import { HiOutlineServerStack } from "react-icons/hi2"
 import { IoCloudOfflineOutline, IoHomeOutline } from "react-icons/io5"
-import { LuBookOpen, LuCalendar, LuCompass, LuRefreshCw, LuRss, LuSettings } from "react-icons/lu"
+import { LuArrowLeftRight, LuBookOpen, LuCalendar, LuCompass, LuRefreshCw, LuRss, LuSettings } from "react-icons/lu"
 import { MdArrowForward } from "react-icons/md"
 import { MdArrowBack } from "react-icons/md"
 import { MdOutlineConnectWithoutContact } from "react-icons/md"
@@ -106,9 +98,6 @@ export function MainSidebar() {
 
     const containerRef = React.useRef<HTMLDivElement>(null)
 
-    // Logout
-    const { mutate: logout } = useLogout()
-
 
     const handleExpandSidebar = () => {
         if (!ctx.isBelowBreakpoint && ts.expandSidebarOnHover) {
@@ -150,8 +139,8 @@ export function MainSidebar() {
 
                 <div className="flex w-full gap-2 flex-col px-4 shrink-0 pb-2">
                     <SidebarUpdates isCollapsed={isCollapsed} />
-                    <SidebarFooter isCollapsed={isCollapsed} onLogout={logout} />
-                    <SidebarUser expandedSidebar={expandedSidebar} onLogout={logout} isCollapsed={isCollapsed} />
+                    <SidebarFooter isCollapsed={isCollapsed} />
+                    <SidebarUser expandedSidebar={expandedSidebar} isCollapsed={isCollapsed} />
                 </div>
             </AppSidebar>
         </>
@@ -484,7 +473,7 @@ function SidebarUpdates({ isCollapsed }: { isCollapsed: boolean }) {
     )
 }
 
-function SidebarFooter({ isCollapsed, onLogout }: { isCollapsed: boolean, onLogout: () => void }) {
+function SidebarFooter({ isCollapsed }: { isCollapsed: boolean }) {
     const ctx = useAppSidebarContext()
     const pathname = usePathname()
     const serverStatus = useServerStatus()
@@ -501,16 +490,9 @@ function SidebarFooter({ isCollapsed, onLogout }: { isCollapsed: boolean, onLogo
     const [nakamaModalOpen, setNakamaModalOpen] = useAtom(nakamaModalOpenAtom)
     const nakamaStatus = useNakamaStatus()
 
-    // Sign out
-    const confirmSignOut = useConfirmationDialog({
-        title: "Sign out",
-        description: "Are you sure you want to sign out?",
-        onConfirm: () => {
-            onLogout()
-        },
-    })
-    // Login
-    const [loginModal, setLoginModal] = useAtom(isLoginModalOpenAtom)
+    // Garceslab Anime: no AniList account; switch profile instead of signing out.
+    const switchProfile = useSwitchProfile()
+    const currentProfile = useCurrentProfile()
 
 
     return (
@@ -584,131 +566,45 @@ function SidebarFooter({ isCollapsed, onLogout }: { isCollapsed: boolean, onLogo
                         href: "/settings",
                         isCurrent: pathname === ("/settings"),
                     },
-                    ...(ctx.isBelowBreakpoint ? [
+                    ...((ctx.isBelowBreakpoint && currentProfile) ? [
                         {
-                            iconType: user?.isSimulated ? FiLogIn : BiLogOut,
-                            name: user?.isSimulated ? "Sign in" : "Sign out",
-                            onClick: user?.isSimulated ? () => setLoginModal(true) : confirmSignOut.open,
+                            iconType: LuArrowLeftRight,
+                            name: "Switch profile",
+                            onClick: switchProfile,
                         },
                     ] : []),
                 ]}
             />
-            <ConfirmationDialog {...confirmSignOut} />
         </div>
     )
 }
 
-function SidebarUser({ isCollapsed, expandedSidebar, onLogout }: { isCollapsed: boolean, expandedSidebar: boolean, onLogout: () => void }) {
+function SidebarUser({ isCollapsed, expandedSidebar }: { isCollapsed: boolean, expandedSidebar: boolean }) {
     const ctx = useAppSidebarContext()
     const user = useCurrentUser()
-    const router = useRouter()
+    const currentProfile = useCurrentProfile()
     const avatarSrc = useResolvedAnilistAvatarSrc(user?.viewer?.avatar)
 
-    const [dropdownOpen, setDropdownOpen] = React.useState(false)
-    const [loginModal, setLoginModal] = useAtom(isLoginModalOpenAtom)
-    const [loggingIn, setLoggingIn] = React.useState(false)
+    // Garceslab Anime: the profile replaces the AniList account (login/logout removed).
+    if (currentProfile) {
+        return <div className={cn("w-full flex p-2 pt-1", { "hidden": ctx.isBelowBreakpoint })}>
+            <ProfileMenu showName={expandedSidebar} className="w-full" />
+        </div>
+    }
 
-    // Sign out
-    const confirmSignOut = useConfirmationDialog({
-        title: "Sign out",
-        description: "Are you sure you want to sign out?",
-        onConfirm: () => {
-            onLogout()
-        },
-    })
+    if (!user) return null
 
     return (
-        <>
-            {!user && (
-                <div>
-                    <VerticalMenu
-                        collapsed={isCollapsed}
-                        itemClass="relative"
-                        onLinkItemClick={() => ctx.setOpen(false)}
-                        isSidebar
-                        items={[
-                            {
-                                iconType: FiLogIn,
-                                name: "Login",
-                                onClick: () => openTab(ANILIST_OAUTH_URL),
-                            },
-                        ]}
-                    />
-                </div>
-            )}
-            {!!user && <div className="flex w-full gap-2 flex-col">
-                <DropdownMenu
-                    trigger={<div
-                        className={cn(
-                            "w-full flex p-2 pt-1 items-center space-x-3",
-                            { "hidden": ctx.isBelowBreakpoint },
-                        )}
-                    >
-                        <Avatar size="sm" className="cursor-pointer" src={avatarSrc || undefined} />
-                        {expandedSidebar && <p className="truncate text-sm text-[--muted]">{user?.viewer?.name}</p>}
-                    </div>}
-                    open={dropdownOpen}
-                    onOpenChange={setDropdownOpen}
-                >
-                    {!user.isSimulated ? <DropdownMenuItem onClick={confirmSignOut.open}>
-                        <BiLogOut /> Sign out
-                    </DropdownMenuItem> : <DropdownMenuItem onClick={() => setLoginModal(true)}>
-                        <BiLogIn /> Log in with AniList
-                    </DropdownMenuItem>}
-                </DropdownMenu>
-            </div>}
-
-            <Modal
-                title="Log in with AniList"
-                description="Using an AniList account is recommended."
-                open={loginModal && user?.isSimulated}
-                onOpenChange={(v) => setLoginModal(v)}
-                overlayClass="bg-opacity-95 bg-gray-950"
-                contentClass="border"
+        <div className="flex w-full gap-2 flex-col">
+            <div
+                className={cn(
+                    "w-full flex p-2 pt-1 items-center space-x-3",
+                    { "hidden": ctx.isBelowBreakpoint },
+                )}
             >
-                <div className="mt-5 text-center space-y-4">
-
-                    <SeaLink
-                        href={ANILIST_PIN_URL}
-                        target="_blank"
-                    >
-                        <Button
-                            leftIcon={<svg
-                                xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="24" height="24"
-                                viewBox="0 0 24 24" role="img"
-                            >
-                                <path
-                                    d="M6.361 2.943 0 21.056h4.942l1.077-3.133H11.4l1.052 3.133H22.9c.71 0 1.1-.392 1.1-1.101V17.53c0-.71-.39-1.101-1.1-1.101h-6.483V4.045c0-.71-.392-1.102-1.101-1.102h-2.422c-.71 0-1.101.392-1.101 1.102v1.064l-.758-2.166zm2.324 5.948 1.688 5.018H7.144z"
-                                />
-                            </svg>}
-                            intent="white"
-                            size="md"
-                        >Get AniList token</Button>
-                    </SeaLink>
-
-                    <Form
-                        schema={defineSchema(({ z }) => z.object({
-                            token: z.string().min(1, "Token is required"),
-                        }))}
-                        onSubmit={data => {
-                            setLoggingIn(true)
-                            router.push("/auth/callback#access_token=" + data.token.trim())
-                            setLoginModal(false)
-                            setLoggingIn(false)
-                        }}
-                    >
-                        <Field.Textarea
-                            name="token"
-                            label="Enter the token"
-                            fieldClass="px-4"
-                        />
-                        <Field.Submit showLoadingOverlayOnSuccess loading={loggingIn}>Continue</Field.Submit>
-                    </Form>
-
-                </div>
-            </Modal>
-
-            <ConfirmationDialog {...confirmSignOut} />
-        </>
+                <Avatar size="sm" src={avatarSrc || undefined} />
+                {expandedSidebar && <p className="truncate text-sm text-[--muted]">{user?.viewer?.name}</p>}
+            </div>
+        </div>
     )
 }
