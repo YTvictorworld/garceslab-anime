@@ -19,6 +19,7 @@ import { cn } from "@/components/ui/core/styling"
 import { Select } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { TextInput } from "@/components/ui/text-input"
+import { SearchTypeahead } from "@/app/(main)/search/_components/search-typeahead"
 import { useDebounce } from "@/hooks/use-debounce"
 import { getYear } from "date-fns"
 import { useAtom } from "jotai/react"
@@ -253,12 +254,25 @@ function TitleInput() {
         setInputValue(params.title || "")
     }, [params.title])
 
+    // Garceslab Anime: suggestions while typing (the full results still follow the debounced title).
+    const [suggestionsOpen, setSuggestionsOpen] = useState(false)
+
     return (
-        <TextInput
-            ref={ref}
-            leftIcon={<FiSearch />} placeholder="Title" className="w-full"
-            value={inputValue}
-            onValueChange={v => setInputValue(v)}
-        />
+        <div className="relative w-full" data-search-title-input>
+            <TextInput
+                ref={ref}
+                leftIcon={<FiSearch />} placeholder="Title" className="w-full"
+                value={inputValue}
+                onValueChange={v => {
+                    setInputValue(v)
+                    setSuggestionsOpen(true)
+                }}
+                onFocus={() => setSuggestionsOpen(true)}
+                onBlur={() => setSuggestionsOpen(false)}
+                autoComplete="off"
+                role="combobox"
+            />
+            <SearchTypeahead query={inputValue} open={suggestionsOpen} onOpenChange={setSuggestionsOpen} inputRef={ref} />
+        </div>
     )
 }
