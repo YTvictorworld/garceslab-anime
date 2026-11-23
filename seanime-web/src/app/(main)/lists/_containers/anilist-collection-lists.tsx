@@ -60,7 +60,9 @@ export function AnilistCollectionLists() {
         customLists,
     } = useHandleUserAnilistLists(debouncedSearchInput)
 
-    const { data: stats, isLoading: statsLoading } = useGetAniListStats(!!serverStatus?.user && !serverStatus?.user?.isSimulated)
+    // Garceslab Anime: profiles compute their stats locally, so the simulated user has them too.
+    const statsAvailable = !!serverStatus?.user && (!serverStatus?.user?.isSimulated || !!serverStatus?.profiles?.enabled)
+    const { data: stats, isLoading: statsLoading } = useGetAniListStats(statsAvailable)
 
     const setParams = useSetAtom(__myListsSearch_paramsAtom)
 
@@ -93,7 +95,7 @@ export function AnilistCollectionLists() {
                             isCurrent: pageType === "manga",
                             onClick: () => setPageType("manga"),
                         }],
-                        ...[!serverStatus?.user?.isSimulated && {
+                        ...[statsAvailable && {
                             name: "Stats",
                             isCurrent: pageType === "stats",
                             onClick: () => setPageType("stats"),
@@ -155,7 +157,7 @@ export function AnilistCollectionLists() {
                     </div>
                 </PageWrapper>}
 
-                {pageType === "stats" && !serverStatus?.user?.isSimulated && <PageWrapper
+                {pageType === "stats" && statsAvailable && <PageWrapper
                     key="stats"
                     className="space-y-6"
                     {...{
