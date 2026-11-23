@@ -45,3 +45,5 @@ TestRefreshMangaCollectionRefreshesMutableEntries
 TestLoadConfig_IsolatedInstances
 # Flaky: passes locally, panics on the CI runner (playbackmanager.Cancel with a nil media player).
 TestPlaylistManagerPlayEpisodePrevious
+# Date-dependent: fails on a clean v3.10.5 checkout too (internal/library/autodownloader).
+TestComparison
