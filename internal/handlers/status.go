@@ -10,6 +10,7 @@ import (
 	"seanime/internal/constants"
 	"seanime/internal/core"
 	"seanime/internal/database/models"
+	"seanime/internal/profiles"
 	"seanime/internal/report"
 	"seanime/internal/user"
 	"seanime/internal/util"
@@ -48,6 +49,10 @@ type Status struct {
 	ServerReady           bool                          `json:"serverReady"`
 	ServerHasPassword     bool                          `json:"serverHasPassword"`
 	ShowChangelogTour     string                        `json:"showChangelogTour"`
+
+	// profiles-hook: local profiles (nil on restricted/unauthenticated status)
+	Profiles       *profiles.Status  `json:"profiles,omitempty"`
+	CurrentProfile *profiles.Profile `json:"currentProfile"`
 }
 
 var clientInfoCache = result.NewMap[string, util.ClientInfo]()
@@ -130,6 +135,8 @@ func (h *Handler) NewStatus(c echo.Context) *Status {
 		DisabledFeatures:      h.App.FeatureManager.DisabledFeatures,
 		ShowChangelogTour:     h.App.ShowTour,
 	}
+
+	h.fillProfilesStatus(c, status) // profiles-hook
 
 	return status
 }

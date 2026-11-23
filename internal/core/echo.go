@@ -73,7 +73,8 @@ func NewEchoApp(app *App, webFS *embed.FS) *echo.Echo {
 					strings.HasPrefix(cUrl.RequestURI(), "/events") ||
 					strings.HasPrefix(cUrl.RequestURI(), "/assets") ||
 					strings.HasPrefix(cUrl.RequestURI(), "/manga-downloads") ||
-					strings.HasPrefix(cUrl.RequestURI(), "/offline-assets") {
+					strings.HasPrefix(cUrl.RequestURI(), "/offline-assets") ||
+					strings.HasPrefix(cUrl.RequestURI(), "/profile-avatars/") { // profiles-hook: served by handlers
 					return true
 				}
 				return false

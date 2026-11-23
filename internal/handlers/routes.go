@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"seanime/internal/core"
+	"seanime/internal/profiles"
 	util "seanime/internal/util/proxies"
 	"strings"
 	"time"
@@ -32,6 +33,7 @@ func InitRoutes(app *core.App, e *echo.Echo) {
 		},
 		AllowHeaders: []string{"Origin", "Content-Type", "Accept", "Cookie", "Authorization",
 			"X-Seanime-Token", clientIdHeaderName, clientIdProofHeaderName, clientPlatformHeader,
+			profiles.HeaderName, // profiles-hook
 			"X-Seanime-Nakama-Token", "X-Seanime-Nakama-Username", "X-Seanime-Nakama-Server-Version", "X-Seanime-Nakama-Peer-Id"},
 		ExposeHeaders:    []string{clientIdHeaderName, clientIdProofHeaderName},
 		AllowCredentials: true,
@@ -117,7 +119,7 @@ func InitRoutes(app *core.App, e *echo.Echo) {
 
 	e.Use(headMethodMiddleware)
 
-	e.GET("/events", h.webSocketEventHandler)
+	e.GET("/events", h.webSocketEventHandler, h.profilesMiddleware()) // profiles-hook: ?profile= on the websocket
 
 	v1 := e.Group("/api").Group("/v1")
 
@@ -125,6 +127,7 @@ func InitRoutes(app *core.App, e *echo.Echo) {
 	// Auth middleware
 	//
 	v1.Use(h.OptionalAuthMiddleware)
+	v1.Use(h.profilesMiddleware()) // profiles-hook: resolve the request's profile after the server password check
 	v1.Use(h.FeaturesMiddleware)
 
 	imageProxy := &util.ImageProxy{}
@@ -136,6 +139,8 @@ func InitRoutes(app *core.App, e *echo.Echo) {
 	v1.HEAD("/proxy", h.VideoProxy)
 
 	v1.GET("/status", h.HandleGetStatus)
+
+	h.registerProfileRoutes(e, v1) // profiles-hook
 	v1.GET("/status/home-items", h.HandleGetHomeItems)
 	v1.POST("/status/home-items", h.HandleUpdateHomeItems)
 

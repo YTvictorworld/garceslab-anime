@@ -45,6 +45,7 @@ import (
 	"seanime/internal/platforms/simulated_platform"
 	"seanime/internal/playlist"
 	"seanime/internal/plugin"
+	"seanime/internal/profiles"
 	"seanime/internal/report"
 	"seanime/internal/torrent_clients/torrent_client"
 	"seanime/internal/torrents/torrent"
@@ -184,6 +185,9 @@ type (
 		// Show this version's tour on the frontend
 		// Hydrated by migrations.go when there's a version change
 		ShowTour string
+
+		// profiles-hook: local profiles manager (profiles.db)
+		Profiles *profiles.Service
 	}
 )
 
@@ -253,6 +257,9 @@ func NewApp(configOpts *ConfigOptions, selfupdater *updater.SelfUpdater) *App {
 	}
 
 	HandleNewDatabaseEntries(database, logger)
+
+	// profiles-hook: open profiles.db (fails startup if foreign keys are off)
+	profilesService := initProfiles(cfg, logger)
 
 	// Clean up old database entries using the cleanup manager to prevent concurrent access issues
 	database.RunDatabaseCleanup() // Remove old entries from all tables sequentially
@@ -463,7 +470,10 @@ func NewApp(configOpts *ConfigOptions, selfupdater *updater.SelfUpdater) *App {
 		isOfflineRef:                    isOfflineRef,
 		ServerPasswordHash:              serverPasswordHash,
 		ClientIdentitySecret:            util.GenerateCryptoID(),
+		Profiles:                        profilesService, // profiles-hook
 	}
+
+	app.AddCleanupFunction(func() { _ = profilesService.Close() }) // profiles-hook
 
 	plugin.GlobalAppContext.SetModulesPartial(plugin.AppContextModules{
 		PromptManager: extensionRepository.PromptManager(),
