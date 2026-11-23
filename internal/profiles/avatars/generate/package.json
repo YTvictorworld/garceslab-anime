@@ -1,0 +1,13 @@
+{
+  "name": "garceslab-profile-avatars",
+  "private": true,
+  "type": "module",
+  "description": "Generates the bundled profile avatar catalog from CC0 DiceBear styles.",
+  "scripts": {
+    "generate": "node generate.mjs"
+  },
+  "dependencies": {
+    "@dicebear/core": "10.7.0",
+    "@dicebear/styles": "10.6.0"
+  }
+}
