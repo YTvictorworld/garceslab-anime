@@ -32,7 +32,9 @@ type MiddlewareConfig struct {
 }
 
 // TokenFromRequest returns the profile token from the header, the cookie or (only
-// for /events) the query string.
+// for /events) the query string. On /events the query wins over the cookie: browsers
+// send the cookie of the last profile selected in any tab, while ?profile= is the
+// profile of the tab that opens the websocket.
 func TokenFromRequest(req *http.Request) string {
 	if req == nil {
 		return ""
@@ -40,11 +42,13 @@ func TokenFromRequest(req *http.Request) string {
 	if t := strings.TrimSpace(req.Header.Get(HeaderName)); t != "" {
 		return t
 	}
+	if req.URL != nil && req.URL.Path == "/events" {
+		if t := strings.TrimSpace(req.URL.Query().Get(QueryParam)); t != "" {
+			return t
+		}
+	}
 	if ck, err := req.Cookie(CookieName); err == nil && strings.TrimSpace(ck.Value) != "" {
 		return strings.TrimSpace(ck.Value)
-	}
-	if req.URL != nil && req.URL.Path == "/events" {
-		return strings.TrimSpace(req.URL.Query().Get(QueryParam))
 	}
 	return ""
 }

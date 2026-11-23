@@ -124,3 +124,20 @@ func TestIsPublicRoute(t *testing.T) {
 	assert.False(t, IsPublicRoute("GET", "/api/v1/continuity/history"))
 	assert.False(t, IsPublicRoute("GET", "/api/v1/settings"))
 }
+
+func TestTokenFromRequestPrecedence(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/events?profile=query", nil)
+	req.AddCookie(&http.Cookie{Name: CookieName, Value: "cookie"})
+	assert.Equal(t, "query", TokenFromRequest(req), "on /events the tab's ?profile= wins over the shared cookie")
+
+	req.Header.Set(HeaderName, "header")
+	assert.Equal(t, "header", TokenFromRequest(req))
+
+	req = httptest.NewRequest(http.MethodGet, "/events", nil)
+	req.AddCookie(&http.Cookie{Name: CookieName, Value: "cookie"})
+	assert.Equal(t, "cookie", TokenFromRequest(req))
+
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/status?profile=query", nil)
+	req.AddCookie(&http.Cookie{Name: CookieName, Value: "cookie"})
+	assert.Equal(t, "cookie", TokenFromRequest(req), "?profile= is only read on /events")
+}
