@@ -25,6 +25,8 @@ jobs:
       # main.go embeds web/; the real web build isn't needed for vet and tests.
       - name: Placeholder web folder
         run: mkdir -p web && echo ok > web/placeholder.txt
+      - name: Avatar catalog (licence, source, files)
+        run: go run .github/scripts/check-avatars.go
       - name: go vet
         # Seanime v3.10.5 already fails three vet checks (assign, copylocks, defers) in
         # code that hasn't been changed here (to fix later). Everything else is checked.
