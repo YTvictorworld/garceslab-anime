@@ -1,19 +1,15 @@
 import { API_ENDPOINTS } from "@/api/generated/endpoints"
+import { Status } from "@/api/generated/types"
 import { useGetStatus } from "@/api/hooks/status.hooks"
 import { serverAuthTokenAtom } from "@/app/(main)/_atoms/server-status.atoms"
 import { GettingStartedPage } from "@/app/(main)/_features/getting-started/getting-started-page"
+import { ProfilesGate } from "@/app/(main)/_features/profiles/profiles-gate"
 import { useServerStatus, useSetServerStatus } from "@/app/(main)/_hooks/use-server-status"
 import { LoadingOverlayWithLogo } from "@/components/shared/loading-overlay-with-logo"
 import { LuffyError } from "@/components/shared/luffy-error"
-import { AppLayoutStack } from "@/components/ui/app-layout"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { defineSchema, Field, Form } from "@/components/ui/form"
 import { logger } from "@/lib/helpers/debug"
-import { usePathname, useRouter } from "@/lib/navigation"
-import { ANILIST_OAUTH_URL, ANILIST_PIN_URL } from "@/lib/server/config"
+import { usePathname } from "@/lib/navigation"
 import { WSEvents } from "@/lib/server/ws-events"
-import { __isDesktop__ } from "@/types/constants"
 import { useQueryClient } from "@tanstack/react-query"
 import { useAtomValue } from "jotai"
 import React from "react"
@@ -33,7 +29,6 @@ export function ServerDataWrapper(props: ServerDataWrapperProps) {
     } = props
 
     const pathname = usePathname()
-    const router = useRouter()
     const serverStatus = useServerStatus()
     const setServerStatus = useSetServerStatus()
     const queryClient = useQueryClient()
@@ -59,6 +54,7 @@ export function ServerDataWrapper(props: ServerDataWrapperProps) {
     useWebsocketMessageListener({
         type: WSEvents.SETTINGS_CHANGED,
         onMessage: () => {
+            // The event carries no data; /status returns the effective settings of this tab's profile.
             logger("Data Wrapper").info("Settings changed, refetching server status")
             void queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.SETTINGS.GetSettings.key] })
             refetch()
@@ -102,18 +98,6 @@ export function ServerDataWrapper(props: ServerDataWrapperProps) {
     const currentServerStatus = resolvedServerStatus
 
     /**
-     * If the pathname is /auth/callback, show the callback page
-     */
-    if (pathname.startsWith("/auth/callback")) return children
-
-    /**
-     * If the server status doesn't have settings, show the getting started page
-     */
-    if (!currentServerStatus.settings) {
-        return <GettingStartedPage status={currentServerStatus} />
-    }
-
-    /**
      * If the app is updating, show a different screen
      */
     if (currentServerStatus.updating) {
@@ -127,92 +111,30 @@ export function ServerDataWrapper(props: ServerDataWrapperProps) {
         </div>
     }
 
+    // Garceslab Anime: "Who's watching?" / "Create your profile" before anything else.
+    // AniList login is gone (profiles never use an AniList account).
+    return (
+        <ProfilesGate status={currentServerStatus}>
+            <ServerDataContent status={currentServerStatus} pathname={pathname}>
+                {children}
+            </ServerDataContent>
+        </ProfilesGate>
+    )
+}
+
+function ServerDataContent({ status, pathname, children }: { status: Status, pathname: string, children?: React.ReactNode }) {
+    /**
+     * If the server status doesn't have settings, show the getting started page
+     */
+    if (!status.settings) {
+        return <GettingStartedPage status={status} />
+    }
+
     /**
      * Check feature flag routes
      */
-
-    if (!currentServerStatus.mediastreamSettings?.transcodeEnabled && pathname.startsWith("/mediastream")) {
+    if (!status.mediastreamSettings?.transcodeEnabled && pathname.startsWith("/mediastream")) {
         return <LuffyError title="Transcoding not enabled" />
-    }
-
-    if (!currentServerStatus.user && host === "127.0.0.1:43211" && !__isDesktop__) {
-        return <div className="container max-w-3xl py-10">
-            <Card className="md:py-10">
-                <AppLayoutStack>
-                    <div className="text-center space-y-4">
-                        <div className="mb-4 flex justify-center w-full">
-                            <img src="/garceslab-logo.png" alt="logo" className="w-24 h-auto" />
-                        </div>
-                        <h3>Welcome!</h3>
-                        <Button
-                            onClick={() => {
-                                const url = currentServerStatus.anilistClientId
-                                    ? `https://anilist.co/api/v2/oauth/authorize?client_id=${currentServerStatus.anilistClientId}&response_type=token`
-                                    : ANILIST_OAUTH_URL
-                                window.open(url, "_self")
-                            }}
-                            leftIcon={<svg
-                                xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="24" height="24"
-                                viewBox="0 0 24 24" role="img"
-                            >
-                                <path
-                                    d="M6.361 2.943 0 21.056h4.942l1.077-3.133H11.4l1.052 3.133H22.9c.71 0 1.1-.392 1.1-1.101V17.53c0-.71-.39-1.101-1.1-1.101h-6.483V4.045c0-.71-.392-1.102-1.101-1.102h-2.422c-.71 0-1.101.392-1.101 1.102v1.064l-.758-2.166zm2.324 5.948 1.688 5.018H7.144z"
-                                />
-                            </svg>}
-                            intent="primary"
-                            size="xl"
-                        >Log in with AniList</Button>
-                    </div>
-                </AppLayoutStack>
-            </Card>
-        </div>
-    } else if (!currentServerStatus.user) {
-        return <div className="container max-w-3xl py-10">
-            <Card className="md:py-10">
-                <AppLayoutStack>
-                    <div className="text-center space-y-4">
-                        <div className="mb-4 flex justify-center w-full">
-                            <img src="/garceslab-logo.png" alt="logo" className="w-24 h-auto" />
-                        </div>
-                        <h3>Welcome!</h3>
-                        <a
-                            href={ANILIST_PIN_URL}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <Button
-                                leftIcon={<svg
-                                    xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="24" height="24"
-                                    viewBox="0 0 24 24" role="img"
-                                >
-                                    <path
-                                        d="M6.361 2.943 0 21.056h4.942l1.077-3.133H11.4l1.052 3.133H22.9c.71 0 1.1-.392 1.1-1.101V17.53c0-.71-.39-1.101-1.1-1.101h-6.483V4.045c0-.71-.392-1.102-1.101-1.102h-2.422c-.71 0-1.101.392-1.101 1.102v1.064l-.758-2.166zm2.324 5.948 1.688 5.018H7.144z"
-                                    />
-                                </svg>}
-                                intent="white"
-                                size="md"
-                            >Get AniList token</Button>
-                        </a>
-
-                        <Form
-                            schema={defineSchema(({ z }) => z.object({
-                                token: z.string().min(1, "Token is required"),
-                            }))}
-                            onSubmit={data => {
-                                router.push("/auth/callback#access_token=" + data.token.trim())
-                            }}
-                        >
-                            <Field.Textarea
-                                name="token"
-                                label="Enter the token"
-                                fieldClass="px-4"
-                            />
-                            <Field.Submit showLoadingOverlayOnSuccess>Continue</Field.Submit>
-                        </Form>
-                    </div>
-                </AppLayoutStack>
-            </Card>
-        </div>
     }
 
     return children
