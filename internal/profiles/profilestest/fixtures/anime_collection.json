@@ -1,0 +1,531 @@
+{
+ "MediaListCollection": {
+  "lists": [
+   {
+    "status": "CURRENT",
+    "name": "Watching",
+    "isCustomList": false,
+    "entries": [
+     {
+      "id": 90001,
+      "createdAt": 1700090001,
+      "updatedAt": 1700190001,
+      "score": 0,
+      "progress": 5,
+      "status": "CURRENT",
+      "notes": null,
+      "repeat": 0,
+      "private": false,
+      "startedAt": {
+       "year": 2026,
+       "month": 10,
+       "day": 3
+      },
+      "completedAt": {
+       "year": null,
+       "month": null,
+       "day": null
+      },
+      "media": {
+       "id": 1002,
+       "idMal": 51002,
+       "siteUrl": "https://anilist.co/anime/1002",
+       "status": "RELEASING",
+       "season": "FALL",
+       "type": "ANIME",
+       "format": "TV",
+       "seasonYear": 2026,
+       "bannerImage": null,
+       "episodes": null,
+       "synonyms": [
+        "Fixture Beta (synthetic)"
+       ],
+       "isAdult": false,
+       "countryOfOrigin": "JP",
+       "meanScore": 70,
+       "description": "Synthetic fixture media for Garceslab Anime tests. Not a real title.",
+       "genres": [
+        "Drama"
+       ],
+       "duration": 24,
+       "trailer": null,
+       "title": {
+        "userPreferred": "Fixture Beta",
+        "romaji": "Fixture Beta",
+        "english": "Fixture Beta",
+        "native": null
+       },
+       "coverImage": {
+        "extraLarge": null,
+        "large": null,
+        "medium": null,
+        "color": "#336699"
+       },
+       "startDate": {
+        "year": 2026,
+        "month": 10,
+        "day": 2
+       },
+       "endDate": {
+        "year": null,
+        "month": null,
+        "day": null
+       },
+       "nextAiringEpisode": {
+        "airingAt": 1795000000,
+        "episode": 8,
+        "timeUntilAiring": 3600
+       }
+      }
+     }
+    ]
+   },
+   {
+    "status": "COMPLETED",
+    "name": "Completed",
+    "isCustomList": false,
+    "entries": [
+     {
+      "id": 90002,
+      "createdAt": 1700090002,
+      "updatedAt": 1700190002,
+      "score": 85,
+      "progress": 12,
+      "status": "COMPLETED",
+      "notes": "synthetic note",
+      "repeat": 1,
+      "private": false,
+      "startedAt": {
+       "year": 2019,
+       "month": 4,
+       "day": 6
+      },
+      "completedAt": {
+       "year": 2019,
+       "month": 7,
+       "day": 1
+      },
+      "media": {
+       "id": 1001,
+       "idMal": 51001,
+       "siteUrl": "https://anilist.co/anime/1001",
+       "status": "FINISHED",
+       "season": "SPRING",
+       "type": "ANIME",
+       "format": "TV",
+       "seasonYear": 2019,
+       "bannerImage": null,
+       "episodes": 12,
+       "synonyms": [
+        "Fixture Alpha (synthetic)"
+       ],
+       "isAdult": false,
+       "countryOfOrigin": "JP",
+       "meanScore": 70,
+       "description": "Synthetic fixture media for Garceslab Anime tests. Not a real title.",
+       "genres": [
+        "Action",
+        "Comedy"
+       ],
+       "duration": 24,
+       "trailer": null,
+       "title": {
+        "userPreferred": "Fixture Alpha",
+        "romaji": "Fixture Alpha",
+        "english": "Fixture Alpha",
+        "native": null
+       },
+       "coverImage": {
+        "extraLarge": null,
+        "large": null,
+        "medium": null,
+        "color": "#336699"
+       },
+       "startDate": {
+        "year": 2019,
+        "month": 4,
+        "day": 5
+       },
+       "endDate": {
+        "year": 2019,
+        "month": 6,
+        "day": 28
+       },
+       "nextAiringEpisode": null
+      }
+     },
+     {
+      "id": 90003,
+      "createdAt": 1700090003,
+      "updatedAt": 1700190003,
+      "score": 70,
+      "progress": 1,
+      "status": "COMPLETED",
+      "notes": null,
+      "repeat": 0,
+      "private": false,
+      "startedAt": {
+       "year": 2021,
+       "month": 8,
+       "day": 1
+      },
+      "completedAt": {
+       "year": 2021,
+       "month": 8,
+       "day": 1
+      },
+      "media": {
+       "id": 1003,
+       "idMal": 51003,
+       "siteUrl": "https://anilist.co/anime/1003",
+       "status": "FINISHED",
+       "season": "SUMMER",
+       "type": "ANIME",
+       "format": "MOVIE",
+       "seasonYear": 2021,
+       "bannerImage": null,
+       "episodes": 1,
+       "synonyms": [
+        "Fixture Gamma Movie (synthetic)"
+       ],
+       "isAdult": false,
+       "countryOfOrigin": "JP",
+       "meanScore": 70,
+       "description": "Synthetic fixture media for Garceslab Anime tests. Not a real title.",
+       "genres": [
+        "Fantasy"
+       ],
+       "duration": 110,
+       "trailer": null,
+       "title": {
+        "userPreferred": "Fixture Gamma Movie",
+        "romaji": "Fixture Gamma Movie",
+        "english": "Fixture Gamma Movie",
+        "native": null
+       },
+       "coverImage": {
+        "extraLarge": null,
+        "large": null,
+        "medium": null,
+        "color": "#336699"
+       },
+       "startDate": {
+        "year": 2021,
+        "month": 7,
+        "day": 16
+       },
+       "endDate": {
+        "year": 2021,
+        "month": 7,
+        "day": 16
+       },
+       "nextAiringEpisode": null
+      }
+     }
+    ]
+   },
+   {
+    "status": "PLANNING",
+    "name": "Planning",
+    "isCustomList": false,
+    "entries": [
+     {
+      "id": 90004,
+      "createdAt": 1700090004,
+      "updatedAt": 1700190004,
+      "score": 0,
+      "progress": 0,
+      "status": "PLANNING",
+      "notes": null,
+      "repeat": 0,
+      "private": false,
+      "startedAt": {
+       "year": null,
+       "month": null,
+       "day": null
+      },
+      "completedAt": {
+       "year": null,
+       "month": null,
+       "day": null
+      },
+      "media": {
+       "id": 1006,
+       "idMal": 51006,
+       "siteUrl": "https://anilist.co/anime/1006",
+       "status": "NOT_YET_RELEASED",
+       "season": "SPRING",
+       "type": "ANIME",
+       "format": "TV",
+       "seasonYear": 2027,
+       "bannerImage": null,
+       "episodes": 13,
+       "synonyms": [
+        "Fixture Zeta (synthetic)"
+       ],
+       "isAdult": false,
+       "countryOfOrigin": "JP",
+       "meanScore": 70,
+       "description": "Synthetic fixture media for Garceslab Anime tests. Not a real title.",
+       "genres": [
+        "Romance"
+       ],
+       "duration": 24,
+       "trailer": null,
+       "title": {
+        "userPreferred": "Fixture Zeta",
+        "romaji": "Fixture Zeta",
+        "english": "Fixture Zeta",
+        "native": null
+       },
+       "coverImage": {
+        "extraLarge": null,
+        "large": null,
+        "medium": null,
+        "color": "#336699"
+       },
+       "startDate": {
+        "year": 2027,
+        "month": 4,
+        "day": 1
+       },
+       "endDate": {
+        "year": null,
+        "month": null,
+        "day": null
+       },
+       "nextAiringEpisode": null
+      }
+     }
+    ]
+   },
+   {
+    "status": "PAUSED",
+    "name": "Paused",
+    "isCustomList": false,
+    "entries": [
+     {
+      "id": 90005,
+      "createdAt": 1700090005,
+      "updatedAt": 1700190005,
+      "score": 60,
+      "progress": 10,
+      "status": "PAUSED",
+      "notes": null,
+      "repeat": 0,
+      "private": true,
+      "startedAt": {
+       "year": 2020,
+       "month": 1,
+       "day": 1
+      },
+      "completedAt": {
+       "year": null,
+       "month": null,
+       "day": null
+      },
+      "media": {
+       "id": 1004,
+       "idMal": 51004,
+       "siteUrl": "https://anilist.co/anime/1004",
+       "status": "FINISHED",
+       "season": "WINTER",
+       "type": "ANIME",
+       "format": "TV",
+       "seasonYear": 2015,
+       "bannerImage": null,
+       "episodes": 24,
+       "synonyms": [
+        "Fixture Delta (synthetic)"
+       ],
+       "isAdult": false,
+       "countryOfOrigin": "JP",
+       "meanScore": 70,
+       "description": "Synthetic fixture media for Garceslab Anime tests. Not a real title.",
+       "genres": [
+        "Action",
+        "Sci-Fi"
+       ],
+       "duration": 23,
+       "trailer": null,
+       "title": {
+        "userPreferred": "Fixture Delta",
+        "romaji": "Fixture Delta",
+        "english": "Fixture Delta",
+        "native": null
+       },
+       "coverImage": {
+        "extraLarge": null,
+        "large": null,
+        "medium": null,
+        "color": "#336699"
+       },
+       "startDate": {
+        "year": 2015,
+        "month": 1,
+        "day": 9
+       },
+       "endDate": {
+        "year": 2015,
+        "month": 6,
+        "day": 26
+       },
+       "nextAiringEpisode": null
+      }
+     }
+    ]
+   },
+   {
+    "status": "REPEATING",
+    "name": "Rewatching",
+    "isCustomList": false,
+    "entries": [
+     {
+      "id": 90006,
+      "createdAt": 1700090006,
+      "updatedAt": 1700190006,
+      "score": 75,
+      "progress": 1,
+      "status": "REPEATING",
+      "notes": null,
+      "repeat": 2,
+      "private": false,
+      "startedAt": {
+       "year": 2021,
+       "month": 1,
+       "day": 2
+      },
+      "completedAt": {
+       "year": 2021,
+       "month": 1,
+       "day": 3
+      },
+      "media": {
+       "id": 1005,
+       "idMal": 51005,
+       "siteUrl": "https://anilist.co/anime/1005",
+       "status": "FINISHED",
+       "season": "FALL",
+       "type": "ANIME",
+       "format": "OVA",
+       "seasonYear": 2020,
+       "bannerImage": null,
+       "episodes": 2,
+       "synonyms": [
+        "Fixture Epsilon (synthetic)"
+       ],
+       "isAdult": false,
+       "countryOfOrigin": "JP",
+       "meanScore": 70,
+       "description": "Synthetic fixture media for Garceslab Anime tests. Not a real title.",
+       "genres": [
+        "Comedy"
+       ],
+       "duration": 30,
+       "trailer": null,
+       "title": {
+        "userPreferred": "Fixture Epsilon",
+        "romaji": "Fixture Epsilon",
+        "english": "Fixture Epsilon",
+        "native": null
+       },
+       "coverImage": {
+        "extraLarge": null,
+        "large": null,
+        "medium": null,
+        "color": "#336699"
+       },
+       "startDate": {
+        "year": 2020,
+        "month": 12,
+        "day": 1
+       },
+       "endDate": {
+        "year": 2020,
+        "month": 12,
+        "day": 15
+       },
+       "nextAiringEpisode": null
+      }
+     }
+    ]
+   },
+   {
+    "status": null,
+    "name": "Fixture Custom",
+    "isCustomList": true,
+    "entries": [
+     {
+      "id": 90002,
+      "createdAt": 1700090002,
+      "updatedAt": 1700190002,
+      "score": 85,
+      "progress": 12,
+      "status": "COMPLETED",
+      "notes": "synthetic note",
+      "repeat": 1,
+      "private": false,
+      "startedAt": {
+       "year": 2019,
+       "month": 4,
+       "day": 6
+      },
+      "completedAt": {
+       "year": 2019,
+       "month": 7,
+       "day": 1
+      },
+      "media": {
+       "id": 1001,
+       "idMal": 51001,
+       "siteUrl": "https://anilist.co/anime/1001",
+       "status": "FINISHED",
+       "season": "SPRING",
+       "type": "ANIME",
+       "format": "TV",
+       "seasonYear": 2019,
+       "bannerImage": null,
+       "episodes": 12,
+       "synonyms": [
+        "Fixture Alpha (synthetic)"
+       ],
+       "isAdult": false,
+       "countryOfOrigin": "JP",
+       "meanScore": 70,
+       "description": "Synthetic fixture media for Garceslab Anime tests. Not a real title.",
+       "genres": [
+        "Action",
+        "Comedy"
+       ],
+       "duration": 24,
+       "trailer": null,
+       "title": {
+        "userPreferred": "Fixture Alpha",
+        "romaji": "Fixture Alpha",
+        "english": "Fixture Alpha",
+        "native": null
+       },
+       "coverImage": {
+        "extraLarge": null,
+        "large": null,
+        "medium": null,
+        "color": "#336699"
+       },
+       "startDate": {
+        "year": 2019,
+        "month": 4,
+        "day": 5
+       },
+       "endDate": {
+        "year": 2019,
+        "month": 6,
+        "day": 28
+       },
+       "nextAiringEpisode": null
+      }
+     }
+    ]
+   }
+  ]
+ }
+}
