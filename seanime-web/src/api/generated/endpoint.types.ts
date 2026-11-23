@@ -1857,6 +1857,120 @@ export type SelectProfile_Variables = {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// profiles_data
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * - Filepath: internal/handlers/profiles_data.go
+ * - Filename: profiles_data.go
+ * - Endpoint: /api/v1/profiles/me/lists/{listId}
+ * @description
+ * Route deletes a custom list of the current profile (the entries stay in the list).
+ */
+export type DeleteMyCustomList_Variables = {
+    /**
+     *  The custom list ID
+     */
+    listId: number
+}
+
+/**
+ * - Filepath: internal/handlers/profiles_data.go
+ * - Filename: profiles_data.go
+ * - Endpoint: /api/v1/profiles/me/lists/{listId}/items/{mediaId}
+ * @description
+ * Route adds a media of the current profile's list to one of its custom lists.
+ */
+export type AddToMyCustomList_Variables = {
+    /**
+     *  The custom list ID
+     */
+    listId: number
+    /**
+     *  The AniList media ID
+     */
+    mediaId: number
+}
+
+/**
+ * - Filepath: internal/handlers/profiles_data.go
+ * - Filename: profiles_data.go
+ * - Endpoint: /api/v1/profiles/me/lists/{listId}/items/{mediaId}
+ * @description
+ * Route removes a media from one of the current profile's custom lists.
+ */
+export type RemoveFromMyCustomList_Variables = {
+    /**
+     *  The custom list ID
+     */
+    listId: number
+    /**
+     *  The AniList media ID
+     */
+    mediaId: number
+}
+
+/**
+ * - Filepath: internal/handlers/profiles_data.go
+ * - Filename: profiles_data.go
+ * - Endpoint: /api/v1/profiles/{id}/import/anilist
+ * @description
+ * Route imports the public AniList anime list of a user into a profile (anonymous, no token).
+ */
+export type ImportProfileAnilist_Variables = {
+    /**
+     *  The profile ID
+     */
+    id: number
+}
+
+/**
+ * - Filepath: internal/handlers/profiles_data.go
+ * - Filename: profiles_data.go
+ * - Endpoint: /api/v1/profiles/{id}/import/server-account
+ * @description
+ * Route imports the server's existing AniList account list (its cached collection or its public list) into a profile.
+ */
+export type ImportProfileServerAccount_Variables = {
+    /**
+     *  The profile ID
+     */
+    id: number
+}
+
+/**
+ * - Filepath: internal/handlers/profiles_data.go
+ * - Filename: profiles_data.go
+ * - Endpoint: /api/v1/profiles/{id}/import/json
+ * @description
+ * Route imports a profile export (or an AniList-shaped anime collection) into a profile.
+ */
+export type ImportProfileJSON_Variables = {
+    /**
+     *  The profile ID
+     */
+    id: number
+}
+
+/**
+ * - Filepath: internal/handlers/profiles_data.go
+ * - Filename: profiles_data.go
+ * - Endpoint: /api/v1/profiles/{id}/export
+ * @description
+ * Route exports everything a profile owns as JSON (lists, custom lists, favourites, history, settings, activity).
+ */
+export type ExportProfile_Variables = {
+    /**
+     *  The profile ID
+     */
+    id: number
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// profiles_m2_test
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // profiles_test
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -2043,6 +2043,78 @@ export const API_ENDPOINTS = {
             endpoint: "/api/v1/profiles/audit",
         },
     },
+    PROFILES_DATA: {
+        GetMyProfileSettings: {
+            key: "PROFILES-DATA-get-my-profile-settings",
+            methods: ["GET"],
+            endpoint: "/api/v1/profiles/me/settings",
+        },
+        PatchMyProfileSettings: {
+            key: "PROFILES-DATA-patch-my-profile-settings",
+            methods: ["PATCH"],
+            endpoint: "/api/v1/profiles/me/settings",
+        },
+        GetMyCustomLists: {
+            key: "PROFILES-DATA-get-my-custom-lists",
+            methods: ["GET"],
+            endpoint: "/api/v1/profiles/me/lists",
+        },
+        CreateMyCustomList: {
+            key: "PROFILES-DATA-create-my-custom-list",
+            methods: ["POST"],
+            endpoint: "/api/v1/profiles/me/lists",
+        },
+        DeleteMyCustomList: {
+            key: "PROFILES-DATA-delete-my-custom-list",
+            methods: ["DELETE"],
+            endpoint: "/api/v1/profiles/me/lists/{listId}",
+        },
+        AddToMyCustomList: {
+            key: "PROFILES-DATA-add-to-my-custom-list",
+            methods: ["POST"],
+            endpoint: "/api/v1/profiles/me/lists/{listId}/items/{mediaId}",
+        },
+        RemoveFromMyCustomList: {
+            key: "PROFILES-DATA-remove-from-my-custom-list",
+            methods: ["DELETE"],
+            endpoint: "/api/v1/profiles/me/lists/{listId}/items/{mediaId}",
+        },
+        GetMyActivity: {
+            key: "PROFILES-DATA-get-my-activity",
+            methods: ["GET"],
+            endpoint: "/api/v1/profiles/me/activity",
+        },
+        ImportProfileAnilist: {
+            key: "PROFILES-DATA-import-profile-anilist",
+            methods: ["POST"],
+            endpoint: "/api/v1/profiles/{id}/import/anilist",
+        },
+        /**
+         *  @description
+         *  Route imports the server's existing AniList account list (its cached collection or its public list) into a profile.
+         *  The account's token is never used. After the import the token can be removed (plan: one-time migration).
+         */
+        ImportProfileServerAccount: {
+            key: "PROFILES-DATA-import-profile-server-account",
+            methods: ["POST"],
+            endpoint: "/api/v1/profiles/{id}/import/server-account",
+        },
+        /**
+         *  @description
+         *  Route imports a profile export (or an AniList-shaped anime collection) into a profile.
+         *  Body: {"mode": "merge"|"replace", "data": <export JSON>}.
+         */
+        ImportProfileJSON: {
+            key: "PROFILES-DATA-import-profile-j-s-o-n",
+            methods: ["POST"],
+            endpoint: "/api/v1/profiles/{id}/import/json",
+        },
+        ExportProfile: {
+            key: "PROFILES-DATA-export-profile",
+            methods: ["GET"],
+            endpoint: "/api/v1/profiles/{id}/export",
+        },
+    },
     RELEASES: {
         /**
          *  @description

@@ -28361,6 +28361,35 @@
         "required": false,
         "public": false,
         "comments": []
+      },
+      {
+        "name": "store",
+        "jsonName": "store",
+        "goType": "HistoryStore",
+        "typescriptType": "Continuity_HistoryStore",
+        "usedTypescriptType": "Continuity_HistoryStore",
+        "usedStructName": "continuity.HistoryStore",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "backgroundCtx",
+        "jsonName": "backgroundCtx",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "settingsFor",
+        "jsonName": "settingsFor",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
       }
     ],
     "comments": []
@@ -29175,6 +29204,17 @@
         "typescriptType": "Service",
         "usedTypescriptType": "Service",
         "usedStructName": "profiles.Service",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ProfilesRuntime",
+        "jsonName": "ProfilesRuntime",
+        "goType": "ProfilesRuntime",
+        "typescriptType": "INTERNAL_ProfilesRuntime",
+        "usedTypescriptType": "INTERNAL_ProfilesRuntime",
+        "usedStructName": "core.ProfilesRuntime",
         "required": false,
         "public": true,
         "comments": []
@@ -30102,6 +30142,161 @@
       }
     ],
     "comments": []
+  },
+  {
+    "filepath": "../internal/core/profiles.go",
+    "filename": "profiles.go",
+    "name": "ProfilesRuntime",
+    "formattedName": "INTERNAL_ProfilesRuntime",
+    "package": "core",
+    "fields": [
+      {
+        "name": "Service",
+        "jsonName": "Service",
+        "goType": "profiles.Service",
+        "typescriptType": "Service",
+        "usedTypescriptType": "Service",
+        "usedStructName": "profiles.Service",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Router",
+        "jsonName": "Router",
+        "goType": "router.Router",
+        "typescriptType": "Router",
+        "usedTypescriptType": "Router",
+        "usedStructName": "router.Router",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Meta",
+        "jsonName": "Meta",
+        "goType": "metadata.Service",
+        "typescriptType": "Metadata_Service",
+        "usedTypescriptType": "Metadata_Service",
+        "usedStructName": "metadata.Service",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Lane",
+        "jsonName": "Lane",
+        "goType": "profiles.PlaybackLane",
+        "typescriptType": "PlaybackLane",
+        "usedTypescriptType": "PlaybackLane",
+        "usedStructName": "profiles.PlaybackLane",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Tags",
+        "jsonName": "Tags",
+        "goType": "profilews.Tags",
+        "typescriptType": "Tags",
+        "usedTypescriptType": "Tags",
+        "usedStructName": "profilews.Tags",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Settings",
+        "jsonName": "Settings",
+        "goType": "settings.Store",
+        "typescriptType": "Store",
+        "usedTypescriptType": "Store",
+        "usedStructName": "settings.Store",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "History",
+        "jsonName": "History",
+        "goType": "history.Store",
+        "typescriptType": "Store",
+        "usedTypescriptType": "Store",
+        "usedStructName": "history.Store",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "DirectAnilist",
+        "jsonName": "DirectAnilist",
+        "goType": "anilist.AnilistClient",
+        "typescriptType": "AL_AnilistClient",
+        "usedTypescriptType": "AL_AnilistClient",
+        "usedStructName": "anilist.AnilistClient",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "lanePlatformRef",
+        "jsonName": "lanePlatformRef",
+        "goType": "",
+        "typescriptType": "any",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "laneWS",
+        "jsonName": "laneWS",
+        "goType": "profilews.ProfileWS",
+        "typescriptType": "ProfileWS",
+        "usedTypescriptType": "ProfileWS",
+        "usedStructName": "profilews.ProfileWS",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "logger",
+        "jsonName": "logger",
+        "goType": "zerolog.Logger",
+        "typescriptType": "Logger",
+        "usedTypescriptType": "Logger",
+        "usedStructName": "zerolog.Logger",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "watchMu",
+        "jsonName": "watchMu",
+        "goType": "sync.Mutex",
+        "typescriptType": "Mutex",
+        "usedTypescriptType": "Mutex",
+        "usedStructName": "sync.Mutex",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "watchRecent",
+        "jsonName": "watchRecent",
+        "goType": "map[string]time.Time",
+        "typescriptType": "Record\u003cstring, string\u003e",
+        "usedStructName": "time.Time",
+        "required": false,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ProfilesRuntime is everything the local profiles add at runtime: the router",
+      " platform behind AnilistPlatformRef, the playback lane (phase 1: one global",
+      " playback, owned by the profile that started it), websocket tagging, the",
+      " per-profile settings and watch history."
+    ]
   },
   {
     "filepath": "../internal/cron/cron.go",
@@ -45865,6 +46060,142 @@
       }
     ],
     "comments": []
+  },
+  {
+    "filepath": "../internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "name": "ProfileSettingsResponse",
+    "formattedName": "ProfileSettingsResponse",
+    "package": "handlers",
+    "fields": [
+      {
+        "name": "Profile",
+        "jsonName": "profile",
+        "goType": "settings.ProfileSettings",
+        "typescriptType": "ProfileSettings",
+        "usedTypescriptType": "ProfileSettings",
+        "usedStructName": "settings.ProfileSettings",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Effective",
+        "jsonName": "effective",
+        "goType": "models.Settings",
+        "typescriptType": "Models_Settings",
+        "usedTypescriptType": "Models_Settings",
+        "usedStructName": "models.Settings",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MarkWatchingOnStart",
+        "jsonName": "markWatchingOnStart",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CompletedAction",
+        "jsonName": "completedAction",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ProfileSettingsResponse is the current profile's settings."
+    ]
+  },
+  {
+    "filepath": "../internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "name": "ProfileActivity",
+    "formattedName": "ProfileActivity",
+    "package": "handlers",
+    "fields": [
+      {
+        "name": "ID",
+        "jsonName": "id",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaType",
+        "jsonName": "mediaType",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaID",
+        "jsonName": "mediaId",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Kind",
+        "jsonName": "kind",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Episode",
+        "jsonName": "episode",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "OldValue",
+        "jsonName": "oldValue",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "NewValue",
+        "jsonName": "newValue",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CreatedAt",
+        "jsonName": "createdAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ProfileActivity is a row of the current profile's activity log."
+    ]
   },
   {
     "filepath": "../internal/handlers/response.go",
@@ -88970,6 +89301,1696 @@
     ]
   },
   {
+    "filepath": "../internal/profiles/history/history.go",
+    "filename": "history.go",
+    "name": "WatchHistoryRow",
+    "formattedName": "WatchHistoryRow",
+    "package": "history",
+    "fields": [
+      {
+        "name": "ProfileID",
+        "jsonName": "",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaID",
+        "jsonName": "mediaId",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "EpisodeNumber",
+        "jsonName": "episodeNumber",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Kind",
+        "jsonName": "kind",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Filepath",
+        "jsonName": "filepath",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "PositionSec",
+        "jsonName": "positionSec",
+        "goType": "float64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Duration",
+        "jsonName": "duration",
+        "goType": "float64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "TimeAdded",
+        "jsonName": "timeAdded",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "TimeUpdated",
+        "jsonName": "timeUpdated",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " WatchHistoryRow is a row of watch_history."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/history/history.go",
+    "filename": "history.go",
+    "name": "EpisodeProgressRow",
+    "formattedName": "EpisodeProgressRow",
+    "package": "history",
+    "fields": [
+      {
+        "name": "ProfileID",
+        "jsonName": "",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaID",
+        "jsonName": "mediaId",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "EpisodeNumber",
+        "jsonName": "episodeNumber",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "PositionSec",
+        "jsonName": "positionSec",
+        "goType": "float64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Duration",
+        "jsonName": "duration",
+        "goType": "float64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Completed",
+        "jsonName": "completed",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "UpdatedAt",
+        "jsonName": "updatedAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " EpisodeProgressRow is a row of episode_progress."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/history/history.go",
+    "filename": "history.go",
+    "name": "Store",
+    "formattedName": "Store",
+    "package": "history",
+    "fields": [
+      {
+        "name": "db",
+        "jsonName": "db",
+        "goType": "gorm.DB",
+        "typescriptType": "DB",
+        "usedTypescriptType": "DB",
+        "usedStructName": "gorm.DB",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "now",
+        "jsonName": "now",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/profiles/importer/importer.go",
+    "filename": "importer.go",
+    "name": "ClientFetcher",
+    "formattedName": "ClientFetcher",
+    "package": "importer",
+    "fields": [
+      {
+        "name": "Client",
+        "jsonName": "Client",
+        "goType": "anilist.AnilistClient",
+        "typescriptType": "AL_AnilistClient",
+        "usedTypescriptType": "AL_AnilistClient",
+        "usedStructName": "anilist.AnilistClient",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ClientFetcher adapts an anilist.AnilistClient. It refuses authenticated clients."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/importer/importer.go",
+    "filename": "importer.go",
+    "name": "ProfileExportInfo",
+    "formattedName": "ProfileExportInfo",
+    "package": "importer",
+    "fields": [
+      {
+        "name": "Name",
+        "jsonName": "name",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "AvatarID",
+        "jsonName": "avatarId",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Color",
+        "jsonName": "color",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ScoreFormat",
+        "jsonName": "scoreFormat",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "TitleLanguage",
+        "jsonName": "titleLanguage",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/profiles/importer/importer.go",
+    "filename": "importer.go",
+    "name": "ProfileExportCustomList",
+    "formattedName": "ProfileExportCustomList",
+    "package": "importer",
+    "fields": [
+      {
+        "name": "Name",
+        "jsonName": "name",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaIDs",
+        "jsonName": "mediaIds",
+        "goType": "[]int",
+        "typescriptType": "Array\u003cnumber\u003e",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/profiles/importer/importer.go",
+    "filename": "importer.go",
+    "name": "ProfileExportFavourite",
+    "formattedName": "ProfileExportFavourite",
+    "package": "importer",
+    "fields": [
+      {
+        "name": "Kind",
+        "jsonName": "kind",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "RefID",
+        "jsonName": "refId",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Position",
+        "jsonName": "position",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/profiles/importer/importer.go",
+    "filename": "importer.go",
+    "name": "ProfileExportActivity",
+    "formattedName": "ProfileExportActivity",
+    "package": "importer",
+    "fields": [
+      {
+        "name": "MediaType",
+        "jsonName": "mediaType",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaID",
+        "jsonName": "mediaId",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Kind",
+        "jsonName": "kind",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Episode",
+        "jsonName": "episode",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "OldValue",
+        "jsonName": "oldValue",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "NewValue",
+        "jsonName": "newValue",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CreatedAt",
+        "jsonName": "createdAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/profiles/importer/importer.go",
+    "filename": "importer.go",
+    "name": "ProfileExport",
+    "formattedName": "ProfileExport",
+    "package": "importer",
+    "fields": [
+      {
+        "name": "Format",
+        "jsonName": "format",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Version",
+        "jsonName": "version",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ExportedAt",
+        "jsonName": "exportedAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Profile",
+        "jsonName": "profile",
+        "goType": "ProfileExportInfo",
+        "typescriptType": "ProfileExportInfo",
+        "usedTypescriptType": "ProfileExportInfo",
+        "usedStructName": "importer.ProfileExportInfo",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Settings",
+        "jsonName": "settings",
+        "goType": "settings.ProfileSettings",
+        "typescriptType": "ProfileSettings",
+        "usedTypescriptType": "ProfileSettings",
+        "usedStructName": "settings.ProfileSettings",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Theme",
+        "jsonName": "theme",
+        "goType": "json.RawMessage",
+        "typescriptType": "RawMessage",
+        "usedTypescriptType": "RawMessage",
+        "usedStructName": "json.RawMessage",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Autoselect",
+        "jsonName": "autoselect",
+        "goType": "json.RawMessage",
+        "typescriptType": "RawMessage",
+        "usedTypescriptType": "RawMessage",
+        "usedStructName": "json.RawMessage",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Entries",
+        "jsonName": "entries",
+        "goType": "[]localplatform.ProfileImportEntry",
+        "typescriptType": "Array\u003cProfileImportEntry\u003e",
+        "usedTypescriptType": "ProfileImportEntry",
+        "usedStructName": "localplatform.ProfileImportEntry",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CustomLists",
+        "jsonName": "customLists",
+        "goType": "[]ProfileExportCustomList",
+        "typescriptType": "Array\u003cProfileExportCustomList\u003e",
+        "usedTypescriptType": "ProfileExportCustomList",
+        "usedStructName": "importer.ProfileExportCustomList",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Favourites",
+        "jsonName": "favourites",
+        "goType": "[]ProfileExportFavourite",
+        "typescriptType": "Array\u003cProfileExportFavourite\u003e",
+        "usedTypescriptType": "ProfileExportFavourite",
+        "usedStructName": "importer.ProfileExportFavourite",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "WatchHistory",
+        "jsonName": "watchHistory",
+        "goType": "[]history.WatchHistoryRow",
+        "typescriptType": "Array\u003cWatchHistoryRow\u003e",
+        "usedTypescriptType": "WatchHistoryRow",
+        "usedStructName": "history.WatchHistoryRow",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "EpisodeProgress",
+        "jsonName": "episodeProgress",
+        "goType": "[]history.EpisodeProgressRow",
+        "typescriptType": "Array\u003cEpisodeProgressRow\u003e",
+        "usedTypescriptType": "EpisodeProgressRow",
+        "usedStructName": "history.EpisodeProgressRow",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Activity",
+        "jsonName": "activity",
+        "goType": "[]ProfileExportActivity",
+        "typescriptType": "Array\u003cProfileExportActivity\u003e",
+        "usedTypescriptType": "ProfileExportActivity",
+        "usedStructName": "importer.ProfileExportActivity",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ProfileExport is the profile export JSON (plan §3.5)."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/lane.go",
+    "filename": "lane.go",
+    "name": "PlaybackLane",
+    "formattedName": "PlaybackLane",
+    "package": "profiles",
+    "fields": [
+      {
+        "name": "mu",
+        "jsonName": "mu",
+        "goType": "sync.RWMutex",
+        "typescriptType": "RWMutex",
+        "usedTypescriptType": "RWMutex",
+        "usedStructName": "sync.RWMutex",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "owner",
+        "jsonName": "owner",
+        "goType": "Profile",
+        "typescriptType": "Profile",
+        "usedTypescriptType": "Profile",
+        "usedStructName": "profiles.Profile",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "acquiredAt",
+        "jsonName": "acquiredAt",
+        "goType": "time.Time",
+        "typescriptType": "string",
+        "usedStructName": "time.Time",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "active",
+        "jsonName": "active",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "onAcquire",
+        "jsonName": "onAcquire",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "now",
+        "jsonName": "now",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " PlaybackLane is the single global playback lane of phase 1 (plan §5 Fase 1): one",
+      " playback at a time on the whole server. The profile that starts a playback owns",
+      " the lane, so the progress, continuity and \"mark as watching\" of the server-side",
+      " players (which run without a request context) go to that profile. Phase 2 turns",
+      " this into one lane per profile."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/localplatform/collection.go",
+    "filename": "collection.go",
+    "name": "CustomListRow",
+    "formattedName": "CustomListRow",
+    "package": "localplatform",
+    "fields": [
+      {
+        "name": "ID",
+        "jsonName": "ID",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ProfileID",
+        "jsonName": "ProfileID",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaType",
+        "jsonName": "MediaType",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Name",
+        "jsonName": "Name",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Position",
+        "jsonName": "Position",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CreatedAt",
+        "jsonName": "CreatedAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " CustomListRow is a row of custom_lists."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/localplatform/customlists.go",
+    "filename": "customlists.go",
+    "name": "ProfileCustomList",
+    "formattedName": "ProfileCustomList",
+    "package": "localplatform",
+    "fields": [
+      {
+        "name": "ID",
+        "jsonName": "id",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Name",
+        "jsonName": "name",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Position",
+        "jsonName": "position",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaIDs",
+        "jsonName": "mediaIds",
+        "goType": "[]int",
+        "typescriptType": "Array\u003cnumber\u003e",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ProfileCustomList is a custom list with the media ids it holds."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/localplatform/import.go",
+    "filename": "import.go",
+    "name": "ImportMode",
+    "formattedName": "ImportMode",
+    "package": "localplatform",
+    "fields": [],
+    "aliasOf": {
+      "goType": "string",
+      "typescriptType": "string",
+      "declaredValues": [
+        "\"replace\"",
+        "\"merge\""
+      ]
+    },
+    "comments": [
+      " ImportMode is the conflict policy of an import (plan §3.5)."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/localplatform/import.go",
+    "filename": "import.go",
+    "name": "ProfileImportEntry",
+    "formattedName": "ProfileImportEntry",
+    "package": "localplatform",
+    "fields": [
+      {
+        "name": "MediaID",
+        "jsonName": "mediaId",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Status",
+        "jsonName": "status",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Progress",
+        "jsonName": "progress",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ScoreRaw",
+        "jsonName": "scoreRaw",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Repeat",
+        "jsonName": "repeat",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Private",
+        "jsonName": "private",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "HiddenFromStatusLists",
+        "jsonName": "hiddenFromStatusLists",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Notes",
+        "jsonName": "notes",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "StartedAt",
+        "jsonName": "startedAt",
+        "goType": "ProfileFuzzyDate",
+        "typescriptType": "ProfileFuzzyDate",
+        "usedTypescriptType": "ProfileFuzzyDate",
+        "usedStructName": "localplatform.ProfileFuzzyDate",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CompletedAt",
+        "jsonName": "completedAt",
+        "goType": "ProfileFuzzyDate",
+        "typescriptType": "ProfileFuzzyDate",
+        "usedTypescriptType": "ProfileFuzzyDate",
+        "usedStructName": "localplatform.ProfileFuzzyDate",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CreatedAt",
+        "jsonName": "createdAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "UpdatedAt",
+        "jsonName": "updatedAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CustomLists",
+        "jsonName": "customLists",
+        "goType": "[]string",
+        "typescriptType": "Array\u003cstring\u003e",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Media",
+        "jsonName": "",
+        "goType": "anilist.BaseAnime",
+        "typescriptType": "AL_BaseAnime",
+        "usedTypescriptType": "AL_BaseAnime",
+        "usedStructName": "anilist.BaseAnime",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ProfileImportEntry is one list entry to import (AniList list, JSON export...)."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/localplatform/import.go",
+    "filename": "import.go",
+    "name": "ProfileImportResult",
+    "formattedName": "ProfileImportResult",
+    "package": "localplatform",
+    "fields": [
+      {
+        "name": "Imported",
+        "jsonName": "imported",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Updated",
+        "jsonName": "updated",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Skipped",
+        "jsonName": "skipped",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Errors",
+        "jsonName": "errors",
+        "goType": "[]string",
+        "typescriptType": "Array\u003cstring\u003e",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ProfileImportResult summarizes an import."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/localplatform/model.go",
+    "filename": "model.go",
+    "name": "EntryRow",
+    "formattedName": "EntryRow",
+    "package": "localplatform",
+    "fields": [
+      {
+        "name": "ID",
+        "jsonName": "id",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ProfileID",
+        "jsonName": "",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaType",
+        "jsonName": "mediaType",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaID",
+        "jsonName": "mediaId",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Status",
+        "jsonName": "status",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Progress",
+        "jsonName": "progress",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ProgressVolumes",
+        "jsonName": "progressVolumes",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ScoreRaw",
+        "jsonName": "scoreRaw",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Repeat",
+        "jsonName": "repeat",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Private",
+        "jsonName": "private",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "HiddenFromStatusLists",
+        "jsonName": "hiddenFromStatusLists",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Notes",
+        "jsonName": "notes",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "StartedY",
+        "jsonName": "",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "StartedM",
+        "jsonName": "",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "StartedD",
+        "jsonName": "",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CompletedY",
+        "jsonName": "",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CompletedM",
+        "jsonName": "",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CompletedD",
+        "jsonName": "",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CreatedAt",
+        "jsonName": "createdAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "UpdatedAt",
+        "jsonName": "updatedAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " EntryRow is a row of list_entries. Every query on it filters by profile_id."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/localplatform/model.go",
+    "filename": "model.go",
+    "name": "ProfileFuzzyDate",
+    "formattedName": "ProfileFuzzyDate",
+    "package": "localplatform",
+    "fields": [
+      {
+        "name": "Year",
+        "jsonName": "year",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Month",
+        "jsonName": "month",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Day",
+        "jsonName": "day",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ProfileFuzzyDate is AniList's partial date (any part may be missing)."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/localplatform/platform.go",
+    "filename": "platform.go",
+    "name": "Platform",
+    "formattedName": "Platform",
+    "package": "localplatform",
+    "fields": [
+      {
+        "name": "profileID",
+        "jsonName": "profileID",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "db",
+        "jsonName": "db",
+        "goType": "gorm.DB",
+        "typescriptType": "DB",
+        "usedTypescriptType": "DB",
+        "usedStructName": "gorm.DB",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "meta",
+        "jsonName": "meta",
+        "goType": "metadata.Service",
+        "typescriptType": "Metadata_Service",
+        "usedTypescriptType": "Metadata_Service",
+        "usedStructName": "metadata.Service",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "logger",
+        "jsonName": "logger",
+        "goType": "zerolog.Logger",
+        "typescriptType": "Logger",
+        "usedTypescriptType": "Logger",
+        "usedStructName": "zerolog.Logger",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "now",
+        "jsonName": "now",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "writeMu",
+        "jsonName": "writeMu",
+        "goType": "sync.Mutex",
+        "typescriptType": "Mutex",
+        "usedTypescriptType": "Mutex",
+        "usedStructName": "sync.Mutex",
+        "required": false,
+        "public": false,
+        "comments": [
+          " serializes the writes of this profile"
+        ]
+      },
+      {
+        "name": "colMu",
+        "jsonName": "colMu",
+        "goType": "sync.RWMutex",
+        "typescriptType": "RWMutex",
+        "usedTypescriptType": "RWMutex",
+        "usedStructName": "sync.RWMutex",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "gen",
+        "jsonName": "gen",
+        "goType": "uint64",
+        "typescriptType": "number",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "raw",
+        "jsonName": "raw",
+        "goType": "anilist.AnimeCollection",
+        "typescriptType": "AL_AnimeCollection",
+        "usedTypescriptType": "AL_AnimeCollection",
+        "usedStructName": "anilist.AnimeCollection",
+        "required": false,
+        "public": false,
+        "comments": [
+          " with custom lists"
+        ]
+      },
+      {
+        "name": "filtered",
+        "jsonName": "filtered",
+        "goType": "anilist.AnimeCollection",
+        "typescriptType": "AL_AnimeCollection",
+        "usedTypescriptType": "AL_AnimeCollection",
+        "usedStructName": "anilist.AnimeCollection",
+        "required": false,
+        "public": false,
+        "comments": [
+          " status lists only"
+        ]
+      }
+    ],
+    "comments": [
+      " Platform is the platform of one profile."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/localplatform/platform.go",
+    "filename": "platform.go",
+    "name": "Options",
+    "formattedName": "Options",
+    "package": "localplatform",
+    "fields": [
+      {
+        "name": "ProfileID",
+        "jsonName": "ProfileID",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "DB",
+        "jsonName": "DB",
+        "goType": "gorm.DB",
+        "typescriptType": "DB",
+        "usedTypescriptType": "DB",
+        "usedStructName": "gorm.DB",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Meta",
+        "jsonName": "Meta",
+        "goType": "metadata.Service",
+        "typescriptType": "Metadata_Service",
+        "usedTypescriptType": "Metadata_Service",
+        "usedStructName": "metadata.Service",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Logger",
+        "jsonName": "Logger",
+        "goType": "zerolog.Logger",
+        "typescriptType": "Logger",
+        "usedTypescriptType": "Logger",
+        "usedStructName": "zerolog.Logger",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Now",
+        "jsonName": "Now",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/profiles/localplatform/watching.go",
+    "filename": "watching.go",
+    "name": "WatchingAction",
+    "formattedName": "WatchingAction",
+    "package": "localplatform",
+    "fields": [],
+    "aliasOf": {
+      "goType": "string",
+      "typescriptType": "string",
+      "declaredValues": [
+        "\"none\"",
+        "\"added\"",
+        "\"resumed\"",
+        "\"rewatched\""
+      ]
+    },
+    "comments": [
+      " WatchingAction is what MarkWatchingOnStart did."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/localplatform/watching.go",
+    "filename": "watching.go",
+    "name": "MarkWatchingOptions",
+    "formattedName": "MarkWatchingOptions",
+    "package": "localplatform",
+    "fields": [
+      {
+        "name": "CompletedAction",
+        "jsonName": "CompletedAction",
+        "goType": "anilist.MediaListStatus",
+        "typescriptType": "AL_MediaListStatus",
+        "usedTypescriptType": "AL_MediaListStatus",
+        "usedStructName": "anilist.MediaListStatus",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " MarkWatchingOptions configures MarkWatchingOnStart (profile settings)."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/metadata/bucket.go",
+    "filename": "bucket.go",
+    "name": "TokenBucket",
+    "formattedName": "Metadata_TokenBucket",
+    "package": "metadata",
+    "fields": [
+      {
+        "name": "mu",
+        "jsonName": "mu",
+        "goType": "sync.Mutex",
+        "typescriptType": "Mutex",
+        "usedTypescriptType": "Mutex",
+        "usedStructName": "sync.Mutex",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "capacity",
+        "jsonName": "capacity",
+        "goType": "float64",
+        "typescriptType": "number",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "tokens",
+        "jsonName": "tokens",
+        "goType": "float64",
+        "typescriptType": "number",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "rate",
+        "jsonName": "rate",
+        "goType": "float64",
+        "typescriptType": "number",
+        "required": true,
+        "public": false,
+        "comments": [
+          " tokens per second"
+        ]
+      },
+      {
+        "name": "last",
+        "jsonName": "last",
+        "goType": "time.Time",
+        "typescriptType": "string",
+        "usedStructName": "time.Time",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "now",
+        "jsonName": "now",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "sleep",
+        "jsonName": "sleep",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " TokenBucket limits background AniList requests: capacity tokens, refilled evenly",
+      " over per. AniList's anonymous rate limit is per IP and shared by all profiles."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/metadata/metadata.go",
+    "filename": "metadata.go",
+    "name": "Options",
+    "formattedName": "Metadata_Options",
+    "package": "metadata",
+    "fields": [
+      {
+        "name": "Client",
+        "jsonName": "Client",
+        "goType": "anilist.AnilistClient",
+        "typescriptType": "AL_AnilistClient",
+        "usedTypescriptType": "AL_AnilistClient",
+        "usedStructName": "anilist.AnilistClient",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "DB",
+        "jsonName": "DB",
+        "goType": "gorm.DB",
+        "typescriptType": "DB",
+        "usedTypescriptType": "DB",
+        "usedStructName": "gorm.DB",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Helper",
+        "jsonName": "Helper",
+        "goType": "shared_platform.PlatformHelper",
+        "typescriptType": "PlatformHelper",
+        "usedTypescriptType": "PlatformHelper",
+        "usedStructName": "shared_platform.PlatformHelper",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Logger",
+        "jsonName": "Logger",
+        "goType": "zerolog.Logger",
+        "typescriptType": "Logger",
+        "usedTypescriptType": "Logger",
+        "usedStructName": "zerolog.Logger",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Now",
+        "jsonName": "Now",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "RatePerMinute",
+        "jsonName": "RatePerMinute",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/profiles/metadata/metadata.go",
+    "filename": "metadata.go",
+    "name": "Service",
+    "formattedName": "Metadata_Service",
+    "package": "metadata",
+    "fields": [
+      {
+        "name": "client",
+        "jsonName": "client",
+        "goType": "anilist.AnilistClient",
+        "typescriptType": "AL_AnilistClient",
+        "usedTypescriptType": "AL_AnilistClient",
+        "usedStructName": "anilist.AnilistClient",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "db",
+        "jsonName": "db",
+        "goType": "gorm.DB",
+        "typescriptType": "DB",
+        "usedTypescriptType": "DB",
+        "usedStructName": "gorm.DB",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "helper",
+        "jsonName": "helper",
+        "goType": "shared_platform.PlatformHelper",
+        "typescriptType": "PlatformHelper",
+        "usedTypescriptType": "PlatformHelper",
+        "usedStructName": "shared_platform.PlatformHelper",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "logger",
+        "jsonName": "logger",
+        "goType": "zerolog.Logger",
+        "typescriptType": "Logger",
+        "usedTypescriptType": "Logger",
+        "usedStructName": "zerolog.Logger",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "now",
+        "jsonName": "now",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "bucket",
+        "jsonName": "bucket",
+        "goType": "TokenBucket",
+        "typescriptType": "Metadata_TokenBucket",
+        "usedTypescriptType": "Metadata_TokenBucket",
+        "usedStructName": "metadata.TokenBucket",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "refreshMu",
+        "jsonName": "refreshMu",
+        "goType": "sync.Mutex",
+        "typescriptType": "Mutex",
+        "usedTypescriptType": "Mutex",
+        "usedStructName": "sync.Mutex",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "refreshPending",
+        "jsonName": "refreshPending",
+        "goType": "map[int]__STRUCT__",
+        "inlineStructType": "map[int]struct{\n}",
+        "typescriptType": "Record\u003cnumber, { }\u003e",
+        "usedTypescriptType": "{ }",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "refreshRunning",
+        "jsonName": "refreshRunning",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "onUpdated",
+        "jsonName": "onUpdated",
+        "goType": "[]",
+        "typescriptType": "Array\u003cany\u003e",
+        "required": false,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Service is shared by every profile."
+    ]
+  },
+  {
     "filepath": "../internal/profiles/middleware.go",
     "filename": "middleware.go",
     "name": "MiddlewareConfig",
@@ -88997,6 +91018,24 @@
       {
         "name": "Reject",
         "jsonName": "Reject",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "RejectBusy",
+        "jsonName": "RejectBusy",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "OnProfile",
+        "jsonName": "OnProfile",
         "goType": "",
         "typescriptType": "any",
         "required": true,
@@ -89288,6 +91327,318 @@
     ]
   },
   {
+    "filepath": "../internal/profiles/profilestest/anilist.go",
+    "filename": "anilist.go",
+    "name": "FakeAnilist",
+    "formattedName": "FakeAnilist",
+    "package": "profilestest",
+    "fields": [
+      {
+        "name": "t",
+        "jsonName": "t",
+        "goType": "Reporter",
+        "typescriptType": "Reporter",
+        "usedTypescriptType": "Reporter",
+        "usedStructName": "profilestest.Reporter",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "mu",
+        "jsonName": "mu",
+        "goType": "sync.Mutex",
+        "typescriptType": "Mutex",
+        "usedTypescriptType": "Mutex",
+        "usedStructName": "sync.Mutex",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "media",
+        "jsonName": "media",
+        "goType": "map[int]anilist.BaseAnime",
+        "typescriptType": "Record\u003cnumber, AL_BaseAnime\u003e",
+        "usedTypescriptType": "AL_BaseAnime",
+        "usedStructName": "anilist.BaseAnime",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "calls",
+        "jsonName": "calls",
+        "goType": "map[string]int",
+        "typescriptType": "Record\u003cstring, number\u003e",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "Fail",
+        "jsonName": "Fail",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " FakeAnilist is an anonymous AniList client. Every mutation, viewer query or",
+      " token use fails the test."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/profilews/profilews.go",
+    "filename": "profilews.go",
+    "name": "Tags",
+    "formattedName": "Tags",
+    "package": "profilews",
+    "fields": [
+      {
+        "name": "mu",
+        "jsonName": "mu",
+        "goType": "sync.RWMutex",
+        "typescriptType": "RWMutex",
+        "usedTypescriptType": "RWMutex",
+        "usedStructName": "sync.RWMutex",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "byID",
+        "jsonName": "byID",
+        "goType": "map[string]int64",
+        "typescriptType": "Record\u003cstring, number\u003e",
+        "required": false,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Tags maps websocket client ids to profiles."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/profilews/profilews.go",
+    "filename": "profilews.go",
+    "name": "ProfileWS",
+    "formattedName": "ProfileWS",
+    "package": "profilews",
+    "fields": [
+      {
+        "name": "base",
+        "jsonName": "base",
+        "goType": "events.WSEventManagerInterface",
+        "typescriptType": "Events_WSEventManagerInterface",
+        "usedTypescriptType": "Events_WSEventManagerInterface",
+        "usedStructName": "events.WSEventManagerInterface",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "tags",
+        "jsonName": "tags",
+        "goType": "Tags",
+        "typescriptType": "Tags",
+        "usedTypescriptType": "Tags",
+        "usedStructName": "profilews.Tags",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "profile",
+        "jsonName": "profile",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "BroadcastWithoutProfile",
+        "jsonName": "BroadcastWithoutProfile",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ProfileWS implements events.WSEventManagerInterface for the components of one",
+      " profile (or of the playback lane): SendEvent goes only to that profile's",
+      " clients. Targeted events and client event subscriptions are passed through."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/router/lane_platform.go",
+    "filename": "lane_platform.go",
+    "name": "LanePlatform",
+    "formattedName": "LanePlatform",
+    "package": "router",
+    "fields": [
+      {
+        "name": "inner",
+        "jsonName": "inner",
+        "goType": "platform.Platform",
+        "typescriptType": "Platform",
+        "usedTypescriptType": "Platform",
+        "usedStructName": "platform.Platform",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "withCtx",
+        "jsonName": "withCtx",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " LanePlatform is the platform given to the server-side playback modules",
+      " (playback manager, media core, direct stream, video core...). They call the",
+      " platform without a request context; LanePlatform adds the profile that owns the",
+      " playback lane, so the progress goes to the profile that started the playback.",
+      " A context that already carries a profile is left alone."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/router/router.go",
+    "filename": "router.go",
+    "name": "Options",
+    "formattedName": "Options",
+    "package": "router",
+    "fields": [
+      {
+        "name": "Meta",
+        "jsonName": "Meta",
+        "goType": "metadata.Service",
+        "typescriptType": "Metadata_Service",
+        "usedTypescriptType": "Metadata_Service",
+        "usedStructName": "metadata.Service",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "DB",
+        "jsonName": "DB",
+        "goType": "gorm.DB",
+        "typescriptType": "DB",
+        "usedTypescriptType": "DB",
+        "usedStructName": "gorm.DB",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Logger",
+        "jsonName": "Logger",
+        "goType": "zerolog.Logger",
+        "typescriptType": "Logger",
+        "usedTypescriptType": "Logger",
+        "usedStructName": "zerolog.Logger",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Now",
+        "jsonName": "Now",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/profiles/router/router.go",
+    "filename": "router.go",
+    "name": "Router",
+    "formattedName": "Router",
+    "package": "router",
+    "fields": [
+      {
+        "name": "meta",
+        "jsonName": "meta",
+        "goType": "metadata.Service",
+        "typescriptType": "Metadata_Service",
+        "usedTypescriptType": "Metadata_Service",
+        "usedStructName": "metadata.Service",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "db",
+        "jsonName": "db",
+        "goType": "gorm.DB",
+        "typescriptType": "DB",
+        "usedTypescriptType": "DB",
+        "usedStructName": "gorm.DB",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "logger",
+        "jsonName": "logger",
+        "goType": "zerolog.Logger",
+        "typescriptType": "Logger",
+        "usedTypescriptType": "Logger",
+        "usedStructName": "zerolog.Logger",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "now",
+        "jsonName": "now",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "mu",
+        "jsonName": "mu",
+        "goType": "sync.Mutex",
+        "typescriptType": "Mutex",
+        "usedTypescriptType": "Mutex",
+        "usedStructName": "sync.Mutex",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "platforms",
+        "jsonName": "platforms",
+        "goType": "map[int64]localplatform.Platform",
+        "typescriptType": "Record\u003cnumber, Platform\u003e",
+        "usedTypescriptType": "Platform",
+        "usedStructName": "localplatform.Platform",
+        "required": false,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
     "filepath": "../internal/profiles/service.go",
     "filename": "service.go",
     "name": "Options",
@@ -89465,6 +91816,17 @@
         "typescriptType": "Once",
         "usedTypescriptType": "Once",
         "usedStructName": "sync.Once",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "lane",
+        "jsonName": "lane",
+        "goType": "PlaybackLane",
+        "typescriptType": "PlaybackLane",
+        "usedTypescriptType": "PlaybackLane",
+        "usedStructName": "profiles.PlaybackLane",
         "required": false,
         "public": false,
         "comments": []
@@ -89651,6 +92013,208 @@
     "comments": [
       " ProfileSession is the result of selecting a profile."
     ]
+  },
+  {
+    "filepath": "../internal/profiles/settings/settings.go",
+    "filename": "settings.go",
+    "name": "ProfileLibraryOverrides",
+    "formattedName": "ProfileLibraryOverrides",
+    "package": "settings",
+    "fields": [
+      {
+        "name": "AutoUpdateProgress",
+        "jsonName": "autoUpdateProgress",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "AutoPlayNextEpisode",
+        "jsonName": "autoPlayNextEpisode",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "EnableWatchContinuity",
+        "jsonName": "enableWatchContinuity",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "DefaultPlaybackSource",
+        "jsonName": "defaultPlaybackSource",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Library overrides (nil = use the global value)."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/settings/settings.go",
+    "filename": "settings.go",
+    "name": "ProfileAnilistOverrides",
+    "formattedName": "ProfileAnilistOverrides",
+    "package": "settings",
+    "fields": [
+      {
+        "name": "HideAudienceScore",
+        "jsonName": "hideAudienceScore",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "EnableAdultContent",
+        "jsonName": "enableAdultContent",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "BlurAdultContent",
+        "jsonName": "blurAdultContent",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Anilist overrides (display preferences; AniList itself is anonymous)."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/settings/settings.go",
+    "filename": "settings.go",
+    "name": "ProfileSettings",
+    "formattedName": "ProfileSettings",
+    "package": "settings",
+    "fields": [
+      {
+        "name": "Library",
+        "jsonName": "library",
+        "goType": "ProfileLibraryOverrides",
+        "typescriptType": "ProfileLibraryOverrides",
+        "usedTypescriptType": "ProfileLibraryOverrides",
+        "usedStructName": "settings.ProfileLibraryOverrides",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Anilist",
+        "jsonName": "anilist",
+        "goType": "ProfileAnilistOverrides",
+        "typescriptType": "ProfileAnilistOverrides",
+        "usedTypescriptType": "ProfileAnilistOverrides",
+        "usedStructName": "settings.ProfileAnilistOverrides",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MarkWatchingOnStart",
+        "jsonName": "markWatchingOnStart",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CompletedAction",
+        "jsonName": "completedAction",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Player",
+        "jsonName": "player",
+        "goType": "json.RawMessage",
+        "typescriptType": "RawMessage",
+        "usedTypescriptType": "RawMessage",
+        "usedStructName": "json.RawMessage",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ProfileSettings is the JSON stored in profile_settings.value."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/settings/settings.go",
+    "filename": "settings.go",
+    "name": "Store",
+    "formattedName": "Store",
+    "package": "settings",
+    "fields": [
+      {
+        "name": "db",
+        "jsonName": "db",
+        "goType": "gorm.DB",
+        "typescriptType": "DB",
+        "usedTypescriptType": "DB",
+        "usedStructName": "gorm.DB",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "now",
+        "jsonName": "now",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "mu",
+        "jsonName": "mu",
+        "goType": "sync.RWMutex",
+        "typescriptType": "RWMutex",
+        "usedTypescriptType": "RWMutex",
+        "usedStructName": "sync.RWMutex",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "cache",
+        "jsonName": "cache",
+        "goType": "map[int64]ProfileSettings",
+        "typescriptType": "Record\u003cnumber, ProfileSettings\u003e",
+        "usedTypescriptType": "ProfileSettings",
+        "usedStructName": "settings.ProfileSettings",
+        "required": false,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": []
   },
   {
     "filepath": "../internal/profiles/store/store.go",

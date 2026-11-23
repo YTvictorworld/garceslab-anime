@@ -2544,6 +2544,134 @@
 // }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// profiles_data
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// export function useGetMyProfileSettings() {
+//     return useServerQuery<ProfileSettingsResponse>({
+//         endpoint: API_ENDPOINTS.PROFILES_DATA.GetMyProfileSettings.endpoint,
+//         method: API_ENDPOINTS.PROFILES_DATA.GetMyProfileSettings.methods[0],
+//         queryKey: [API_ENDPOINTS.PROFILES_DATA.GetMyProfileSettings.key],
+//         enabled: true,
+//     })
+// }
+
+// export function usePatchMyProfileSettings() {
+//     return useServerMutation<ProfileSettingsResponse>({
+//         endpoint: API_ENDPOINTS.PROFILES_DATA.PatchMyProfileSettings.endpoint,
+//         method: API_ENDPOINTS.PROFILES_DATA.PatchMyProfileSettings.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES_DATA.PatchMyProfileSettings.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useGetMyCustomLists() {
+//     return useServerQuery<Array<ProfileCustomList>>({
+//         endpoint: API_ENDPOINTS.PROFILES_DATA.GetMyCustomLists.endpoint,
+//         method: API_ENDPOINTS.PROFILES_DATA.GetMyCustomLists.methods[0],
+//         queryKey: [API_ENDPOINTS.PROFILES_DATA.GetMyCustomLists.key],
+//         enabled: true,
+//     })
+// }
+
+// export function useCreateMyCustomList() {
+//     return useServerMutation<Array<ProfileCustomList>>({
+//         endpoint: API_ENDPOINTS.PROFILES_DATA.CreateMyCustomList.endpoint,
+//         method: API_ENDPOINTS.PROFILES_DATA.CreateMyCustomList.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES_DATA.CreateMyCustomList.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useDeleteMyCustomList(listId: number) {
+//     return useServerMutation<boolean>({
+//         endpoint: API_ENDPOINTS.PROFILES_DATA.DeleteMyCustomList.endpoint.replace("{listId}", String(listId)),
+//         method: API_ENDPOINTS.PROFILES_DATA.DeleteMyCustomList.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES_DATA.DeleteMyCustomList.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useAddToMyCustomList(listId: number, mediaId: number) {
+//     return useServerMutation<boolean>({
+//         endpoint: API_ENDPOINTS.PROFILES_DATA.AddToMyCustomList.endpoint.replace("{listId}", String(listId)).replace("{mediaId}", String(mediaId)),
+//         method: API_ENDPOINTS.PROFILES_DATA.AddToMyCustomList.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES_DATA.AddToMyCustomList.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useRemoveFromMyCustomList(listId: number, mediaId: number) {
+//     return useServerMutation<boolean>({
+//         endpoint: API_ENDPOINTS.PROFILES_DATA.RemoveFromMyCustomList.endpoint.replace("{listId}", String(listId)).replace("{mediaId}", String(mediaId)),
+//         method: API_ENDPOINTS.PROFILES_DATA.RemoveFromMyCustomList.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES_DATA.RemoveFromMyCustomList.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useGetMyActivity() {
+//     return useServerQuery<Array<ProfileActivity>>({
+//         endpoint: API_ENDPOINTS.PROFILES_DATA.GetMyActivity.endpoint,
+//         method: API_ENDPOINTS.PROFILES_DATA.GetMyActivity.methods[0],
+//         queryKey: [API_ENDPOINTS.PROFILES_DATA.GetMyActivity.key],
+//         enabled: true,
+//     })
+// }
+
+// export function useImportProfileAnilist(id: number) {
+//     return useServerMutation<ProfileImportResult>({
+//         endpoint: API_ENDPOINTS.PROFILES_DATA.ImportProfileAnilist.endpoint.replace("{id}", String(id)),
+//         method: API_ENDPOINTS.PROFILES_DATA.ImportProfileAnilist.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES_DATA.ImportProfileAnilist.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useImportProfileServerAccount(id: number) {
+//     return useServerMutation<ProfileImportResult>({
+//         endpoint: API_ENDPOINTS.PROFILES_DATA.ImportProfileServerAccount.endpoint.replace("{id}", String(id)),
+//         method: API_ENDPOINTS.PROFILES_DATA.ImportProfileServerAccount.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES_DATA.ImportProfileServerAccount.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useImportProfileJSON(id: number) {
+//     return useServerMutation<ProfileImportResult>({
+//         endpoint: API_ENDPOINTS.PROFILES_DATA.ImportProfileJSON.endpoint.replace("{id}", String(id)),
+//         method: API_ENDPOINTS.PROFILES_DATA.ImportProfileJSON.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES_DATA.ImportProfileJSON.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useExportProfile(id: number) {
+//     return useServerQuery<ProfileExport>({
+//         endpoint: API_ENDPOINTS.PROFILES_DATA.ExportProfile.endpoint.replace("{id}", String(id)),
+//         method: API_ENDPOINTS.PROFILES_DATA.ExportProfile.methods[0],
+//         queryKey: [API_ENDPOINTS.PROFILES_DATA.ExportProfile.key],
+//         enabled: true,
+//     })
+// }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // releases
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

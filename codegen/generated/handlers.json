@@ -10325,6 +10325,604 @@
     }
   },
   {
+    "name": "tagWebsocketProfile",
+    "trimmedName": "tagWebsocketProfile",
+    "comments": [
+      "tagWebsocketProfile tags a new /events connection with the profile of its",
+      "?profile= token (plan §3.7.1).",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "requestProfileID",
+    "trimmedName": "requestProfileID",
+    "comments": [
+      "requestProfileID is the profile of the request (0 without one). Used as the key of",
+      "the per-profile package caches.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "requireProfile",
+    "trimmedName": "requireProfile",
+    "comments": [
+      "requireProfile returns the request's profile or writes 401 PROFILE_REQUIRED.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "targetProfile",
+    "trimmedName": "targetProfile",
+    "comments": [
+      "targetProfile resolves :id for the import/export routes (any profile may manage",
+      "any profile, plan §3.3).",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "saveProfileSettingsFromBody",
+    "trimmedName": "saveProfileSettingsFromBody",
+    "comments": [
+      "saveProfileSettingsFromBody moves the per-profile fields of a full settings body",
+      "to the request's profile and restores their global values in the body.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "patchProfileSetting",
+    "trimmedName": "patchProfileSetting",
+    "comments": [
+      "patchProfileSetting handles PATCH /settings/path for per-profile fields.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "HandleGetMyProfileSettings",
+    "trimmedName": "GetMyProfileSettings",
+    "comments": [
+      "HandleGetMyProfileSettings",
+      "",
+      "\t@summary returns the current profile's settings (its overrides and the effective settings).",
+      "\t@route /api/v1/profiles/me/settings [GET]",
+      "\t@returns handlers.ProfileSettingsResponse",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "api": {
+      "summary": "returns the current profile's settings (its overrides and the effective settings).",
+      "descriptions": [],
+      "endpoint": "/api/v1/profiles/me/settings",
+      "methods": [
+        "GET"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "handlers.ProfileSettingsResponse",
+      "returnGoType": "handlers.ProfileSettingsResponse",
+      "returnTypescriptType": "ProfileSettingsResponse"
+    }
+  },
+  {
+    "name": "HandlePatchMyProfileSettings",
+    "trimmedName": "PatchMyProfileSettings",
+    "comments": [
+      "HandlePatchMyProfileSettings",
+      "",
+      "\t@summary updates the current profile's settings. Only the fields sent change; null resets a field to the global value.",
+      "\t@route /api/v1/profiles/me/settings [PATCH]",
+      "\t@returns handlers.ProfileSettingsResponse",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "api": {
+      "summary": "updates the current profile's settings. Only the fields sent change; null resets a field to the global value.",
+      "descriptions": [],
+      "endpoint": "/api/v1/profiles/me/settings",
+      "methods": [
+        "PATCH"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "handlers.ProfileSettingsResponse",
+      "returnGoType": "handlers.ProfileSettingsResponse",
+      "returnTypescriptType": "ProfileSettingsResponse"
+    }
+  },
+  {
+    "name": "HandleGetMyCustomLists",
+    "trimmedName": "GetMyCustomLists",
+    "comments": [
+      "HandleGetMyCustomLists",
+      "",
+      "\t@summary returns the current profile's anime custom lists.",
+      "\t@route /api/v1/profiles/me/lists [GET]",
+      "\t@returns []localplatform.ProfileCustomList",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "api": {
+      "summary": "returns the current profile's anime custom lists.",
+      "descriptions": [],
+      "endpoint": "/api/v1/profiles/me/lists",
+      "methods": [
+        "GET"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "[]localplatform.ProfileCustomList",
+      "returnGoType": "localplatform.ProfileCustomList",
+      "returnTypescriptType": "Array\u003cProfileCustomList\u003e"
+    }
+  },
+  {
+    "name": "HandleCreateMyCustomList",
+    "trimmedName": "CreateMyCustomList",
+    "comments": [
+      "HandleCreateMyCustomList",
+      "",
+      "\t@summary creates a custom list in the current profile.",
+      "\t@route /api/v1/profiles/me/lists [POST]",
+      "\t@returns []localplatform.ProfileCustomList",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "api": {
+      "summary": "creates a custom list in the current profile.",
+      "descriptions": [],
+      "endpoint": "/api/v1/profiles/me/lists",
+      "methods": [
+        "POST"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "[]localplatform.ProfileCustomList",
+      "returnGoType": "localplatform.ProfileCustomList",
+      "returnTypescriptType": "Array\u003cProfileCustomList\u003e"
+    }
+  },
+  {
+    "name": "HandleDeleteMyCustomList",
+    "trimmedName": "DeleteMyCustomList",
+    "comments": [
+      "HandleDeleteMyCustomList",
+      "",
+      "\t@summary deletes a custom list of the current profile (the entries stay in the list).",
+      "\t@route /api/v1/profiles/me/lists/{listId} [DELETE]",
+      "\t@param listId - int - true - \"The custom list ID\"",
+      "\t@returns bool",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "api": {
+      "summary": "deletes a custom list of the current profile (the entries stay in the list).",
+      "descriptions": [],
+      "endpoint": "/api/v1/profiles/me/lists/{listId}",
+      "methods": [
+        "DELETE"
+      ],
+      "params": [
+        {
+          "name": "listId",
+          "jsonName": "listId",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The custom list ID"
+          ]
+        }
+      ],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "HandleAddToMyCustomList",
+    "trimmedName": "AddToMyCustomList",
+    "comments": [
+      "HandleAddToMyCustomList",
+      "",
+      "\t@summary adds a media of the current profile's list to one of its custom lists.",
+      "\t@route /api/v1/profiles/me/lists/{listId}/items/{mediaId} [POST]",
+      "\t@param listId - int - true - \"The custom list ID\"",
+      "\t@param mediaId - int - true - \"The AniList media ID\"",
+      "\t@returns bool",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "api": {
+      "summary": "adds a media of the current profile's list to one of its custom lists.",
+      "descriptions": [],
+      "endpoint": "/api/v1/profiles/me/lists/{listId}/items/{mediaId}",
+      "methods": [
+        "POST"
+      ],
+      "params": [
+        {
+          "name": "listId",
+          "jsonName": "listId",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The custom list ID"
+          ]
+        },
+        {
+          "name": "mediaId",
+          "jsonName": "mediaId",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The AniList media ID"
+          ]
+        }
+      ],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "HandleRemoveFromMyCustomList",
+    "trimmedName": "RemoveFromMyCustomList",
+    "comments": [
+      "HandleRemoveFromMyCustomList",
+      "",
+      "\t@summary removes a media from one of the current profile's custom lists.",
+      "\t@route /api/v1/profiles/me/lists/{listId}/items/{mediaId} [DELETE]",
+      "\t@param listId - int - true - \"The custom list ID\"",
+      "\t@param mediaId - int - true - \"The AniList media ID\"",
+      "\t@returns bool",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "api": {
+      "summary": "removes a media from one of the current profile's custom lists.",
+      "descriptions": [],
+      "endpoint": "/api/v1/profiles/me/lists/{listId}/items/{mediaId}",
+      "methods": [
+        "DELETE"
+      ],
+      "params": [
+        {
+          "name": "listId",
+          "jsonName": "listId",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The custom list ID"
+          ]
+        },
+        {
+          "name": "mediaId",
+          "jsonName": "mediaId",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The AniList media ID"
+          ]
+        }
+      ],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "HandleGetMyActivity",
+    "trimmedName": "GetMyActivity",
+    "comments": [
+      "HandleGetMyActivity",
+      "",
+      "\t@summary returns the current profile's latest list activity (\"recently watched\", changes).",
+      "\t@route /api/v1/profiles/me/activity [GET]",
+      "\t@returns []handlers.ProfileActivity",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "api": {
+      "summary": "returns the current profile's latest list activity (\"recently watched\", changes).",
+      "descriptions": [],
+      "endpoint": "/api/v1/profiles/me/activity",
+      "methods": [
+        "GET"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "[]handlers.ProfileActivity",
+      "returnGoType": "handlers.ProfileActivity",
+      "returnTypescriptType": "Array\u003cProfileActivity\u003e"
+    }
+  },
+  {
+    "name": "HandleImportProfileAnilist",
+    "trimmedName": "ImportProfileAnilist",
+    "comments": [
+      "HandleImportProfileAnilist",
+      "",
+      "\t@summary imports the public AniList anime list of a user into a profile (anonymous, no token).",
+      "\t@route /api/v1/profiles/{id}/import/anilist [POST]",
+      "\t@param id - int - true - \"The profile ID\"",
+      "\t@returns localplatform.ProfileImportResult",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "api": {
+      "summary": "imports the public AniList anime list of a user into a profile (anonymous, no token).",
+      "descriptions": [],
+      "endpoint": "/api/v1/profiles/{id}/import/anilist",
+      "methods": [
+        "POST"
+      ],
+      "params": [
+        {
+          "name": "id",
+          "jsonName": "id",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The profile ID"
+          ]
+        }
+      ],
+      "bodyFields": [],
+      "returns": "localplatform.ProfileImportResult",
+      "returnGoType": "localplatform.ProfileImportResult",
+      "returnTypescriptType": "ProfileImportResult"
+    }
+  },
+  {
+    "name": "HandleImportProfileServerAccount",
+    "trimmedName": "ImportProfileServerAccount",
+    "comments": [
+      "HandleImportProfileServerAccount",
+      "",
+      "\t@summary imports the server's existing AniList account list (its cached collection or its public list) into a profile.",
+      "\t@desc The account's token is never used. After the import the token can be removed (plan: one-time migration).",
+      "\t@route /api/v1/profiles/{id}/import/server-account [POST]",
+      "\t@param id - int - true - \"The profile ID\"",
+      "\t@returns localplatform.ProfileImportResult",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "api": {
+      "summary": "imports the server's existing AniList account list (its cached collection or its public list) into a profile.",
+      "descriptions": [
+        "The account's token is never used. After the import the token can be removed (plan: one-time migration)."
+      ],
+      "endpoint": "/api/v1/profiles/{id}/import/server-account",
+      "methods": [
+        "POST"
+      ],
+      "params": [
+        {
+          "name": "id",
+          "jsonName": "id",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The profile ID"
+          ]
+        }
+      ],
+      "bodyFields": [],
+      "returns": "localplatform.ProfileImportResult",
+      "returnGoType": "localplatform.ProfileImportResult",
+      "returnTypescriptType": "ProfileImportResult"
+    }
+  },
+  {
+    "name": "HandleImportProfileJSON",
+    "trimmedName": "ImportProfileJSON",
+    "comments": [
+      "HandleImportProfileJSON",
+      "",
+      "\t@summary imports a profile export (or an AniList-shaped anime collection) into a profile.",
+      "\t@desc Body: {\"mode\": \"merge\"|\"replace\", \"data\": \u003cexport JSON\u003e}.",
+      "\t@route /api/v1/profiles/{id}/import/json [POST]",
+      "\t@param id - int - true - \"The profile ID\"",
+      "\t@returns localplatform.ProfileImportResult",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "api": {
+      "summary": "imports a profile export (or an AniList-shaped anime collection) into a profile.",
+      "descriptions": [
+        "Body: {\"mode\": \"merge\"|\"replace\", \"data\": \u003cexport JSON\u003e}."
+      ],
+      "endpoint": "/api/v1/profiles/{id}/import/json",
+      "methods": [
+        "POST"
+      ],
+      "params": [
+        {
+          "name": "id",
+          "jsonName": "id",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The profile ID"
+          ]
+        }
+      ],
+      "bodyFields": [],
+      "returns": "localplatform.ProfileImportResult",
+      "returnGoType": "localplatform.ProfileImportResult",
+      "returnTypescriptType": "ProfileImportResult"
+    }
+  },
+  {
+    "name": "HandleExportProfile",
+    "trimmedName": "ExportProfile",
+    "comments": [
+      "HandleExportProfile",
+      "",
+      "\t@summary exports everything a profile owns as JSON (lists, custom lists, favourites, history, settings, activity).",
+      "\t@route /api/v1/profiles/{id}/export [GET]",
+      "\t@param id - int - true - \"The profile ID\"",
+      "\t@returns importer.ProfileExport",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_data.go",
+    "filename": "profiles_data.go",
+    "api": {
+      "summary": "exports everything a profile owns as JSON (lists, custom lists, favourites, history, settings, activity).",
+      "descriptions": [],
+      "endpoint": "/api/v1/profiles/{id}/export",
+      "methods": [
+        "GET"
+      ],
+      "params": [
+        {
+          "name": "id",
+          "jsonName": "id",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The profile ID"
+          ]
+        }
+      ],
+      "bodyFields": [],
+      "returns": "importer.ProfileExport",
+      "returnGoType": "importer.ProfileExport",
+      "returnTypescriptType": "ProfileExport"
+    }
+  },
+  {
+    "name": "newM2Env",
+    "trimmedName": "newM2Env",
+    "comments": [
+      "newM2Env is newProfilesTestEnv with the local profiles runtime installed on a",
+      "fake anonymous AniList client (any token or mutation fails the test) and",
+      "enforcement on.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_m2_test.go",
+    "filename": "profiles_m2_test.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
     "name": "call",
     "trimmedName": "call",
     "comments": [
