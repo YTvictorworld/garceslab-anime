@@ -11,6 +11,12 @@ Based on Seanime and Seanime Tenji (GPL-3.0).
 
 ---
 
+> **Not original work.** Garceslab Anime is derived from
+> [Seanime](https://github.com/5rahim/seanime) (© 5rahim and contributors) and
+> [Seanime Tenji](https://github.com/AlkindiX/seanime-tv) (© AlkindiX and contributors). Their
+> authors keep their copyright; this project only adds modifications, under the same GPL-3.0
+> license. See [Credits & License](#credits--license).
+
 **Status: early development.** The current version is Seanime v3.10.5 with a few fixes and the
 update checker turned off. The features below that are marked *planned* don't exist yet.
 
@@ -68,21 +74,26 @@ exposing it to your network. Prebuilt images will be published at
 See [CONTRIBUTING.md](CONTRIBUTING.md) and [DEVELOPMENT_AND_BUILD.md](DEVELOPMENT_AND_BUILD.md).
 Changes compared with Seanime are listed in [MODIFICATIONS.md](MODIFICATIONS.md).
 
-## Credits
+## Credits & License
 
-Garceslab Anime is based on:
+Garceslab Anime is **not originally our code**. It is derived from:
 
-- **[Seanime](https://github.com/5rahim/seanime)** by **5rahim** and its contributors: the
+- **[Seanime](https://github.com/5rahim/seanime)**, © 5rahim and the Seanime contributors: the
   server and web interface in this repository are derived from Seanime v3.10.5.
-- **[Seanime Tenji](https://github.com/AlkindiX/seanime-tv)** by **AlkindiX** (from Seanime
-  Tenji by 5rahim): the TV app in
+- **[Seanime Tenji](https://github.com/AlkindiX/seanime-tv)**, © AlkindiX and contributors
+  (based on [Seanime Tenji](https://github.com/5rahim/seanime-tenji) by 5rahim): the TV app in
   [garceslab-anime-tv](https://github.com/YTvictorworld/garceslab-anime-tv) is derived from it.
 
-The original git history is kept, so every upstream commit keeps its author. The original
-copyright and license notices are preserved (see [NOTICE](NOTICE)). Garceslab Anime is an
-independent, unofficial project: it is not affiliated with or endorsed by Seanime or Seanime
-Tenji, so please don't report Garceslab Anime issues to them.
+The original authors keep the copyright on their work, and this project does not claim
+ownership of it. All original copyright and license notices are preserved unchanged, and the
+full git history is kept, so every upstream commit keeps its author.
 
-## License
+The modifications made by the Garceslab Anime contributors are distributed under the same
+license, the [GNU General Public License v3.0](LICENSE), with no additional restrictions. The
+modifications and their dates are listed in [MODIFICATIONS.md](MODIFICATIONS.md); see also
+[NOTICE](NOTICE).
 
-[GNU General Public License v3.0](LICENSE), like the projects it is based on.
+"Seanime" and "Seanime Tenji", and their logos, belong to their respective owners and are used
+only to say where this project comes from. Garceslab Anime is an independent, unofficial
+project, not affiliated with or endorsed by Seanime or Seanime Tenji: please don't report
+Garceslab Anime issues to them.

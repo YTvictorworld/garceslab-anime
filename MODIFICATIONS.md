@@ -33,3 +33,17 @@ Maintained independently since 2026-11 by YTvictorworld.
 
 Nothing else differs from Seanime v3.10.5 yet. Planned changes (local profiles without an
 AniList account, several playbacks at the same time) will be listed here as they land.
+
+## GPL-3.0 compliance checklist
+
+- [x] **Prominent modification notices with dates (§5a):** this file, `NOTICE`, the README's
+      "Credits & License", and the git history (every change is a dated commit).
+- [x] **License files untouched:** `LICENSE` is Seanime's GPL-3.0 text, unchanged. Copyright
+      and license notices in the sources are kept.
+- [x] **Same license, no additional restrictions:** modifications are GPL-3.0; nothing in this
+      repository adds terms to it.
+- [ ] **Source for every binary we distribute (§6):** every published image must be built
+      from a git tag in this repository. The image carries
+      `org.opencontainers.image.source` and `org.opencontainers.image.revision` labels
+      (see `Dockerfile` and `.github/workflows/release.yml`), and the release notes link to
+      the tag. Ticked when the first release is published.

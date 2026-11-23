@@ -1,18 +1,28 @@
 Garceslab Anime
-Copyright (C) 2026 YTvictorworld and Garceslab Anime contributors
+https://github.com/YTvictorworld/garceslab-anime
 
-This program is a modified version of Seanime
+This program is NOT original work. It is a modified version of Seanime
 (https://github.com/5rahim/seanime), Copyright (C) 5rahim and the Seanime
-contributors, based on Seanime v3.10.5. It is distributed under the GNU
-General Public License, version 3 (see LICENSE). All original copyright and
-license notices are kept.
+contributors, based on Seanime v3.10.5. The original authors keep their
+copyright, and this project does not claim ownership of the original work.
+All original copyright and license notices are preserved unchanged, and the
+full git history of Seanime is kept in this repository.
 
-Garceslab Anime is an independent, unofficial project. It is not affiliated with, endorsed by
-or supported by Seanime or its authors. "Seanime" and its logo belong to their
+Modifications Copyright (C) 2026 the Garceslab Anime contributors.
+
+Seanime and these modifications are distributed under the GNU General Public
+License, version 3 (see LICENSE), with no additional restrictions. The
+modifications and their dates are listed in MODIFICATIONS.md (GPL-3.0,
+section 5a); the complete history is in the git log.
+
+The companion TV app (https://github.com/YTvictorworld/garceslab-anime-tv) is
+derived from Seanime Tenji by AlkindiX (https://github.com/AlkindiX/seanime-tv),
+Copyright (C) AlkindiX and contributors.
+
+"Seanime" and "Seanime Tenji", and their logos, belong to their respective
 owners and are used only to describe where this program comes from.
-
-The modifications made to Seanime, and when they were made, are listed in
-MODIFICATIONS.md (GPL-3.0, section 5a). The full history is in the git log.
+Garceslab Anime is an independent, unofficial project. It is not affiliated
+with, endorsed by or supported by Seanime, Seanime Tenji or their authors.
 
 This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
