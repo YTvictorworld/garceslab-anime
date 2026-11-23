@@ -65,6 +65,8 @@ type Service struct {
 
 	stopPurge chan struct{}
 	stopOnce  sync.Once
+
+	lane *PlaybackLane
 }
 
 // EnforceFromEnv reads EnforceEnvVar.
@@ -116,6 +118,7 @@ func New(st *store.Store, opts Options) (*Service, error) {
 		now:       now,
 		lastTouch: map[string]time.Time{},
 		stopPurge: make(chan struct{}),
+		lane:      &PlaybackLane{now: now},
 	}
 
 	secret, err := s.loadOrCreateSecret()
@@ -153,6 +156,9 @@ func (s *Service) loadOrCreateSecret() ([]byte, error) {
 func (s *Service) Store() *store.Store { return s.store }
 func (s *Service) DB() *gorm.DB        { return s.db }
 func (s *Service) Enforced() bool      { return s.enforce }
+
+// Lane returns the (phase 1, single) playback lane.
+func (s *Service) Lane() *PlaybackLane { return s.lane }
 
 // SetEnforced toggles enforcement at runtime (tests, future settings).
 func (s *Service) SetEnforced(v bool) { s.enforce = v }
@@ -416,6 +422,7 @@ func (s *Service) Update(ctx context.Context, id int64, in UpdateInput) (*Profil
 // Delete moves a profile to the trash. Its sessions are invalidated; its data stays
 // until the purge (TrashRetention).
 func (s *Service) Delete(ctx context.Context, id int64) error {
+	defer s.lane.ForgetProfile(id)
 	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		p, err := getTx(tx, id)
 		if err != nil {

@@ -8,18 +8,20 @@ import "strings"
 //
 // Keys are "METHOD route-template". Stream routes are matched by prefix below.
 var publicRoutes = map[string]bool{
-	"GET /api/v1/status":                     true,
-	"GET /api/v1/profiles":                   true,
-	"POST /api/v1/profiles":                  true, // first-run "Create your profile"
-	"POST /api/v1/profiles/:id/select":       true,
-	"POST /api/v1/profiles/logout":           true,
-	"GET /api/v1/avatars":                    true,
-	"GET /api/v1/image-proxy":                true,
-	"GET /api/v1/anilist/media-details/:id":  true,
-	"GET /api/v1/anilist/studio-details/:id": true,
-	"POST /api/v1/anilist/list-anime":        true,
-	"POST /api/v1/anilist/list-recent-anime": true,
-	"GET /events":                            true, // the websocket handler authenticates itself
+	"GET /api/v1/status":                       true,
+	"GET /api/v1/profiles":                     true,
+	"POST /api/v1/profiles":                    true, // first-run "Create your profile"
+	"POST /api/v1/profiles/:id/select":         true,
+	"POST /api/v1/profiles/logout":             true,
+	"GET /api/v1/avatars":                      true,
+	"GET /api/v1/image-proxy":                  true,
+	"GET /api/v1/anilist/media-details/:id":    true,
+	"GET /api/v1/anilist/studio-details/:id":   true,
+	"POST /api/v1/anilist/list-anime":          true,
+	"POST /api/v1/anilist/list-recent-anime":   true,
+	"GET /api/v1/anilist/cache-layer/status":   true,
+	"GET /api/v1/anime/episode-collection/:id": true, // public episode metadata
+	"GET /events":                              true, // the websocket handler authenticates itself
 }
 
 // Stream URLs are fetched by players that can't send headers; they keep using the

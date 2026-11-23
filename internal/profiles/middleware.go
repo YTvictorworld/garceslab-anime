@@ -25,6 +25,10 @@ type MiddlewareConfig struct {
 	// Reject writes the error response when a profile is required. Defaults to a
 	// JSON {"error": "PROFILE_REQUIRED"} with status 401.
 	Reject func(c echo.Context, err error) error
+	// RejectBusy writes the 409 PLAYBACK_BUSY response. Defaults to a JSON error.
+	RejectBusy func(c echo.Context, err error) error
+	// OnProfile is called for every request with a valid profile (connection tagging).
+	OnProfile func(clientID string, profileID int64)
 }
 
 // TokenFromRequest returns the profile token from the header, the cookie or (only
@@ -56,6 +60,12 @@ func (s *Service) Middleware(cfg MiddlewareConfig) echo.MiddlewareFunc {
 			return c.JSON(http.StatusUnauthorized, map[string]string{"error": err.Error()})
 		}
 	}
+	rejectBusy := cfg.RejectBusy
+	if rejectBusy == nil {
+		rejectBusy = func(c echo.Context, err error) error {
+			return c.JSON(http.StatusConflict, map[string]string{"error": err.Error()})
+		}
+	}
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			req := c.Request()
@@ -71,12 +81,21 @@ func (s *Service) Middleware(cfg MiddlewareConfig) echo.MiddlewareFunc {
 						platform = cfg.Platform(c)
 					}
 					s.TouchDevice(req.Context(), clientID, p.ID, platform)
+					if cfg.OnProfile != nil {
+						cfg.OnProfile(clientID, p.ID)
+					}
+					if err := s.acquireLaneIfPlayback(c, p); err != nil {
+						return rejectBusy(c, err)
+					}
 					return next(c)
 				}
 			}
 
 			if s.Enforced() && !IsPublicRoute(req.Method, routePath(c)) && !IsPublicRoute(req.Method, req.URL.Path) {
 				return reject(c, ErrProfileRequired)
+			}
+			if err := s.acquireLaneIfPlayback(c, nil); err != nil {
+				return rejectBusy(c, err)
 			}
 			return next(c)
 		}
@@ -101,4 +120,13 @@ func FromEcho(c echo.Context) *Profile {
 		return p
 	}
 	return FromContext(c.Request().Context())
+}
+
+// acquireLaneIfPlayback takes the playback lane for p on the routes that start a
+// server-side playback (phase 1: one playback at a time, 409 PLAYBACK_BUSY).
+func (s *Service) acquireLaneIfPlayback(c echo.Context, p *Profile) error {
+	if s.lane == nil || !IsPlaybackStartRoute(c.Request().Method, routePath(c)) {
+		return nil
+	}
+	return s.lane.Acquire(p)
 }
