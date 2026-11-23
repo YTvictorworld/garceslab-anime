@@ -1,7 +1,7 @@
 {
-  "name": "Seanime",
-  "short_name": "Seanime",
-  "description": "Self-hosted, user-friendly media server for anime and manga.",
+  "name": "Garceslab Anime",
+  "short_name": "Garceslab",
+  "description": "Garceslab Anime: self-hosted anime media server, based on Seanime.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0c0c0c",

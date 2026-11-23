@@ -1,151 +1,88 @@
-# Garceslab Anime
+<p align="center">
+<img src="branding/logo.svg" alt="Garceslab Anime" width="80px"/>
+</p>
 
-> **Garceslab Anime** está basado en [Seanime](https://github.com/5rahim/seanime) (de 5rahim) y
-> en [Seanime Tenji](https://github.com/AlkindiX/seanime-tv) (de AlkindiX). Es un proyecto
-> independiente y no oficial, centrado en televisores LG con webOS (probado en webOS 23). Su objetivo es añadir perfiles locales sin
-> cuenta de AniList y hasta 3 reproducciones simultáneas con TorBox (en desarrollo). No está
-> afiliado ni respaldado por Seanime ni por Seanime Tenji: por favor, **no reportes problemas de
-> Garceslab Anime en sus repositorios**. Licencia GPL-3.0, como los proyectos originales.
->
-> *English:* based on Seanime and Seanime Tenji (GPL-3.0). An independent, unofficial project
-> focused on LG webOS TVs (tested on webOS 23). Not affiliated with or endorsed by either
-> project; please don't report Garceslab Anime issues to them.
+<h1 align="center">Garceslab Anime</h1>
 
-Este repositorio contiene el **servidor y la interfaz web**, derivados de
-[5rahim/seanime](https://github.com/5rahim/seanime) a partir de **v3.10.5** (se conserva su
-historial de git). La app de TV está en
-[garceslab-anime-tv](https://github.com/YTvictorworld/garceslab-anime-tv).
-
-- Se mantiene **de forma independiente**: no sigue a los proyectos originales de forma automática. Los cambios respecto a
-  Seanime están en [MODIFICATIONS.md](MODIFICATIONS.md) y el aviso de licencia en [NOTICE](NOTICE).
-- El **actualizador automático está desactivado**: esta versión nunca busca ni instala versiones de
-  Seanime (que sustituirían a Garceslab Anime).
-- **Imagen Docker:** `docker build -t garceslab-anime .` (ver [Dockerfile](Dockerfile)). Usuario sin
-  privilegios `seanime` (uid 1000), datos en `/home/seanime/.config/Seanime`, puerto `43211`.
+<p align="center">
+A self-hosted anime media server and web interface, made to work well with LG webOS TVs.<br/>
+Based on Seanime and Seanime Tenji (GPL-3.0).
+</p>
 
 ---
 
-*Lo que sigue es el README original de Seanime, sin cambios.*
+**Status: early development.** The current version is Seanime v3.10.5 with a few fixes and the
+update checker turned off. The features below that are marked *planned* don't exist yet.
 
-<p align="center">
-<a href="https://seanime.app/">
-<img src="docs/images/seanime-logo.png" alt="preview" width="70px"/>
-</a>
-</p>
+## What it is
 
-<h1 align="center"><b>Seanime</b></h1>
+Garceslab Anime is a server you run yourself (Docker) plus a web interface, and a companion TV
+app for LG webOS in [garceslab-anime-tv](https://github.com/YTvictorworld/garceslab-anime-tv).
+It is published only so that people can **self-host a version that works with LG webOS TVs**
+(tested on webOS 23).
 
-<p align="center">
-<img src="https://s3.seanime.app/sea/img-20260508-090529-ioc20pjr--sq2.webp" alt="preview" width="100%"/>
-</p>
-
-<p align="center">
-  <a href="https://seanime.app/docs">Documentation</a> |
-  <a href="https://github.com/5rahim/seanime/releases">Latest release</a> |
-  <a href="https://seanime.app/docs/policies">Copyright</a>
-</p>
-
-<div align="center">
-  <a href="https://github.com/5rahim/seanime/releases">
-    <img src="https://img.shields.io/github/v/release/5rahim/seanime?style=flat-square&color=blue" alt="" />
-  </a>
-  <a href="https://github.com/5rahim/seanime/releases">
-    <img src="https://img.shields.io/github/downloads/5rahim/seanime/total?style=flat-square&color=blue" alt="" />
-  </a>
-	<a href="https://discord.gg/Aruz7wdAaf">
-	  <img src="https://img.shields.io/discord/1224767201551192224?style=flat-square&logo=Discord&color=blue&label=Discord" alt="discord">
-	</a>
-  <a href="https://github.com/sponsors/5rahim">
-    <img src="https://img.shields.io/static/v1?label=Sponsor&style=flat-square&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86" alt="" />
-  </a>
-</div>
-
-
-<h5 align="center">
-Leave a star if you like the project! ⭐️
-</h5>
-
-## About
-
-Seanime is a **media server** with a **web interface** and **desktop app** for managing your local library, streaming anime and reading manga.
+There is **no hosted service**: no website to watch anything on, no accounts, nothing run by
+this project. You install and run it on your own hardware.
 
 > [!IMPORTANT]
->Seanime does not provide, host, or distribute any media content. Users are responsible for obtaining media through legal means and complying with their local laws. Extensions listed on the app are unaffiliated with Seanime and may be removed if they violated copyright laws. </strong>
-
+> Garceslab Anime does not provide, host or distribute any media content. Users are responsible
+> for obtaining media through legal means and for complying with the laws of their country.
+> Extensions are third-party software, unaffiliated with this project.
 
 ## Features
 
-- **Cross-platform**: Web interface and desktop app for Windows, Linux, and macOS, companion and mobile server apps for iOS and Android
-- **Seanime Denshi**: Desktop client with built-in libmpv-based video player (support for SSA/ASS subtitles, shaders, and more)
-- **Seanime Tenji**: Companion app for iOS and Android to browse your library, manage your AniList, stream content, and enjoy offline access. Connect to your existing Seanime server or host your own directly on your mobile device with the Mobile Server app
-- **AniList Integration**: Browse and manage your lists, discover anime and manga
-- **Custom Sources**: Support for adding non-AniList anime and manga series 
-- **Library Management**: Fast and smart scanning of local files without strict naming conventions or folder structures
-- **Torrent Integration**: Built-in torrent search engine via extensions and downloading support with qBittorrent, Transmission, Torbox, Real-Debrid, AllDebrid and Premiumize
-- **Torrent Streaming**: Stream torrents directly to the media player without waiting for downloads (supports Bittorrent, Torbox, Real-Debrid, AllDebrid and Premiumize)
-- **Online Streaming**: Watch anime from online sources directly within the app via extensions
-- **Auto Downloader**: Automatically track and download new episodes with customizable filters and advanced features (prioritization, scoring, delay, etc.)
-- **Extension Marketplace**: In-app repository to install and manage extensions for online streaming, manga sources, and torrent providers
-- **Manga Reader**: Read chapters from your local library or via extensions with a unified interface
-- **Transcoding & Direct Play**: Stream your library to any device web browser with on-the-fly transcoding or direct play
-- **External Player Support**: Seamless integration with MPV, VLC, and MPC-HC on desktop
-- **Mobile Player Integration**: Open files and streams in mobile players (Outplayer, VLC, etc.) via intents or deep links
-- **Playlists**: Create and manage playlists for a seamless binge watching experience
-- **Customizable UI**: Personalize the interface with color themes, background images, and layout options
-- **Discord Rich Presence**: Display your watching activity automatically
-- **Offline Mode**: Access your anime and manga library without an internet connection
-- **Schedule**: Track upcoming releases and missed episodes
+- Everything Seanime v3.10.5 does: library management and scanning, AniList integration,
+  debrid and torrent streaming, online streaming and torrent providers through extensions,
+  plugins, schedule, and the web interface.
+- **LG webOS fixes:** debrid streams requested without an HTTP `Range` header (as the webOS
+  native player does) are served correctly, so the TV no longer needs a proxy in front of the
+  server.
+- **No auto-update to Seanime:** the update check and self-update are turned off, so the server
+  is never replaced by a Seanime release.
+- *Planned:* local Netflix-style profiles without an AniList account, and up to three playbacks
+  at the same time.
 
-## Get started
+## Run it with Docker
 
-Read the installation guide to set up Seanime on your device.
+```sh
+docker build -t garceslab-anime .
+docker volume create garceslab_anime_data
+docker run -d --name garceslab-anime \
+  -p 43211:43211 \
+  -e SEANIME_SERVER_HOST=0.0.0.0 -e SEANIME_SERVER_PORT=43211 \
+  -v garceslab_anime_data:/home/seanime \
+  --read-only --tmpfs /tmp:size=8g,mode=1777 \
+  --cap-drop ALL --security-opt no-new-privileges:true \
+  garceslab-anime
+```
 
-<p align="center">
-<a href="https://seanime.app/docs" style="font-size:18px;" align="center">
-How to install Seanime
-</a>
-</p>
+Then open `http://<server>:43211`. The container runs as the unprivileged user `seanime`
+(uid 1000) and keeps its data in `/home/seanime/.config/Seanime` (same layout as the community
+rootless Seanime images, so an existing volume can be reused). Streams are buffered in `/tmp`,
+hence the large tmpfs. Set a server password in the settings (or in `config.toml`) before
+exposing it to your network. Prebuilt images will be published at
+`ghcr.io/ytvictorworld/garceslab-anime` once the first release is made.
 
-<br>
+## Development
 
-## Goal
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [DEVELOPMENT_AND_BUILD.md](DEVELOPMENT_AND_BUILD.md).
+Changes compared with Seanime are listed in [MODIFICATIONS.md](MODIFICATIONS.md).
 
-This is a one-person project and may not meet every use case. If it doesn’t fully fit your needs, other tools might be a better match.
+## Credits
 
-### Not planned
+Garceslab Anime is based on:
 
-- Built-in support for other trackers such as MyAnimeList, Trakt, SIMKL, etc.
-- Built-in support for other media players
-- Built-in localization (translations)
+- **[Seanime](https://github.com/5rahim/seanime)** by **5rahim** and its contributors: the
+  server and web interface in this repository are derived from Seanime v3.10.5.
+- **[Seanime Tenji](https://github.com/AlkindiX/seanime-tv)** by **AlkindiX** (from Seanime
+  Tenji by 5rahim): the TV app in
+  [garceslab-anime-tv](https://github.com/YTvictorworld/garceslab-anime-tv) is derived from it.
 
+The original git history is kept, so every upstream commit keeps its author. The original
+copyright and license notices are preserved (see [NOTICE](NOTICE)). Garceslab Anime is an
+independent, unofficial project: it is not affiliated with or endorsed by Seanime or Seanime
+Tenji, so please don't report Garceslab Anime issues to them.
 
-Consider sponsoring or sharing the project if you want to see more features implemented.
+## License
 
-## Sponsors
-
-The maintenance of this project is made possible by the sponsors.
-
-<p align="center">
-<!-- real-sponsors --><a href="https://github.com/aquaryuo"><img src="https:&#x2F;&#x2F;github.com&#x2F;aquaryuo.png" width="60px" alt="User avatar: aquaryuo" /></a><!-- real-sponsors -->
-<!-- real-sponsors --><a href="https://github.com/osayed0001"><img src="https:&#x2F;&#x2F;github.com&#x2F;osayed0001.png" width="60px" alt="User avatar: osayed0001" /></a><!-- real-sponsors -->
-</p>
-
-## Tech stack
-
-* Server: [Go](https://go.dev/)
-* Frontend: [React](https://reactjs.org/), [Rsbuild/Rspack](https://rsbuild.rs/), [Tanstack Router](https://tanstack.com/router)
-* Seanime Denshi: [Electron](https://www.electronjs.org/)
-
-## Development and Build
-
-Building from source is straightforward, you'll need [Node.js](https://nodejs.org/en/download) and [Go](https://go.dev/doc/install) installed on your system.
-Development and testing might require additional configuration.
-
-[Read more here](https://github.com/5rahim/seanime/blob/main/DEVELOPMENT_AND_BUILD.md)
-
-<br>
-
-<br>
-
-> [!NOTE]
-> For copyright-related requests, please contact the maintainer using the contact information provided on [the website](https://seanime.app/docs/policies).
+[GNU General Public License v3.0](LICENSE), like the projects it is based on.

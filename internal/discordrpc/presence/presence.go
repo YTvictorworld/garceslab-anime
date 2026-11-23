@@ -244,8 +244,8 @@ var (
 		},
 		Buttons: []*discordrpc_client.Button{
 			{
-				Label: "Seanime",
-				Url:   "https://seanime.app",
+				Label: "Garceslab Anime",
+				Url:   "https://github.com/YTvictorworld/garceslab-anime",
 			},
 		},
 		Instance:          true,
@@ -373,8 +373,8 @@ func (p *Presence) SetAnimeActivity(a *AnimeActivity) {
 
 	if !(p.settings.RichPresenceHideSeanimeRepositoryButton || len(activity.Buttons) > 1) {
 		activity.Buttons = append(activity.Buttons, &discordrpc_client.Button{
-			Label: "Seanime",
-			Url:   "https://seanime.app",
+			Label: "Garceslab Anime",
+			Url:   "https://github.com/YTvictorworld/garceslab-anime",
 		})
 	}
 
@@ -559,8 +559,8 @@ func (p *Presence) LegacySetAnimeActivity(a *LegacyAnimeActivity) {
 
 	if !(p.settings.RichPresenceHideSeanimeRepositoryButton || len(activity.Buttons) > 1) {
 		activity.Buttons = append(activity.Buttons, &discordrpc_client.Button{
-			Label: "Seanime",
-			Url:   "https://seanime.app",
+			Label: "Garceslab Anime",
+			Url:   "https://github.com/YTvictorworld/garceslab-anime",
 		})
 	}
 
@@ -621,8 +621,8 @@ func (p *Presence) SetMangaActivity(a *MangaActivity) {
 
 	if !(p.settings.RichPresenceHideSeanimeRepositoryButton || len(activity.Buttons) > 1) {
 		activity.Buttons = append(activity.Buttons, &discordrpc_client.Button{
-			Label: "Seanime",
-			Url:   "https://seanime.app",
+			Label: "Garceslab Anime",
+			Url:   "https://github.com/YTvictorworld/garceslab-anime",
 		})
 	}
 
@@ -747,8 +747,8 @@ func (p *Presence) SetCustomActivity(a *CustomActivity) {
 		}
 		if !(p.settings.RichPresenceHideSeanimeRepositoryButton || len(activity.Buttons) > 1) {
 			activity.Buttons = append(activity.Buttons, &discordrpc_client.Button{
-				Label: "Seanime",
-				Url:   "https://seanime.app",
+				Label: "Garceslab Anime",
+				Url:   "https://github.com/YTvictorworld/garceslab-anime",
 			})
 		}
 	}

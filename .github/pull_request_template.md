@@ -1,13 +1,10 @@
 ## Summary
 
-Describe what this PR changes.
+What does this change, and why?
 
 ## Checklist
 
-- [ ] I have read `CONTRIBUTING.md`
-- [ ] I set up Seanime locally.
-- [ ] I understand the code I changed.
-- [ ] I tested the change locally.
-- [ ] I wrote this PR description myself.
-- [ ] I disclosed any AI assistance.
-- [ ] I can explain and maintain this change.
+- [ ] CI is green (Go vet/tests, web build, gitleaks, image build).
+- [ ] I tested the change locally (and on a webOS TV if it touches playback or the TV app).
+- [ ] No secrets, server addresses or personal data in the diff.
+- [ ] `MODIFICATIONS.md` is updated if the change modifies code that comes from Seanime.

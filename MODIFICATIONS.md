@@ -17,7 +17,15 @@ Maintained independently since 2026-11 by YTvictorworld.
 - **Updater disabled** (`internal/updater`, `internal/handlers/releases.go`): Garceslab Anime never
   checks for or installs Seanime releases, which would replace it. "Check for updates"
   always answers that there is none, and self-update returns an error.
-- **Project files:** this file, `NOTICE`, a header at the top of `README.md`, a
+- **Branding:** a placeholder Garceslab Anime logo (`branding/logo.svg`, exported by
+  `branding/export.sh`) replaces Seanime's logo, favicons, PWA icons, the embedded server logo
+  and the Windows icon; the web UI's window/page titles and PWA manifest say "Garceslab Anime";
+  the settings page's donate link points to this project's source code; the getting-started
+  page credits Seanime by 5rahim.
+- **Links:** the changelog and API docs the server downloads, the Discord Rich Presence button
+  and the updater's GitHub fallback point to this repository instead of Seanime's.
+- **Project files:** this file, `NOTICE`, a new `README.md` and `CONTRIBUTING.md`, issue and
+  pull request templates (Seanime's `FUNDING.yml` and issue templates removed), a
   `Dockerfile` and `.dockerignore` (rootless image), GitHub Actions CI and Dependabot
   (`.github/`). Seanime's own release and Electron workflows were removed from
   `.github/workflows` because they publish Seanime-named builds; they remain in Seanime's

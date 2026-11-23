@@ -127,7 +127,7 @@ function StepIndicator({ currentStep, totalSteps, onStepClick }: { currentStep: 
             <div className="flex items-center justify-center mb-6">
                 <div className="relative mx-auto size-16">
                     <motion.img
-                        src="/seanime-logo.png"
+                        src="/garceslab-logo.png"
                         alt="Seanime Logo"
                         className="w-full h-full object-contain"
                         initial={{ opacity: 0 }}
@@ -868,7 +868,7 @@ export function GettingStartedPage({ status }: { status: Status }) {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1 }}
                 >
-                    By 5rahim
+                    Garceslab Anime, based on Seanime by 5rahim (GPL-3.0)
                 </motion.p>
             </div>
         </div>

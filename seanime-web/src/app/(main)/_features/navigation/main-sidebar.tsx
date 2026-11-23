@@ -410,7 +410,7 @@ function SidebarNavigation({ isCollapsed, containerRef }: { isCollapsed: boolean
                 )}
             >
                 <img
-                    src="/seanime-logo.png"
+                    src="/garceslab-logo.png"
                     alt="logo"
                     className="w-15 h-10 transition-all duration-300"
                 />

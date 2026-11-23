@@ -46,7 +46,6 @@ import { useAtom } from "jotai/react"
 import capitalize from "lodash/capitalize"
 import React from "react"
 import { UseFormReturn } from "react-hook-form"
-import { BiDonateHeart } from "react-icons/bi"
 import { CgMediaPodcast } from "react-icons/cg"
 import { FaDiscord } from "react-icons/fa"
 import { HiOutlineServerStack } from "react-icons/hi2"
@@ -63,7 +62,7 @@ import {
     LuTabletSmartphone,
     LuWandSparkles,
 } from "react-icons/lu"
-import { LuRefreshCw } from "react-icons/lu"
+import { LuCode, LuRefreshCw } from "react-icons/lu"
 import { MdOutlineConnectWithoutContact, MdOutlineDownloading, MdOutlinePalette } from "react-icons/md"
 import { RiFolderDownloadFill } from "react-icons/ri"
 import { SiBittorrent, SiQbittorrent, SiTransmission } from "react-icons/si"
@@ -317,16 +316,16 @@ export default function Page() {
 
                             <div className="flex justify-center !mt-0 pb-4">
                                 <SeaLink
-                                    href="https://github.com/sponsors/5rahim"
+                                    href="https://github.com/YTvictorworld/garceslab-anime"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
                                     <Button
                                         intent="gray-link"
                                         size="md"
-                                        leftIcon={<BiDonateHeart className="text-lg" />}
+                                        leftIcon={<LuCode className="text-lg" />}
                                     >
-                                        Donate
+                                        Source code (GPL-3.0)
                                     </Button>
                                 </SeaLink>
                             </div>
