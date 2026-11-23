@@ -247,9 +247,15 @@ func (s *httpBaseStream) getStreamHandler(outer Stream) http.Handler {
 			return
 		}
 
-		ra, ok := handleRange(w, r, reader, s.filename, s.contentLength)
-		if !ok {
-			return
+		// Without a Range header, proxy the whole file instead of letting handleRange
+		// serve it from the cache, which is only filled by the CDN request below
+		ra := httputil.Range{Start: 0, Length: s.contentLength}
+		if rangeHeader != "" {
+			var ok bool
+			ra, ok = handleRange(w, r, reader, s.filename, s.contentLength)
+			if !ok {
+				return
+			}
 		}
 
 		// Use the client's request context so the CDN request is cancelled when the client disconnects
@@ -260,7 +266,11 @@ func (s *httpBaseStream) getStreamHandler(outer Stream) http.Handler {
 		}
 
 		req.Header.Set("Accept", "*/*")
-		req.Header.Set("Range", rangeHeader)
+		// Prevent the transport from requesting gzip, which would drop the Content-Length
+		req.Header.Set("Accept-Encoding", "identity")
+		if rangeHeader != "" {
+			req.Header.Set("Range", rangeHeader)
+		}
 
 		// Only forward safe headers to avoid conflicts with the CDN
 		for key, values := range r.Header {

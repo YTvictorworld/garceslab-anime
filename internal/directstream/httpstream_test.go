@@ -1,6 +1,7 @@
 package directstream
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -10,6 +11,7 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"seanime/internal/mkvparser"
 	"seanime/internal/player"
@@ -217,4 +219,74 @@ func TestNakamaMetadataReaderStartsAtRequestedRange(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "efgh", string(buf))
 	require.Equal(t, "bytes=4-", <-ranges)
+}
+
+func TestUrlStreamGetStreamHandlerServesFullAndOpenEndedRanges(t *testing.T) {
+	payload := make([]byte, 256*1024)
+	for i := range payload {
+		payload[i] = byte(i % 251)
+	}
+	cdn := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if values, ok := r.Header["Range"]; ok && values[0] == "" {
+			http.Error(w, "empty Range header", http.StatusBadRequest)
+			return
+		}
+		w.Header().Set("Content-Type", "video/x-matroska")
+		http.ServeContent(w, r, "video.mkv", time.Time{}, bytes.NewReader(payload))
+	}))
+	defer cdn.Close()
+
+	manager := newHTTPStreamTestManager()
+	stream := &UrlStream{
+		httpBaseStream: httpBaseStream{
+			streamUrl: cdn.URL + "/video.mkv",
+			BaseStream: BaseStream{
+				manager:               manager,
+				logger:                manager.Logger,
+				subtitleEventCache:    result.NewMap[string, *mkvparser.SubtitleEvent](),
+				activeSubtitleStreams: result.NewMap[string, *SubtitleStream](),
+			},
+		},
+	}
+	require.Equal(t, "video/x-matroska", stream.LoadContentType())
+	defer stream.Close()
+
+	server := httptest.NewServer(stream.GetStreamHandler())
+	defer server.Close()
+	client := &http.Client{Timeout: 5 * time.Second}
+
+	size := int64(len(payload))
+	tests := []struct {
+		name         string
+		rangeHeader  string
+		start        int64
+		status       int
+		contentRange string
+	}{
+		{name: "no range", status: http.StatusOK},
+		{name: "open-ended near end", rangeHeader: "bytes=200000-", start: 200000, status: http.StatusPartialContent, contentRange: fmt.Sprintf("bytes 200000-%d/%d", size-1, size)},
+		{name: "open-ended from start", rangeHeader: "bytes=0-", status: http.StatusPartialContent, contentRange: fmt.Sprintf("bytes 0-%d/%d", size-1, size)},
+		{name: "open-ended middle", rangeHeader: "bytes=1000-", start: 1000, status: http.StatusPartialContent, contentRange: fmt.Sprintf("bytes 1000-%d/%d", size-1, size)},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, err := http.NewRequest(http.MethodGet, server.URL+"/api/v1/directstream/stream", nil)
+			require.NoError(t, err)
+			if tt.rangeHeader != "" {
+				req.Header.Set("Range", tt.rangeHeader)
+			}
+
+			resp, err := client.Do(req)
+			require.NoError(t, err)
+			defer resp.Body.Close()
+
+			body, err := io.ReadAll(resp.Body)
+			require.NoError(t, err)
+			require.Equal(t, tt.status, resp.StatusCode)
+			require.Equal(t, tt.contentRange, resp.Header.Get("Content-Range"))
+			require.Equal(t, strconv.Itoa(len(payload[tt.start:])), resp.Header.Get("Content-Length"))
+			require.True(t, bytes.Equal(payload[tt.start:], body), "body mismatch")
+		})
+	}
 }
