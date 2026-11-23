@@ -56,9 +56,7 @@ type (
 )
 
 func NewAnalyzer(opts *NewAnalyzerOptions) *Analyzer {
-	files := lop.Map(opts.Filepaths, func(filepath string, idx int) *File {
-		return newFile(idx, filepath)
-	})
+	files := newVideoFiles(opts.Filepaths)
 	return &Analyzer{
 		files:               files,
 		media:               opts.Media,
@@ -274,6 +272,27 @@ func (a *Analyzer) scanFiles() error {
 	}
 
 	return nil
+}
+
+// newVideoFiles creates a File for each video file in the torrent, keeping each file's
+// original index so callers can still select it in the torrent's file list.
+//
+// Torrents often ship extra files whose names match an episode, such as "...S01E01...-thumb.jpg"
+// next to "...S01E01....mkv". Without this filter the analyzer could pick the image as the
+// episode file. If no file has a video extension, all files are kept (unchanged behaviour).
+func newVideoFiles(paths []string) []*File {
+	files := make([]*File, 0, len(paths))
+	for idx, p := range paths {
+		if util.IsValidVideoExtension(filepath.Ext(p)) {
+			files = append(files, newFile(idx, p))
+		}
+	}
+	if len(files) == 0 {
+		return lop.Map(paths, func(p string, idx int) *File {
+			return newFile(idx, p)
+		})
+	}
+	return files
 }
 
 // newFile creates a new File from a file path.

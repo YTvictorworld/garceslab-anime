@@ -116,3 +116,28 @@ func newAnalyzedFile(path string, index int, mediaID int, episode int, fileType 
 	}
 	return file
 }
+
+// A torrent can ship a thumbnail named like the episode ("...S01E01...-thumb.jpg"). Only video files
+// must be analyzed, keeping their original index in the torrent's file list.
+func TestNewAnalyzerIgnoresNonVideoFiles(t *testing.T) {
+	paths := []string{
+		"Show/Show - S01E01 - Pilot [Bluray-1080p]-thumb.jpg",
+		"Show/Show - S01E01 - Pilot [Bluray-1080p].mkv",
+		"Show/Show - S01E01 - Pilot [Bluray-1080p].nfo",
+		"Show/Show - S01E02 - Next [Bluray-1080p].mkv",
+	}
+
+	a := NewAnalyzer(&NewAnalyzerOptions{Filepaths: paths})
+
+	require.Len(t, a.files, 2)
+	require.Equal(t, 1, a.files[0].GetIndex())
+	require.Equal(t, "Show/Show - S01E01 - Pilot [Bluray-1080p].mkv", a.files[0].GetPath())
+	require.Equal(t, 3, a.files[1].GetIndex())
+}
+
+// If nothing looks like a video, keep every file so behaviour doesn't change for unusual torrents.
+func TestNewAnalyzerKeepsAllFilesWithoutVideos(t *testing.T) {
+	a := NewAnalyzer(&NewAnalyzerOptions{Filepaths: []string{"a.bin", "b.dat"}})
+	require.Len(t, a.files, 2)
+	require.Equal(t, 1, a.files[1].GetIndex())
+}
