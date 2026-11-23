@@ -29167,6 +29167,17 @@
         "required": true,
         "public": true,
         "comments": []
+      },
+      {
+        "name": "Profiles",
+        "jsonName": "Profiles",
+        "goType": "profiles.Service",
+        "typescriptType": "Service",
+        "usedTypescriptType": "Service",
+        "usedStructName": "profiles.Service",
+        "required": false,
+        "public": true,
+        "comments": []
       }
     ],
     "comments": []
@@ -46131,6 +46142,28 @@
         "goType": "string",
         "typescriptType": "string",
         "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Profiles",
+        "jsonName": "profiles",
+        "goType": "profiles.ProfilesStatus",
+        "typescriptType": "ProfilesStatus",
+        "usedTypescriptType": "ProfilesStatus",
+        "usedStructName": "profiles.ProfilesStatus",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CurrentProfile",
+        "jsonName": "currentProfile",
+        "goType": "profiles.Profile",
+        "typescriptType": "Profile",
+        "usedTypescriptType": "Profile",
+        "usedStructName": "profiles.Profile",
+        "required": false,
         "public": true,
         "comments": []
       }
@@ -88833,6 +88866,823 @@
     "comments": []
   },
   {
+    "filepath": "../internal/profiles/avatars/avatars.go",
+    "filename": "avatars.go",
+    "name": "Avatar",
+    "formattedName": "Avatar",
+    "package": "avatars",
+    "fields": [
+      {
+        "name": "ID",
+        "jsonName": "id",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "File",
+        "jsonName": "file",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Category",
+        "jsonName": "category",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Label",
+        "jsonName": "label",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "License",
+        "jsonName": "license",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "LicenseURL",
+        "jsonName": "licenseUrl",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Creator",
+        "jsonName": "creator",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Source",
+        "jsonName": "source",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Origin",
+        "jsonName": "origin",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "URL",
+        "jsonName": "url",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": [
+          " Filled at load time: URLPrefix + File"
+        ]
+      }
+    ],
+    "comments": [
+      " Avatar is one entry of catalog.json."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/middleware.go",
+    "filename": "middleware.go",
+    "name": "MiddlewareConfig",
+    "formattedName": "MiddlewareConfig",
+    "package": "profiles",
+    "fields": [
+      {
+        "name": "ClientID",
+        "jsonName": "ClientID",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Platform",
+        "jsonName": "Platform",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Reject",
+        "jsonName": "Reject",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " MiddlewareConfig wires the middleware to the server's client identity."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/model.go",
+    "filename": "model.go",
+    "name": "Profile",
+    "formattedName": "Profile",
+    "package": "profiles",
+    "fields": [
+      {
+        "name": "ID",
+        "jsonName": "id",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Name",
+        "jsonName": "name",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "AvatarID",
+        "jsonName": "avatarId",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Color",
+        "jsonName": "color",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "PinHash",
+        "jsonName": "",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "PinFailed",
+        "jsonName": "",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "PinLockedUntil",
+        "jsonName": "",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "TokenVersion",
+        "jsonName": "",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "SortOrder",
+        "jsonName": "sortOrder",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ScoreFormat",
+        "jsonName": "scoreFormat",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "TitleLanguage",
+        "jsonName": "titleLanguage",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "DeletedAt",
+        "jsonName": "deletedAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CreatedAt",
+        "jsonName": "createdAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "UpdatedAt",
+        "jsonName": "updatedAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "LastUsedAt",
+        "jsonName": "lastUsedAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "HasPin",
+        "jsonName": "hasPin",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "AvatarURL",
+        "jsonName": "avatarUrl",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Profile is a row of the profiles table. The PIN hash never leaves the server."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/model.go",
+    "filename": "model.go",
+    "name": "ProfileAuditEntry",
+    "formattedName": "ProfileAuditEntry",
+    "package": "profiles",
+    "fields": [
+      {
+        "name": "ID",
+        "jsonName": "id",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ActorProfileID",
+        "jsonName": "actorProfileId",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "TargetProfileID",
+        "jsonName": "targetProfileId",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "TargetName",
+        "jsonName": "targetName",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Action",
+        "jsonName": "action",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CreatedAt",
+        "jsonName": "createdAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ProfileAuditEntry is a row of profile_audit."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/model.go",
+    "filename": "model.go",
+    "name": "ProfilesStatus",
+    "formattedName": "ProfilesStatus",
+    "package": "profiles",
+    "fields": [
+      {
+        "name": "Enabled",
+        "jsonName": "enabled",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "NeedsSetup",
+        "jsonName": "needsSetup",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MaxLanes",
+        "jsonName": "maxLanes",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Enforced",
+        "jsonName": "enforced",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ProfilesStatus is what /api/v1/status exposes about profiles."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/service.go",
+    "filename": "service.go",
+    "name": "Options",
+    "formattedName": "Options",
+    "package": "profiles",
+    "fields": [
+      {
+        "name": "DataDir",
+        "jsonName": "DataDir",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Enforce",
+        "jsonName": "Enforce",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "TokenTTL",
+        "jsonName": "TokenTTL",
+        "goType": "time.Duration",
+        "typescriptType": "Duration",
+        "usedTypescriptType": "Duration",
+        "usedStructName": "time.Duration",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Logger",
+        "jsonName": "Logger",
+        "goType": "zerolog.Logger",
+        "typescriptType": "Logger",
+        "usedTypescriptType": "Logger",
+        "usedStructName": "zerolog.Logger",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Now",
+        "jsonName": "Now",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/profiles/service.go",
+    "filename": "service.go",
+    "name": "Service",
+    "formattedName": "Service",
+    "package": "profiles",
+    "fields": [
+      {
+        "name": "store",
+        "jsonName": "store",
+        "goType": "store.Store",
+        "typescriptType": "Store",
+        "usedTypescriptType": "Store",
+        "usedStructName": "store.Store",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "db",
+        "jsonName": "db",
+        "goType": "gorm.DB",
+        "typescriptType": "DB",
+        "usedTypescriptType": "DB",
+        "usedStructName": "gorm.DB",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "signer",
+        "jsonName": "signer",
+        "goType": "tokenSigner",
+        "typescriptType": "tokenSigner",
+        "usedTypescriptType": "tokenSigner",
+        "usedStructName": "profiles.tokenSigner",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "enforce",
+        "jsonName": "enforce",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "tokenTTL",
+        "jsonName": "tokenTTL",
+        "goType": "time.Duration",
+        "typescriptType": "Duration",
+        "usedTypescriptType": "Duration",
+        "usedStructName": "time.Duration",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "logger",
+        "jsonName": "logger",
+        "goType": "zerolog.Logger",
+        "typescriptType": "Logger",
+        "usedTypescriptType": "Logger",
+        "usedStructName": "zerolog.Logger",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "now",
+        "jsonName": "now",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "touchMu",
+        "jsonName": "touchMu",
+        "goType": "sync.Mutex",
+        "typescriptType": "Mutex",
+        "usedTypescriptType": "Mutex",
+        "usedStructName": "sync.Mutex",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "lastTouch",
+        "jsonName": "lastTouch",
+        "goType": "map[string]time.Time",
+        "typescriptType": "Record\u003cstring, string\u003e",
+        "usedStructName": "time.Time",
+        "required": false,
+        "public": false,
+        "comments": [
+          " clientID -\u003e last profile_devices write"
+        ]
+      },
+      {
+        "name": "stopPurge",
+        "jsonName": "stopPurge",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "stopOnce",
+        "jsonName": "stopOnce",
+        "goType": "sync.Once",
+        "typescriptType": "Once",
+        "usedTypescriptType": "Once",
+        "usedStructName": "sync.Once",
+        "required": false,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Service is the profile manager."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/service.go",
+    "filename": "service.go",
+    "name": "CreateInput",
+    "formattedName": "CreateInput",
+    "package": "profiles",
+    "fields": [
+      {
+        "name": "Name",
+        "jsonName": "name",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "AvatarID",
+        "jsonName": "avatarId",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Color",
+        "jsonName": "color",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Pin",
+        "jsonName": "pin",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": [
+          " optional PIN set at creation"
+        ]
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/profiles/service.go",
+    "filename": "service.go",
+    "name": "UpdateInput",
+    "formattedName": "UpdateInput",
+    "package": "profiles",
+    "fields": [
+      {
+        "name": "Name",
+        "jsonName": "name",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "AvatarID",
+        "jsonName": "avatarId",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Color",
+        "jsonName": "color",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": [
+          " \"\" clears it"
+        ]
+      },
+      {
+        "name": "SortOrder",
+        "jsonName": "sortOrder",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ScoreFormat",
+        "jsonName": "scoreFormat",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "TitleLanguage",
+        "jsonName": "titleLanguage",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/profiles/service.go",
+    "filename": "service.go",
+    "name": "PinLockedError",
+    "formattedName": "PinLockedError",
+    "package": "profiles",
+    "fields": [
+      {
+        "name": "Until",
+        "jsonName": "Until",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " PinLockedError carries when the lock ends. errors.Is(err, ErrPinLocked) is true."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/service.go",
+    "filename": "service.go",
+    "name": "ProfileSession",
+    "formattedName": "ProfileSession",
+    "package": "profiles",
+    "fields": [
+      {
+        "name": "ProfileToken",
+        "jsonName": "profileToken",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ExpiresAt",
+        "jsonName": "expiresAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": [
+          " unix seconds"
+        ]
+      },
+      {
+        "name": "Profile",
+        "jsonName": "profile",
+        "goType": "Profile",
+        "typescriptType": "Profile",
+        "usedTypescriptType": "Profile",
+        "usedStructName": "profiles.Profile",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ProfileSession is the result of selecting a profile."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/store/store.go",
+    "filename": "store.go",
+    "name": "Store",
+    "formattedName": "Store",
+    "package": "store",
+    "fields": [
+      {
+        "name": "db",
+        "jsonName": "db",
+        "goType": "gorm.DB",
+        "typescriptType": "DB",
+        "usedTypescriptType": "DB",
+        "usedStructName": "gorm.DB",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "path",
+        "jsonName": "path",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
     "filepath": "../internal/report/report.go",
     "filename": "report.go",
     "name": "ClickLog",
@@ -99432,6 +100282,15 @@
         "typescriptType": "string",
         "required": true,
         "public": true,
+        "comments": []
+      },
+      {
+        "name": "disabled",
+        "jsonName": "disabled",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": false,
         "comments": []
       },
       {

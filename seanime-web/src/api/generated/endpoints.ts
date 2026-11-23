@@ -1960,6 +1960,89 @@ export const API_ENDPOINTS = {
             endpoint: "/api/v1/playlist/episodes/{id}",
         },
     },
+    PROFILES: {
+        GetAvatarCatalog: {
+            key: "PROFILES-get-avatar-catalog",
+            methods: ["GET"],
+            endpoint: "/api/v1/avatars",
+        },
+        /**
+         *  @description
+         *  Route returns the profiles for the "Who's watching?" screen.
+         *  Pass ?deleted=true to include the profiles in the trash (restorable for 30 days).
+         */
+        GetProfiles: {
+            key: "PROFILES-get-profiles",
+            methods: ["GET"],
+            endpoint: "/api/v1/profiles",
+        },
+        /**
+         *  @description
+         *  Route creates a profile.
+         *  The avatar must be an id from /api/v1/avatars. The PIN is optional (4-6 digits).
+         */
+        CreateProfile: {
+            key: "PROFILES-create-profile",
+            methods: ["POST"],
+            endpoint: "/api/v1/profiles",
+        },
+        /**
+         *  @description
+         *  Route updates a profile (name, avatar, color, order, score format, title language).
+         *  Any profile can edit any profile (no roles).
+         */
+        UpdateProfile: {
+            key: "PROFILES-update-profile",
+            methods: ["PATCH"],
+            endpoint: "/api/v1/profiles/{id}",
+        },
+        /**
+         *  @description
+         *  Route moves a profile to the trash.
+         *  It can be restored for 30 days; then it is purged with all its data.
+         */
+        DeleteProfile: {
+            key: "PROFILES-delete-profile",
+            methods: ["DELETE"],
+            endpoint: "/api/v1/profiles/{id}",
+        },
+        RestoreProfile: {
+            key: "PROFILES-restore-profile",
+            methods: ["POST"],
+            endpoint: "/api/v1/profiles/{id}/restore",
+        },
+        /**
+         *  @description
+         *  Route sets, changes or removes (pin: null) a profile's PIN.
+         *  Any change closes the profile's open sessions.
+         */
+        SetProfilePin: {
+            key: "PROFILES-set-profile-pin",
+            methods: ["PUT"],
+            endpoint: "/api/v1/profiles/{id}/pin",
+        },
+        /**
+         *  @description
+         *  Route enters a profile on this device and returns its session token.
+         *  Send the token in X-Seanime-Profile (or rely on the HttpOnly Seanime-Profile cookie on the web).
+         *  It lasts 24 h at most, is bound to this client id and must not be persisted by clients.
+         */
+        SelectProfile: {
+            key: "PROFILES-select-profile",
+            methods: ["POST"],
+            endpoint: "/api/v1/profiles/{id}/select",
+        },
+        ProfileLogout: {
+            key: "PROFILES-profile-logout",
+            methods: ["POST"],
+            endpoint: "/api/v1/profiles/logout",
+        },
+        GetProfileAudit: {
+            key: "PROFILES-get-profile-audit",
+            methods: ["GET"],
+            endpoint: "/api/v1/profiles/audit",
+        },
+    },
     RELEASES: {
         /**
          *  @description

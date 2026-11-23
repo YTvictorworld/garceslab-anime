@@ -1789,6 +1789,78 @@ export type GetPlaylistEpisodes_Variables = {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// profiles
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * - Filepath: internal/handlers/profiles.go
+ * - Filename: profiles.go
+ * - Endpoint: /api/v1/profiles/{id}
+ * @description
+ * Route updates a profile (name, avatar, color, order, score format, title language).
+ */
+export type UpdateProfile_Variables = {
+    /**
+     *  The profile ID
+     */
+    id: number
+}
+
+/**
+ * - Filepath: internal/handlers/profiles.go
+ * - Filename: profiles.go
+ * - Endpoint: /api/v1/profiles/{id}
+ * @description
+ * Route moves a profile to the trash.
+ */
+export type DeleteProfile_Variables = {
+    /**
+     *  The profile ID
+     */
+    id: number
+}
+
+/**
+ * - Filepath: internal/handlers/profiles.go
+ * - Filename: profiles.go
+ * - Endpoint: /api/v1/profiles/{id}/restore
+ * @description
+ * Route restores a profile from the trash.
+ */
+export type RestoreProfile_Variables = {
+    /**
+     *  The profile ID
+     */
+    id: number
+}
+
+/**
+ * - Filepath: internal/handlers/profiles.go
+ * - Filename: profiles.go
+ * - Endpoint: /api/v1/profiles/{id}/pin
+ * @description
+ * Route sets, changes or removes (pin: null) a profile's PIN.
+ */
+export type SetProfilePin_Variables = {
+    pin?: string
+}
+
+/**
+ * - Filepath: internal/handlers/profiles.go
+ * - Filename: profiles.go
+ * - Endpoint: /api/v1/profiles/{id}/select
+ * @description
+ * Route enters a profile on this device and returns its session token.
+ */
+export type SelectProfile_Variables = {
+    pin: string
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// profiles_test
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // releases
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

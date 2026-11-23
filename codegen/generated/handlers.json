@@ -9842,6 +9842,510 @@
     }
   },
   {
+    "name": "registerProfileRoutes",
+    "trimmedName": "registerProfileRoutes",
+    "comments": [
+      "registerProfileRoutes adds the profile and avatar routes.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles.go",
+    "filename": "profiles.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "profilesMiddleware",
+    "trimmedName": "profilesMiddleware",
+    "comments": [
+      "profilesMiddleware resolves the request's profile. Registered right after the",
+      "server password middleware.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles.go",
+    "filename": "profiles.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "requestClientID",
+    "trimmedName": "requestClientID",
+    "comments": [
+      "requestClientID returns the client id resolved by the client identity middleware",
+      "(signed header, trusted claimed header, or the HttpOnly cookie).",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles.go",
+    "filename": "profiles.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "HandleGetAvatarCatalog",
+    "trimmedName": "GetAvatarCatalog",
+    "comments": [
+      "HandleGetAvatarCatalog",
+      "",
+      "\t@summary returns the bundled profile avatar catalog.",
+      "\t@route /api/v1/avatars [GET]",
+      "\t@returns []avatars.Avatar",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles.go",
+    "filename": "profiles.go",
+    "api": {
+      "summary": "returns the bundled profile avatar catalog.",
+      "descriptions": [],
+      "endpoint": "/api/v1/avatars",
+      "methods": [
+        "GET"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "[]avatars.Avatar",
+      "returnGoType": "avatars.Avatar",
+      "returnTypescriptType": "Array\u003cAvatar\u003e"
+    }
+  },
+  {
+    "name": "HandleGetProfileAvatarFile",
+    "trimmedName": "GetProfileAvatarFile",
+    "comments": [
+      "HandleGetProfileAvatarFile serves a bundled avatar image. Public (no server",
+      "password), like the embedded web assets, so \u003cimg\u003e tags work on every client.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles.go",
+    "filename": "profiles.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "HandleGetProfiles",
+    "trimmedName": "GetProfiles",
+    "comments": [
+      "HandleGetProfiles",
+      "",
+      "\t@summary returns the profiles for the \"Who's watching?\" screen.",
+      "\t@desc Pass ?deleted=true to include the profiles in the trash (restorable for 30 days).",
+      "\t@route /api/v1/profiles [GET]",
+      "\t@returns []profiles.Profile",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles.go",
+    "filename": "profiles.go",
+    "api": {
+      "summary": "returns the profiles for the \"Who's watching?\" screen.",
+      "descriptions": [
+        "Pass ?deleted=true to include the profiles in the trash (restorable for 30 days)."
+      ],
+      "endpoint": "/api/v1/profiles",
+      "methods": [
+        "GET"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "[]profiles.Profile",
+      "returnGoType": "profiles.Profile",
+      "returnTypescriptType": "Array\u003cProfile\u003e"
+    }
+  },
+  {
+    "name": "HandleCreateProfile",
+    "trimmedName": "CreateProfile",
+    "comments": [
+      "HandleCreateProfile",
+      "",
+      "\t@summary creates a profile.",
+      "\t@desc The avatar must be an id from /api/v1/avatars. The PIN is optional (4-6 digits).",
+      "\t@route /api/v1/profiles [POST]",
+      "\t@returns profiles.Profile",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles.go",
+    "filename": "profiles.go",
+    "api": {
+      "summary": "creates a profile.",
+      "descriptions": [
+        "The avatar must be an id from /api/v1/avatars. The PIN is optional (4-6 digits)."
+      ],
+      "endpoint": "/api/v1/profiles",
+      "methods": [
+        "POST"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "profiles.Profile",
+      "returnGoType": "profiles.Profile",
+      "returnTypescriptType": "Profile"
+    }
+  },
+  {
+    "name": "HandleUpdateProfile",
+    "trimmedName": "UpdateProfile",
+    "comments": [
+      "HandleUpdateProfile",
+      "",
+      "\t@summary updates a profile (name, avatar, color, order, score format, title language).",
+      "\t@desc Any profile can edit any profile (no roles).",
+      "\t@route /api/v1/profiles/{id} [PATCH]",
+      "\t@param id - int - true - \"The profile ID\"",
+      "\t@returns profiles.Profile",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles.go",
+    "filename": "profiles.go",
+    "api": {
+      "summary": "updates a profile (name, avatar, color, order, score format, title language).",
+      "descriptions": [
+        "Any profile can edit any profile (no roles)."
+      ],
+      "endpoint": "/api/v1/profiles/{id}",
+      "methods": [
+        "PATCH"
+      ],
+      "params": [
+        {
+          "name": "id",
+          "jsonName": "id",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The profile ID"
+          ]
+        }
+      ],
+      "bodyFields": [],
+      "returns": "profiles.Profile",
+      "returnGoType": "profiles.Profile",
+      "returnTypescriptType": "Profile"
+    }
+  },
+  {
+    "name": "HandleDeleteProfile",
+    "trimmedName": "DeleteProfile",
+    "comments": [
+      "HandleDeleteProfile",
+      "",
+      "\t@summary moves a profile to the trash.",
+      "\t@desc It can be restored for 30 days; then it is purged with all its data.",
+      "\t@route /api/v1/profiles/{id} [DELETE]",
+      "\t@param id - int - true - \"The profile ID\"",
+      "\t@returns bool",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles.go",
+    "filename": "profiles.go",
+    "api": {
+      "summary": "moves a profile to the trash.",
+      "descriptions": [
+        "It can be restored for 30 days; then it is purged with all its data."
+      ],
+      "endpoint": "/api/v1/profiles/{id}",
+      "methods": [
+        "DELETE"
+      ],
+      "params": [
+        {
+          "name": "id",
+          "jsonName": "id",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The profile ID"
+          ]
+        }
+      ],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "HandleRestoreProfile",
+    "trimmedName": "RestoreProfile",
+    "comments": [
+      "HandleRestoreProfile",
+      "",
+      "\t@summary restores a profile from the trash.",
+      "\t@route /api/v1/profiles/{id}/restore [POST]",
+      "\t@param id - int - true - \"The profile ID\"",
+      "\t@returns profiles.Profile",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles.go",
+    "filename": "profiles.go",
+    "api": {
+      "summary": "restores a profile from the trash.",
+      "descriptions": [],
+      "endpoint": "/api/v1/profiles/{id}/restore",
+      "methods": [
+        "POST"
+      ],
+      "params": [
+        {
+          "name": "id",
+          "jsonName": "id",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The profile ID"
+          ]
+        }
+      ],
+      "bodyFields": [],
+      "returns": "profiles.Profile",
+      "returnGoType": "profiles.Profile",
+      "returnTypescriptType": "Profile"
+    }
+  },
+  {
+    "name": "HandleSetProfilePin",
+    "trimmedName": "SetProfilePin",
+    "comments": [
+      "HandleSetProfilePin",
+      "",
+      "\t@summary sets, changes or removes (pin: null) a profile's PIN.",
+      "\t@desc Any change closes the profile's open sessions.",
+      "\t@route /api/v1/profiles/{id}/pin [PUT]",
+      "\t@param id - int - true - \"The profile ID\"",
+      "\t@returns bool",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles.go",
+    "filename": "profiles.go",
+    "api": {
+      "summary": "sets, changes or removes (pin: null) a profile's PIN.",
+      "descriptions": [
+        "Any change closes the profile's open sessions."
+      ],
+      "endpoint": "/api/v1/profiles/{id}/pin",
+      "methods": [
+        "PUT"
+      ],
+      "params": [
+        {
+          "name": "id",
+          "jsonName": "id",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The profile ID"
+          ]
+        }
+      ],
+      "bodyFields": [
+        {
+          "name": "Pin",
+          "jsonName": "pin",
+          "goType": "string",
+          "usedStructType": "",
+          "typescriptType": "string",
+          "required": false,
+          "descriptions": []
+        }
+      ],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "HandleSelectProfile",
+    "trimmedName": "SelectProfile",
+    "comments": [
+      "HandleSelectProfile",
+      "",
+      "\t@summary enters a profile on this device and returns its session token.",
+      "\t@desc Send the token in X-Seanime-Profile (or rely on the HttpOnly Seanime-Profile cookie on the web).",
+      "\t@desc It lasts 24 h at most, is bound to this client id and must not be persisted by clients.",
+      "\t@route /api/v1/profiles/{id}/select [POST]",
+      "\t@param id - int - true - \"The profile ID\"",
+      "\t@returns profiles.ProfileSession",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles.go",
+    "filename": "profiles.go",
+    "api": {
+      "summary": "enters a profile on this device and returns its session token.",
+      "descriptions": [
+        "Send the token in X-Seanime-Profile (or rely on the HttpOnly Seanime-Profile cookie on the web).",
+        "It lasts 24 h at most, is bound to this client id and must not be persisted by clients."
+      ],
+      "endpoint": "/api/v1/profiles/{id}/select",
+      "methods": [
+        "POST"
+      ],
+      "params": [
+        {
+          "name": "id",
+          "jsonName": "id",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The profile ID"
+          ]
+        }
+      ],
+      "bodyFields": [
+        {
+          "name": "Pin",
+          "jsonName": "pin",
+          "goType": "string",
+          "usedStructType": "",
+          "typescriptType": "string",
+          "required": true,
+          "descriptions": []
+        }
+      ],
+      "returns": "profiles.ProfileSession",
+      "returnGoType": "profiles.ProfileSession",
+      "returnTypescriptType": "ProfileSession"
+    }
+  },
+  {
+    "name": "HandleProfileLogout",
+    "trimmedName": "ProfileLogout",
+    "comments": [
+      "HandleProfileLogout",
+      "",
+      "\t@summary leaves the current profile on this device.",
+      "\t@route /api/v1/profiles/logout [POST]",
+      "\t@returns bool",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles.go",
+    "filename": "profiles.go",
+    "api": {
+      "summary": "leaves the current profile on this device.",
+      "descriptions": [],
+      "endpoint": "/api/v1/profiles/logout",
+      "methods": [
+        "POST"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "HandleGetProfileAudit",
+    "trimmedName": "GetProfileAudit",
+    "comments": [
+      "HandleGetProfileAudit",
+      "",
+      "\t@summary returns the latest profile management actions (who did what, when).",
+      "\t@route /api/v1/profiles/audit [GET]",
+      "\t@returns []profiles.ProfileAuditEntry",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles.go",
+    "filename": "profiles.go",
+    "api": {
+      "summary": "returns the latest profile management actions (who did what, when).",
+      "descriptions": [],
+      "endpoint": "/api/v1/profiles/audit",
+      "methods": [
+        "GET"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "[]profiles.ProfileAuditEntry",
+      "returnGoType": "profiles.ProfileAuditEntry",
+      "returnTypescriptType": "Array\u003cProfileAuditEntry\u003e"
+    }
+  },
+  {
+    "name": "fillProfilesStatus",
+    "trimmedName": "fillProfilesStatus",
+    "comments": [
+      "fillProfilesStatus adds the profiles block and the current profile to /status.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles.go",
+    "filename": "profiles.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "call",
+    "trimmedName": "call",
+    "comments": [
+      "call sends a request as a signed client (clientID != \"\") with an optional profile token.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_test.go",
+    "filename": "profiles_test.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
     "name": "HandleInstallLatestUpdate",
     "trimmedName": "InstallLatestUpdate",
     "comments": [

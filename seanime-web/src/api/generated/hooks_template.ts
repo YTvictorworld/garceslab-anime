@@ -2436,6 +2436,114 @@
 // }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// profiles
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// export function useGetAvatarCatalog() {
+//     return useServerQuery<Array<Avatar>>({
+//         endpoint: API_ENDPOINTS.PROFILES.GetAvatarCatalog.endpoint,
+//         method: API_ENDPOINTS.PROFILES.GetAvatarCatalog.methods[0],
+//         queryKey: [API_ENDPOINTS.PROFILES.GetAvatarCatalog.key],
+//         enabled: true,
+//     })
+// }
+
+// export function useGetProfiles() {
+//     return useServerQuery<Array<Profile>>({
+//         endpoint: API_ENDPOINTS.PROFILES.GetProfiles.endpoint,
+//         method: API_ENDPOINTS.PROFILES.GetProfiles.methods[0],
+//         queryKey: [API_ENDPOINTS.PROFILES.GetProfiles.key],
+//         enabled: true,
+//     })
+// }
+
+// export function useCreateProfile() {
+//     return useServerMutation<Profile>({
+//         endpoint: API_ENDPOINTS.PROFILES.CreateProfile.endpoint,
+//         method: API_ENDPOINTS.PROFILES.CreateProfile.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES.CreateProfile.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useUpdateProfile(id: number) {
+//     return useServerMutation<Profile>({
+//         endpoint: API_ENDPOINTS.PROFILES.UpdateProfile.endpoint.replace("{id}", String(id)),
+//         method: API_ENDPOINTS.PROFILES.UpdateProfile.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES.UpdateProfile.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useDeleteProfile(id: number) {
+//     return useServerMutation<boolean>({
+//         endpoint: API_ENDPOINTS.PROFILES.DeleteProfile.endpoint.replace("{id}", String(id)),
+//         method: API_ENDPOINTS.PROFILES.DeleteProfile.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES.DeleteProfile.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useRestoreProfile(id: number) {
+//     return useServerMutation<Profile>({
+//         endpoint: API_ENDPOINTS.PROFILES.RestoreProfile.endpoint.replace("{id}", String(id)),
+//         method: API_ENDPOINTS.PROFILES.RestoreProfile.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES.RestoreProfile.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useSetProfilePin(id: number) {
+//     return useServerMutation<boolean, SetProfilePin_Variables>({
+//         endpoint: API_ENDPOINTS.PROFILES.SetProfilePin.endpoint.replace("{id}", String(id)),
+//         method: API_ENDPOINTS.PROFILES.SetProfilePin.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES.SetProfilePin.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useSelectProfile(id: number) {
+//     return useServerMutation<ProfileSession, SelectProfile_Variables>({
+//         endpoint: API_ENDPOINTS.PROFILES.SelectProfile.endpoint.replace("{id}", String(id)),
+//         method: API_ENDPOINTS.PROFILES.SelectProfile.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES.SelectProfile.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useProfileLogout() {
+//     return useServerMutation<boolean>({
+//         endpoint: API_ENDPOINTS.PROFILES.ProfileLogout.endpoint,
+//         method: API_ENDPOINTS.PROFILES.ProfileLogout.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES.ProfileLogout.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useGetProfileAudit() {
+//     return useServerQuery<Array<ProfileAuditEntry>>({
+//         endpoint: API_ENDPOINTS.PROFILES.GetProfileAudit.endpoint,
+//         method: API_ENDPOINTS.PROFILES.GetProfileAudit.methods[0],
+//         queryKey: [API_ENDPOINTS.PROFILES.GetProfileAudit.key],
+//         enabled: true,
+//     })
+// }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // releases
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

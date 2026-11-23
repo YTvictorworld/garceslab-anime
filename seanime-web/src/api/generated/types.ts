@@ -1955,6 +1955,33 @@ export type StreamAutoSelectStatusPayload = {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Avatars
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * - Filepath: internal/profiles/avatars/avatars.go
+ * - Filename: avatars.go
+ * - Package: avatars
+ * @description
+ *  Avatar is one entry of catalog.json.
+ */
+export type Avatar = {
+    id: string
+    file: string
+    category: string
+    label: string
+    license: string
+    licenseUrl: string
+    creator: string
+    source: string
+    origin: string
+    /**
+     * Filled at load time: URLPrefix + File
+     */
+    url: string
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ChapterDownloader
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2973,6 +3000,8 @@ export type Status = {
     serverReady: boolean
     serverHasPassword: boolean
     showChangelogTour: string
+    profiles?: ProfilesStatus
+    currentProfile?: Profile
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -5162,6 +5191,79 @@ export type PluginUI_WebviewWindowOptions = {
     defaultY?: number
     frameless?: boolean
     defaultPosition?: string
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Profiles
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * - Filepath: internal/profiles/model.go
+ * - Filename: model.go
+ * - Package: profiles
+ * @description
+ *  Profile is a row of the profiles table. The PIN hash never leaves the server.
+ */
+export type Profile = {
+    id: number
+    name: string
+    avatarId: string
+    color?: string
+    sortOrder: number
+    scoreFormat: string
+    titleLanguage: string
+    deletedAt?: number
+    createdAt: number
+    updatedAt: number
+    lastUsedAt?: number
+    hasPin: boolean
+    avatarUrl: string
+}
+
+/**
+ * - Filepath: internal/profiles/model.go
+ * - Filename: model.go
+ * - Package: profiles
+ * @description
+ *  ProfileAuditEntry is a row of profile_audit.
+ */
+export type ProfileAuditEntry = {
+    id: number
+    actorProfileId?: number
+    targetProfileId: number
+    targetName: string
+    action: string
+    createdAt: number
+}
+
+/**
+ * - Filepath: internal/profiles/service.go
+ * - Filename: service.go
+ * - Package: profiles
+ * @description
+ *  ProfileSession is the result of selecting a profile.
+ */
+export type ProfileSession = {
+    profileToken: string
+    /**
+     * unix seconds
+     */
+    expiresAt: number
+    profile?: Profile
+}
+
+/**
+ * - Filepath: internal/profiles/model.go
+ * - Filename: model.go
+ * - Package: profiles
+ * @description
+ *  ProfilesStatus is what /api/v1/status exposes about profiles.
+ */
+export type ProfilesStatus = {
+    enabled: boolean
+    needsSetup: boolean
+    maxLanes: number
+    enforced: boolean
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
