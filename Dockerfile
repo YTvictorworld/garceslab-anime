@@ -2,7 +2,7 @@
 #
 # Garceslab Anime: server image with the web interface embedded.
 #
-#   docker build -t garceslab-anime .
+#   docker build -t garceslab-anime-server .
 #
 # Runs as the rootless user `seanime` (uid/gid 1000) with HOME=/home/seanime, so the
 # data lives in /home/seanime/.config/Seanime, the same layout as the community
@@ -43,7 +43,7 @@ FROM alpine:${ALPINE_VERSION}
 
 ARG VERSION=dev
 ARG REVISION=unknown
-ARG SOURCE=https://github.com/YTvictorworld/garceslab-anime
+ARG SOURCE=https://github.com/YTvictorworld/garceslab-anime-server
 
 LABEL org.opencontainers.image.title="Garceslab Anime" \
       org.opencontainers.image.description="Based on Seanime (GPL-3.0), focused on LG webOS TVs. Not affiliated with Seanime." \

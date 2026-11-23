@@ -20,7 +20,7 @@ starting on anything large.
 
 ## Building and running
 
-- Image: `docker build -t garceslab-anime .`
+- Image: `docker build -t garceslab-anime-server .`
 - From source: see [DEVELOPMENT_AND_BUILD.md](DEVELOPMENT_AND_BUILD.md) (inherited from
   Seanime): build `seanime-web` first, copy `seanime-web/out` to `web/`, then `go build`.
 - API types for the web UI are generated from the Go handlers; see the `codegen` folder.

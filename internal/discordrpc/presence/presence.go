@@ -245,7 +245,7 @@ var (
 		Buttons: []*discordrpc_client.Button{
 			{
 				Label: "Garceslab Anime",
-				Url:   "https://github.com/YTvictorworld/garceslab-anime",
+				Url:   "https://github.com/YTvictorworld/garceslab-anime-server",
 			},
 		},
 		Instance:          true,
@@ -374,7 +374,7 @@ func (p *Presence) SetAnimeActivity(a *AnimeActivity) {
 	if !(p.settings.RichPresenceHideSeanimeRepositoryButton || len(activity.Buttons) > 1) {
 		activity.Buttons = append(activity.Buttons, &discordrpc_client.Button{
 			Label: "Garceslab Anime",
-			Url:   "https://github.com/YTvictorworld/garceslab-anime",
+			Url:   "https://github.com/YTvictorworld/garceslab-anime-server",
 		})
 	}
 
@@ -560,7 +560,7 @@ func (p *Presence) LegacySetAnimeActivity(a *LegacyAnimeActivity) {
 	if !(p.settings.RichPresenceHideSeanimeRepositoryButton || len(activity.Buttons) > 1) {
 		activity.Buttons = append(activity.Buttons, &discordrpc_client.Button{
 			Label: "Garceslab Anime",
-			Url:   "https://github.com/YTvictorworld/garceslab-anime",
+			Url:   "https://github.com/YTvictorworld/garceslab-anime-server",
 		})
 	}
 
@@ -622,7 +622,7 @@ func (p *Presence) SetMangaActivity(a *MangaActivity) {
 	if !(p.settings.RichPresenceHideSeanimeRepositoryButton || len(activity.Buttons) > 1) {
 		activity.Buttons = append(activity.Buttons, &discordrpc_client.Button{
 			Label: "Garceslab Anime",
-			Url:   "https://github.com/YTvictorworld/garceslab-anime",
+			Url:   "https://github.com/YTvictorworld/garceslab-anime-server",
 		})
 	}
 
@@ -748,7 +748,7 @@ func (p *Presence) SetCustomActivity(a *CustomActivity) {
 		if !(p.settings.RichPresenceHideSeanimeRepositoryButton || len(activity.Buttons) > 1) {
 			activity.Buttons = append(activity.Buttons, &discordrpc_client.Button{
 				Label: "Garceslab Anime",
-				Url:   "https://github.com/YTvictorworld/garceslab-anime",
+				Url:   "https://github.com/YTvictorworld/garceslab-anime-server",
 			})
 		}
 	}

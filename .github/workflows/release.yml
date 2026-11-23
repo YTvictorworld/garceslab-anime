@@ -30,7 +30,7 @@ jobs:
       - id: meta
         uses: docker/metadata-action@v6
         with:
-          images: ghcr.io/ytvictorworld/garceslab-anime
+          images: ghcr.io/ytvictorworld/garceslab-anime-server
           tags: |
             type=ref,event=tag
       - uses: docker/build-push-action@v7
@@ -49,6 +49,6 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" --verify-tag \
             --title "Garceslab Anime $GITHUB_REF_NAME" \
-            --notes "Image: ghcr.io/ytvictorworld/garceslab-anime:$GITHUB_REF_NAME
+            --notes "Image: ghcr.io/ytvictorworld/garceslab-anime-server:$GITHUB_REF_NAME
           Source: https://github.com/$GITHUB_REPOSITORY/tree/$GITHUB_REF_NAME (commit $GITHUB_SHA)
           Garceslab Anime is derived from Seanime (5rahim) and is licensed GPL-3.0; see NOTICE and MODIFICATIONS.md."

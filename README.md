@@ -51,15 +51,15 @@ this project. You install and run it on your own hardware.
 ## Run it with Docker
 
 ```sh
-docker build -t garceslab-anime .
-docker volume create garceslab_anime_data
-docker run -d --name garceslab-anime \
+docker build -t garceslab-anime-server .
+docker volume create garceslab_anime_server_data
+docker run -d --name garceslab-anime-server \
   -p 43211:43211 \
   -e SEANIME_SERVER_HOST=0.0.0.0 -e SEANIME_SERVER_PORT=43211 \
-  -v garceslab_anime_data:/home/seanime \
+  -v garceslab_anime_server_data:/home/seanime \
   --read-only --tmpfs /tmp:size=8g,mode=1777 \
   --cap-drop ALL --security-opt no-new-privileges:true \
-  garceslab-anime
+  garceslab-anime-server
 ```
 
 Then open `http://<server>:43211`. The container runs as the unprivileged user `seanime`
@@ -67,7 +67,7 @@ Then open `http://<server>:43211`. The container runs as the unprivileged user `
 rootless Seanime images, so an existing volume can be reused). Streams are buffered in `/tmp`,
 hence the large tmpfs. Set a server password in the settings (or in `config.toml`) before
 exposing it to your network. Prebuilt images will be published at
-`ghcr.io/ytvictorworld/garceslab-anime` once the first release is made.
+`ghcr.io/ytvictorworld/garceslab-anime-server` once the first release is made.
 
 ## Development
 
