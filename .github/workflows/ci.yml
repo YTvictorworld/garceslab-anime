@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  go:
+    name: Go (vet, test, govulncheck)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      # main.go embeds web/; the real web build isn't needed for vet and tests.
+      - name: Placeholder web folder
+        run: mkdir -p web && echo ok > web/placeholder.txt
+      - name: go vet
+        # Seanime v3.10.5 already fails three vet checks (assign, copylocks, defers) in
+        # code that hasn't been changed here (to fix later). Everything else is checked.
+        run: go vet -assign=false -copylocks=false -defers=false ./...
+      - name: go test
+        run: go test ./...
+      - name: govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+  web:
+    name: Web (build, audit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: seanime-web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: seanime-web/package-lock.json
+      - run: npm ci --no-fund
+      - run: npm run build
+      - name: npm audit (high, not blocking)
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+  gitleaks:
+    name: Secrets (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      # Whole history; known false positives from before the fork are in .gitleaksignore.
+      - name: gitleaks
+        run: docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.28.0 git /repo --redact --no-banner
+
+  docker:
+    name: Docker image (build only, no push)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          tags: garceslab-anime:ci
+          build-args: |
+            VERSION=ci
+            REVISION=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

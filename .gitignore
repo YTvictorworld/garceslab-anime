@@ -11,11 +11,11 @@ testdata/
 !.github/ISSUE_TEMPLATE
 !.github/scripts
 !.github/pull_request_template.md
+!.github/workflows
+!.github/dependabot.yml
 
-Dockerfile
 Dockerfile.dev
 dev.dockerfile
-.dockerignore
 
 go.work
 .gocache

@@ -1,0 +1,6 @@
+# Findings in Seanime's own history (before the fork), checked and not secrets:
+# test vectors for the crypto bindings, and a minified third-party chunk.
+b35a36f5ce8d37b0d3cccf450e56782ea1c8bc61:internal/goja/goja_bindings/crypto_test.go:generic-api-key:129
+c16596f67f4721a28fa364a4bd8066c78d8ddc5b:internal/goja/goja_bindings/crypto_test.go:generic-api-key:162
+2d0a7cd4131721627190f427354584ceec74f849:web-denshi/_next/static/chunks/a4634e51-4866649ade130676.js:generic-api-key:1
+2d0a7cd4131721627190f427354584ceec74f849:web/_next/static/chunks/a4634e51-4866649ade130676.js:generic-api-key:1

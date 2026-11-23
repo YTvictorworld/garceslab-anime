@@ -1,3 +1,32 @@
+# Garceslab Anime
+
+> **Garceslab Anime** está basado en [Seanime](https://github.com/5rahim/seanime) (de 5rahim) y
+> en [Seanime Tenji](https://github.com/AlkindiX/seanime-tv) (de AlkindiX). Es un proyecto
+> independiente y no oficial, centrado en televisores LG con webOS (probado en webOS 23). Su objetivo es añadir perfiles locales sin
+> cuenta de AniList y hasta 3 reproducciones simultáneas con TorBox (en desarrollo). No está
+> afiliado ni respaldado por Seanime ni por Seanime Tenji: por favor, **no reportes problemas de
+> Garceslab Anime en sus repositorios**. Licencia GPL-3.0, como los proyectos originales.
+>
+> *English:* based on Seanime and Seanime Tenji (GPL-3.0). An independent, unofficial project
+> focused on LG webOS TVs (tested on webOS 23). Not affiliated with or endorsed by either
+> project; please don't report Garceslab Anime issues to them.
+
+Este repositorio contiene el **servidor y la interfaz web**, derivados de
+[5rahim/seanime](https://github.com/5rahim/seanime) a partir de **v3.10.5** (se conserva su
+historial de git). La app de TV está en
+[garceslab-anime-tv](https://github.com/YTvictorworld/garceslab-anime-tv).
+
+- Se mantiene **de forma independiente**: no sigue a los proyectos originales de forma automática. Los cambios respecto a
+  Seanime están en [MODIFICATIONS.md](MODIFICATIONS.md) y el aviso de licencia en [NOTICE](NOTICE).
+- El **actualizador automático está desactivado**: esta versión nunca busca ni instala versiones de
+  Seanime (que sustituirían a Garceslab Anime).
+- **Imagen Docker:** `docker build -t garceslab-anime .` (ver [Dockerfile](Dockerfile)). Usuario sin
+  privilegios `seanime` (uid 1000), datos en `/home/seanime/.config/Seanime`, puerto `43211`.
+
+---
+
+*Lo que sigue es el README original de Seanime, sin cambios.*
+
 <p align="center">
 <a href="https://seanime.app/">
 <img src="docs/images/seanime-logo.png" alt="preview" width="70px"/>

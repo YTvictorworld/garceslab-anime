@@ -1,0 +1,17 @@
+.git
+**/node_modules
+seanime-web/out
+seanime-web/out-denshi
+seanime-web/public/jassub
+web
+web-denshi
+seanime-denshi
+logs
+test/testdata
+test/sample
+test/*.json
+test/config.toml
+**/*.db
+**/.env.local
+.gocache
+.gotmp
