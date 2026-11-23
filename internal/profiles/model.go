@@ -48,8 +48,8 @@ func (p *Profile) fill() *Profile {
 // IsDeleted reports whether the profile is in the trash.
 func (p *Profile) IsDeleted() bool { return p != nil && p.DeletedAt != nil }
 
-// AuditEntry is a row of profile_audit.
-type AuditEntry struct {
+// ProfileAuditEntry is a row of profile_audit.
+type ProfileAuditEntry struct {
 	ID              int64  `gorm:"column:id;primaryKey" json:"id"`
 	ActorProfileID  *int64 `gorm:"column:actor_profile_id" json:"actorProfileId,omitempty"`
 	TargetProfileID int64  `gorm:"column:target_profile_id" json:"targetProfileId"`
@@ -58,7 +58,7 @@ type AuditEntry struct {
 	CreatedAt       int64  `gorm:"column:created_at" json:"createdAt"`
 }
 
-func (AuditEntry) TableName() string { return "profile_audit" }
+func (ProfileAuditEntry) TableName() string { return "profile_audit" }
 
 const (
 	AuditCreate    = "create"
@@ -71,8 +71,8 @@ const (
 	AuditPinRemove = "pin_remove"
 )
 
-// Status is what /api/v1/status exposes about profiles.
-type Status struct {
+// ProfilesStatus is what /api/v1/status exposes about profiles.
+type ProfilesStatus struct {
 	Enabled    bool `json:"enabled"`
 	NeedsSetup bool `json:"needsSetup"`
 	MaxLanes   int  `json:"maxLanes"`

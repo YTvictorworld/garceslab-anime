@@ -164,12 +164,12 @@ func (s *Service) Close() error {
 }
 
 // Status returns the profiles block of /api/v1/status.
-func (s *Service) Status(ctx context.Context) Status {
+func (s *Service) Status(ctx context.Context) ProfilesStatus {
 	needsSetup, err := s.NeedsSetup(ctx)
 	if err != nil {
 		s.logger.Error().Err(err).Msg("profiles: count profiles")
 	}
-	return Status{Enabled: true, NeedsSetup: needsSetup, MaxLanes: MaxLanes, Enforced: s.enforce}
+	return ProfilesStatus{Enabled: true, NeedsSetup: needsSetup, MaxLanes: MaxLanes, Enforced: s.enforce}
 }
 
 // NeedsSetup reports whether there is no active (non-deleted) profile.
@@ -511,17 +511,17 @@ func (s *Service) StartPurgeLoop() {
 }
 
 // AuditLog returns the latest audit entries, newest first.
-func (s *Service) AuditLog(ctx context.Context, limit int) ([]*AuditEntry, error) {
+func (s *Service) AuditLog(ctx context.Context, limit int) ([]*ProfileAuditEntry, error) {
 	if limit <= 0 || limit > 500 {
 		limit = 100
 	}
-	var list []*AuditEntry
+	var list []*ProfileAuditEntry
 	err := s.db.WithContext(ctx).Order("created_at DESC, id DESC").Limit(limit).Find(&list).Error
 	return list, err
 }
 
 func (s *Service) audit(ctx context.Context, tx *gorm.DB, target *Profile, action string) error {
-	e := &AuditEntry{
+	e := &ProfileAuditEntry{
 		TargetProfileID: target.ID,
 		TargetName:      target.Name,
 		Action:          action,
@@ -648,15 +648,15 @@ func (s *Service) checkPin(ctx context.Context, p *Profile, pin string) error {
 // Sessions
 //----------------------------------------------------------------------------------------------------------------------
 
-// Session is the result of selecting a profile.
-type Session struct {
+// ProfileSession is the result of selecting a profile.
+type ProfileSession struct {
 	ProfileToken string   `json:"profileToken"`
 	ExpiresAt    int64    `json:"expiresAt"` // unix seconds
 	Profile      *Profile `json:"profile"`
 }
 
 // Select checks the PIN (if any) and issues a session token bound to clientID.
-func (s *Service) Select(ctx context.Context, id int64, pin string, clientID, platform string) (*Session, error) {
+func (s *Service) Select(ctx context.Context, id int64, pin string, clientID, platform string) (*ProfileSession, error) {
 	clientID = strings.TrimSpace(clientID)
 	if clientID == "" {
 		return nil, ErrNoClientID
@@ -683,7 +683,7 @@ func (s *Service) Select(ctx context.Context, id int64, pin string, clientID, pl
 	if err != nil {
 		return nil, err
 	}
-	return &Session{
+	return &ProfileSession{
 		ProfileToken: s.signer.sign(id, clientID, p.TokenVersion, expiry),
 		ExpiresAt:    expiry,
 		Profile:      p,

@@ -51,8 +51,8 @@ type Status struct {
 	ShowChangelogTour     string                        `json:"showChangelogTour"`
 
 	// profiles-hook: local profiles (nil on restricted/unauthenticated status)
-	Profiles       *profiles.Status  `json:"profiles,omitempty"`
-	CurrentProfile *profiles.Profile `json:"currentProfile"`
+	Profiles       *profiles.ProfilesStatus `json:"profiles,omitempty"`
+	CurrentProfile *profiles.Profile        `json:"currentProfile"`
 }
 
 var clientInfoCache = result.NewMap[string, util.ClientInfo]()

@@ -335,7 +335,7 @@ func TestSoftDeleteRestorePurge(t *testing.T) {
 	assert.Equal(t, AuditPurge, log[0].Action)
 	assert.Equal(t, a.ID, log[0].TargetProfileID)
 	assert.Equal(t, "Ana", log[0].TargetName)
-	var deleteEntry *AuditEntry
+	var deleteEntry *ProfileAuditEntry
 	for _, e := range log {
 		if e.Action == AuditDelete {
 			deleteEntry = e

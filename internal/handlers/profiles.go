@@ -265,7 +265,7 @@ func (h *Handler) HandleSetProfilePin(c echo.Context) error {
 //	@desc It lasts 24 h at most, is bound to this client id and must not be persisted by clients.
 //	@route /api/v1/profiles/{id}/select [POST]
 //	@param id - int - true - "The profile ID"
-//	@returns profiles.Session
+//	@returns profiles.ProfileSession
 func (h *Handler) HandleSelectProfile(c echo.Context) error {
 	if h.App.Profiles == nil {
 		return h.profilesUnavailable(c)
@@ -324,7 +324,7 @@ func (h *Handler) HandleProfileLogout(c echo.Context) error {
 //
 //	@summary returns the latest profile management actions (who did what, when).
 //	@route /api/v1/profiles/audit [GET]
-//	@returns []profiles.AuditEntry
+//	@returns []profiles.ProfileAuditEntry
 func (h *Handler) HandleGetProfileAudit(c echo.Context) error {
 	if h.App.Profiles == nil {
 		return h.profilesUnavailable(c)
