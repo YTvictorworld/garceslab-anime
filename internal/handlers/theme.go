@@ -12,6 +12,9 @@ import (
 //	@route /api/v1/theme [GET]
 //	@returns models.Theme
 func (h *Handler) HandleGetTheme(c echo.Context) error {
+	if t, ok := h.profileTheme(c); ok { // profiles-hook
+		return h.RespondWithData(c, t)
+	}
 	theme, err := h.App.Database.GetTheme()
 	if err != nil {
 		return h.RespondWithError(c, err)
@@ -47,6 +50,10 @@ func (h *Handler) HandleUpdateTheme(c echo.Context) error {
 	}
 
 	b.Theme.HomeItems = currentTheme.HomeItems
+
+	if handled, err := h.saveProfileTheme(c, &b.Theme); handled { // profiles-hook
+		return err
+	}
 
 	// Update the theme settings
 	if _, err := h.App.Database.UpsertTheme(&b.Theme); err != nil {

@@ -24,7 +24,7 @@ func (h *Handler) HandleUpdateContinuityWatchHistoryItem(c echo.Context) error {
 		return h.RespondWithError(c, err)
 	}
 
-	err := h.App.ContinuityManager.UpdateWatchHistoryItem(&b.Options)
+	err := h.App.ContinuityManager.UpdateWatchHistoryItemCtx(c.Request().Context(), &b.Options) // profiles-hook
 	if err != nil {
 		// Ignore the error
 		return h.RespondWithError(c, err)
@@ -46,14 +46,14 @@ func (h *Handler) HandleGetContinuityWatchHistoryItem(c echo.Context) error {
 		return h.RespondWithError(c, err)
 	}
 
-	if !h.App.ContinuityManager.GetSettings().WatchContinuityEnabled {
+	if !h.App.ContinuityManager.GetSettingsCtx(c.Request().Context()).WatchContinuityEnabled { // profiles-hook
 		return h.RespondWithData(c, &continuity.WatchHistoryItemResponse{
 			Item:  nil,
 			Found: false,
 		})
 	}
 
-	resp := h.App.ContinuityManager.GetWatchHistoryItem(id)
+	resp := h.App.ContinuityManager.GetWatchHistoryItemCtx(c.Request().Context(), id) // profiles-hook
 	return h.RespondWithData(c, resp)
 }
 
@@ -64,11 +64,11 @@ func (h *Handler) HandleGetContinuityWatchHistoryItem(c echo.Context) error {
 //	@route /api/v1/continuity/history [GET]
 //	@returns continuity.WatchHistory
 func (h *Handler) HandleGetContinuityWatchHistory(c echo.Context) error {
-	if !h.App.ContinuityManager.GetSettings().WatchContinuityEnabled {
+	if !h.App.ContinuityManager.GetSettingsCtx(c.Request().Context()).WatchContinuityEnabled { // profiles-hook
 		ret := make(map[int]*continuity.WatchHistoryItem)
 		return h.RespondWithData(c, ret)
 	}
 
-	resp := h.App.ContinuityManager.GetWatchHistory()
+	resp := h.App.ContinuityManager.GetWatchHistoryCtx(c.Request().Context()) // profiles-hook
 	return h.RespondWithData(c, resp)
 }

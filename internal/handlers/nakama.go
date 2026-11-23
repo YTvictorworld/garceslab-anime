@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -90,7 +91,7 @@ func (h *Handler) HandleGetNakamaAnimeLibrary(c echo.Context) error {
 		return h.RespondWithError(c, errors.New("host is not sharing its anime library"))
 	}
 
-	animeCollection, err := h.App.GetAnimeCollection(false)
+	animeCollection, err := h.App.GetAnimeCollectionCtx(c.Request().Context(), false)
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}
@@ -232,7 +233,7 @@ func (h *Handler) getFilteredLocalFiles(mediaId int) ([]*anime.LocalFile, error)
 
 // buildNakamaLocalFiles constructs a NakamaLocalFiles response with custom source mappings.
 func (h *Handler) buildNakamaLocalFiles(lfs []*anime.LocalFile) (*nakama.NakamaLocalFiles, error) {
-	animeCollection, err := h.App.GetAnimeCollection(false)
+	animeCollection, err := h.App.GlobalAnimeCollection(context.Background()) // profiles-hook: shared with peers
 	if err != nil {
 		return nil, err
 	}

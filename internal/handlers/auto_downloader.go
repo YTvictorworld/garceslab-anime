@@ -208,7 +208,7 @@ func (h *Handler) HandleDeleteAutoDownloaderRule(c echo.Context) error {
 
 	// -1 deletes all no longer airing
 	if id == -1 {
-		animeCollection, err := h.App.GetAnimeCollection(false)
+		animeCollection, err := h.App.GlobalAnimeCollection(c.Request().Context())
 		if err != nil {
 			return h.RespondWithError(c, err)
 		}

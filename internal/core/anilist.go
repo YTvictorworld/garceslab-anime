@@ -36,6 +36,9 @@ func (a *App) GetUsername() string {
 }
 
 func (a *App) GetUserAnilistToken() string {
+	if a.ProfilesRuntime != nil { // profiles-hook: never send the server's token
+		return ""
+	}
 	if a.user == nil || a.user.Token == user.SimulatedUserToken {
 		return ""
 	}
@@ -47,6 +50,11 @@ func (a *App) GetUserAnilistToken() string {
 
 // UpdatePlatform changes the current platform to the provided one.
 func (a *App) UpdatePlatform(platform platform.Platform) {
+	if a.ProfilesRuntime != nil { // profiles-hook: the profiles router stays installed
+		a.Logger.Warn().Msg("app: Platform switch ignored, local profiles use AniList anonymously")
+		platform.Close()
+		return
+	}
 	if a.AnilistPlatformRef.IsPresent() {
 		a.AnilistPlatformRef.Get().Close()
 	}
@@ -90,6 +98,9 @@ func (a *App) UseCustomAnimeClient(config anilist.CustomClientConfig) error {
 }
 
 func (a *App) applyRuntimeAnilistClient(client anilist.AnilistClient) error {
+	if a.ProfilesRuntime != nil { // profiles-hook
+		return ErrAnilistLoginDisabled
+	}
 	if a.IsOffline() {
 		return errors.New("anilist runtime switch is unavailable in offline mode")
 	}
@@ -174,6 +185,9 @@ func fetchRuntimeViewer(provider string, getViewer func() (*anilist.GetViewer, e
 }
 
 func (a *App) LoginToAnilist(token string) error {
+	if a.ProfilesRuntime != nil { // profiles-hook
+		return ErrAnilistLoginDisabled
+	}
 	if token == "" {
 		return errors.New("token is empty")
 	}
@@ -229,6 +243,9 @@ func (a *App) LoginToAnilist(token string) error {
 // LogoutFromAnilist clears the AniList token and switches to the simulated platform.
 // This is called internally when the token is detected as invalid.
 func (a *App) LogoutFromAnilist() {
+	if a.ProfilesRuntime != nil { // profiles-hook: nothing to log out of; keep the account for the one-time import
+		return
+	}
 	// prevent multiple concurrent calls (e.g. from parallel failing requests)
 	if !a.logoutInProgress.CompareAndSwap(false, true) {
 		return
@@ -283,6 +300,9 @@ func (a *App) SyncAnilistToSimulatedCollection() {
 
 // RefreshAnimeCollection queries Anilist for the user's collection
 func (a *App) RefreshAnimeCollection() (*anilist.AnimeCollection, error) {
+	if a.ProfilesRuntime != nil { // profiles-hook: the playback lane owner's collection
+		return a.refreshAnimeCollectionProfiles(a.ProfilesRuntime.Lane.Context(context.Background()))
+	}
 	go func() {
 		a.OnRefreshAnilistCollectionFuncs.Range(func(key string, f func()) bool {
 			go f()

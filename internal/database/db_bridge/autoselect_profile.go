@@ -15,8 +15,22 @@ func FindAutoSelectProfile(db *db.Database) (*anime.AutoSelectProfile, bool) {
 	return profile, err == nil && profile.DbID != 0
 }
 
+// ProfileAutoSelectHook (profiles-hook) returns the auto-select profile of the
+// local profile that owns the playback, if it has one.
+var ProfileAutoSelectHook func() (*anime.AutoSelectProfile, bool)
+
 // GetAutoSelectProfile returns the single autoselect profile if it exists
 func GetAutoSelectProfile(db *db.Database) (*anime.AutoSelectProfile, error) {
+	if ProfileAutoSelectHook != nil { // profiles-hook
+		if p, ok := ProfileAutoSelectHook(); ok {
+			return p, nil
+		}
+	}
+	return GetGlobalAutoSelectProfile(db)
+}
+
+// GetGlobalAutoSelectProfile returns the global (server) autoselect profile (profiles-hook).
+func GetGlobalAutoSelectProfile(db *db.Database) (*anime.AutoSelectProfile, error) {
 	var res models.AutoSelectProfile
 	err := db.Gorm().First(&res).Error
 	if err != nil {

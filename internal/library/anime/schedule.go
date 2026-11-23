@@ -25,7 +25,8 @@ type ScheduleItem struct {
 	IsSeasonFinale bool      `json:"isSeasonFinale"`
 }
 
-var scheduleCache = result.NewCache[int, []*ScheduleItem]()
+// profiles-hook: keyed by profile id (0 = no profile / upstream).
+var scheduleCache = result.NewCache[int64, []*ScheduleItem]()
 
 func GetScheduleCache() ([]*ScheduleItem, bool) {
 	return scheduleCache.Get(0)
@@ -35,8 +36,19 @@ func SetScheduleCache(val []*ScheduleItem) {
 	scheduleCache.Set(0, val)
 }
 
+// GetScheduleCacheFor returns the cached schedule of a profile (profiles-hook).
+func GetScheduleCacheFor(profileID int64) ([]*ScheduleItem, bool) {
+	return scheduleCache.Get(profileID)
+}
+
+// SetScheduleCacheFor caches the schedule of a profile (profiles-hook).
+func SetScheduleCacheFor(profileID int64, val []*ScheduleItem) {
+	scheduleCache.Set(profileID, val)
+}
+
+// ClearScheduleCache clears the schedule of every profile.
 func ClearScheduleCache() {
-	scheduleCache.Delete(0)
+	scheduleCache.Clear()
 }
 
 func GetScheduleItems(animeSchedule *anilist.AnimeAiringSchedule, animeCollection *anilist.AnimeCollection) []*ScheduleItem {

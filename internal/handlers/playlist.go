@@ -134,7 +134,7 @@ func (h *Handler) HandleGetPlaylistEpisodes(c echo.Context) error {
 		return h.RespondWithError(c, err)
 	}
 
-	animeCollection, err := h.App.GetAnimeCollection(false)
+	animeCollection, err := h.App.GetAnimeCollectionCtx(c.Request().Context(), false)
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}

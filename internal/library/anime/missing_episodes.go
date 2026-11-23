@@ -16,27 +16,46 @@ import (
 	lop "github.com/samber/lo/parallel"
 )
 
+// profiles-hook: one cached value per profile (key 0 = no profile / upstream).
 var missingEpisodesCache = struct {
 	sync.Mutex
-	value *MissingEpisodes
-}{}
+	values map[int64]*MissingEpisodes
+}{values: map[int64]*MissingEpisodes{}}
 
 func GetMissingEpisodesCache() (*MissingEpisodes, bool) {
-	missingEpisodesCache.Lock()
-	defer missingEpisodesCache.Unlock()
-
-	return missingEpisodesCache.value, missingEpisodesCache.value != nil
+	return GetMissingEpisodesCacheFor(0)
 }
 
 func SetMissingEpisodesCache(missing *MissingEpisodes) {
+	SetMissingEpisodesCacheFor(0, missing)
+}
+
+// GetMissingEpisodesCacheFor returns the cached value of a profile (profiles-hook).
+func GetMissingEpisodesCacheFor(profileID int64) (*MissingEpisodes, bool) {
 	missingEpisodesCache.Lock()
 	defer missingEpisodesCache.Unlock()
 
-	missingEpisodesCache.value = missing
+	v := missingEpisodesCache.values[profileID]
+	return v, v != nil
 }
 
+// SetMissingEpisodesCacheFor caches the value of a profile (profiles-hook).
+func SetMissingEpisodesCacheFor(profileID int64, missing *MissingEpisodes) {
+	missingEpisodesCache.Lock()
+	defer missingEpisodesCache.Unlock()
+
+	if missing == nil {
+		delete(missingEpisodesCache.values, profileID)
+		return
+	}
+	missingEpisodesCache.values[profileID] = missing
+}
+
+// ClearMissingEpisodesCache clears the cached values of every profile.
 func ClearMissingEpisodesCache() {
-	SetMissingEpisodesCache(nil)
+	missingEpisodesCache.Lock()
+	defer missingEpisodesCache.Unlock()
+	missingEpisodesCache.values = map[int64]*MissingEpisodes{}
 }
 
 type (

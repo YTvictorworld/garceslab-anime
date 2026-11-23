@@ -24,7 +24,7 @@ import (
 //	@returns anime.LibraryCollection
 func (h *Handler) HandleGetLibraryCollection(c echo.Context) error {
 
-	animeCollection, err := h.App.GetAnimeCollection(false)
+	animeCollection, err := h.App.GetAnimeCollectionCtx(c.Request().Context(), false)
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}
@@ -244,7 +244,7 @@ func (h *Handler) HandleGetAnimeCollectionSchedule(c echo.Context) error {
 		anime.ClearScheduleCache()
 	})
 
-	if ret, ok := anime.GetScheduleCache(); ok {
+	if ret, ok := anime.GetScheduleCacheFor(requestProfileID(c)); ok { // profiles-hook
 		return h.RespondWithData(c, ret)
 	}
 
@@ -253,14 +253,14 @@ func (h *Handler) HandleGetAnimeCollectionSchedule(c echo.Context) error {
 		return h.RespondWithError(c, err)
 	}
 
-	animeCollection, err := h.App.GetAnimeCollection(false)
+	animeCollection, err := h.App.GetAnimeCollectionCtx(c.Request().Context(), false)
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}
 
 	ret := anime.GetScheduleItems(animeSchedule, animeCollection)
 
-	anime.SetScheduleCache(ret)
+	anime.SetScheduleCacheFor(requestProfileID(c), ret) // profiles-hook
 
 	return h.RespondWithData(c, ret)
 }
@@ -289,7 +289,7 @@ func (h *Handler) HandleAddUnknownMedia(c echo.Context) error {
 	}
 
 	// Bypass the cache
-	animeCollection, err := h.App.GetAnimeCollection(true)
+	animeCollection, err := h.App.GetAnimeCollectionCtx(c.Request().Context(), true)
 	if err != nil {
 		return h.RespondWithError(c, errors.New("error: Anilist responded with an error, wait one minute before refreshing"))
 	}

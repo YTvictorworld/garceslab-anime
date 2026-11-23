@@ -65,6 +65,7 @@ func (h *Handler) webSocketEventHandler(c echo.Context) error {
 
 	// Add connection to manager
 	h.App.WSEventManager.AddConn(id, ws, platform)
+	h.tagWebsocketProfile(c, id) // profiles-hook: route per-profile events to this connection
 	h.App.Logger.Debug().Str("id", id).Str("platform", platform).Msg("ws: Client connected")
 	h.App.WSEventManager.SendEventTo(id, events.ClientIdentity, map[string]string{
 		"clientId": id,

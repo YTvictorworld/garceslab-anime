@@ -188,6 +188,8 @@ type (
 
 		// profiles-hook: local profiles manager (profiles.db)
 		Profiles *profiles.Service
+		// profiles-hook: router platform, playback lane, per-profile settings/history (nil in offline mode)
+		ProfilesRuntime *ProfilesRuntime
 	}
 )
 
@@ -273,6 +275,9 @@ func NewApp(configOpts *ConfigOptions, selfupdater *updater.SelfUpdater) *App {
 
 	// Get Anilist token from database if available
 	anilistToken := database.GetAnilistToken()
+	if profilesPlatformEnabled(cfg) {
+		anilistToken = "" // profiles-hook: AniList is only used anonymously (the token stays in the db for the one-time import)
+	}
 
 	anilistCacheDir := filepath.Join(cfg.Cache.Dir, "anilist")
 
@@ -386,6 +391,14 @@ func NewApp(configOpts *ConfigOptions, selfupdater *updater.SelfUpdater) *App {
 		activePlatformRef.Set(simulatedPlatform)
 	}
 
+	// profiles-hook: route every platform call to the local platform of the request's profile
+	var profilesRuntime *ProfilesRuntime
+	if profilesPlatformEnabled(cfg) {
+		profilesRuntime = newProfilesRuntime(profilesService, wsEventManager, database, extensionBankRef, anilistCacheDir, logger)
+		activePlatformRef.Set(profilesRuntime.Router)
+		logger.Info().Msg("app: Using the local profiles platform")
+	}
+
 	isOfflineRef := util.NewRef(cfg.Server.Offline)
 	offlinePlatformRef := util.NewRef[platform.Platform](offlinePlatform)
 
@@ -471,6 +484,7 @@ func NewApp(configOpts *ConfigOptions, selfupdater *updater.SelfUpdater) *App {
 		ServerPasswordHash:              serverPasswordHash,
 		ClientIdentitySecret:            util.GenerateCryptoID(),
 		Profiles:                        profilesService, // profiles-hook
+		ProfilesRuntime:                 profilesRuntime, // profiles-hook
 	}
 
 	app.AddCleanupFunction(func() { _ = profilesService.Close() }) // profiles-hook

@@ -5,6 +5,7 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"seanime/internal/core"
 	"seanime/internal/profiles"
 	"seanime/internal/profiles/avatars"
 	"strconv"
@@ -30,6 +31,8 @@ func (h *Handler) registerProfileRoutes(e *echo.Echo, v1 *echo.Group) {
 	v1.POST("/profiles/:id/restore", h.HandleRestoreProfile)
 	v1.PUT("/profiles/:id/pin", h.HandleSetProfilePin)
 	v1.POST("/profiles/:id/select", h.HandleSelectProfile)
+
+	h.registerProfileDataRoutes(v1)
 }
 
 // profilesMiddleware resolves the request's profile. Registered right after the
@@ -46,6 +49,15 @@ func (h *Handler) profilesMiddleware() echo.MiddlewareFunc {
 		},
 		Reject: func(c echo.Context, err error) error {
 			return h.RespondWithStatusError(c, http.StatusUnauthorized, err)
+		},
+		RejectBusy: func(c echo.Context, err error) error {
+			return h.RespondWithStatusError(c, http.StatusConflict, err)
+		},
+		OnProfile: func(clientID string, profileID int64) {
+			// Tag the client's websocket with its profile (plan §3.7.1).
+			if h.App.ProfilesRuntime != nil {
+				h.App.ProfilesRuntime.Tags.Tag(clientID, profileID)
+			}
 		},
 	})
 }
@@ -203,6 +215,11 @@ func (h *Handler) HandleDeleteProfile(c echo.Context) error {
 	if err := h.App.Profiles.Delete(c.Request().Context(), id); err != nil {
 		return h.respondProfilesError(c, err)
 	}
+	if rt := h.App.ProfilesRuntime; rt != nil {
+		rt.Router.ForgetProfile(id)
+		rt.Tags.UntagProfile(id)
+		rt.Settings.Forget(id)
+	}
 	if cur := profiles.FromEcho(c); cur != nil && cur.ID == id {
 		clearProfileCookie(c)
 	}
@@ -315,6 +332,9 @@ func (h *Handler) HandleProfileLogout(c echo.Context) error {
 		if err := h.App.Profiles.Logout(c.Request().Context(), clientID); err != nil {
 			return h.respondProfilesError(c, err)
 		}
+		if h.App.ProfilesRuntime != nil {
+			h.App.ProfilesRuntime.Tags.Untag(clientID)
+		}
 	}
 	clearProfileCookie(c)
 	return h.RespondWithData(c, true)
@@ -357,4 +377,18 @@ func (h *Handler) fillProfilesStatus(c echo.Context, status *Status) {
 	st := h.App.Profiles.Status(c.Request().Context())
 	status.Profiles = &st
 	status.CurrentProfile = profiles.FromEcho(c)
+
+	if h.App.ProfilesRuntime == nil {
+		return
+	}
+	// The server's AniList account is never exposed: the user is the profile.
+	status.User = core.ProfileUser(status.CurrentProfile)
+	if status.Settings != nil {
+		status.Settings = h.App.EffectiveSettings(c.Request().Context(), status.Settings)
+	}
+	if t, ok := h.profileTheme(c); ok {
+		cp := *t
+		cp.HomeItems = nil
+		status.ThemeSettings = &cp
+	}
 }

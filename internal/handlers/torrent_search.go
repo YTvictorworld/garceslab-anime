@@ -93,6 +93,12 @@ func (h *Handler) HandleSearchTorrent(c echo.Context) error {
 //	@route /api/v1/auto-select/profile [GET]
 //	@returns anime.AutoSelectProfile
 func (h *Handler) HandleGetAutoSelectProfile(c echo.Context) error {
+	if handled, p, err := h.profileAutoSelect(c); handled { // profiles-hook
+		if err != nil {
+			return h.RespondWithError(c, err)
+		}
+		return h.RespondWithData(c, p)
+	}
 	profile, err := db_bridge.GetAutoSelectProfile(h.App.Database)
 	if err != nil {
 		return h.RespondWithError(c, err)
@@ -117,6 +123,13 @@ func (h *Handler) HandleSaveAutoSelectProfile(c echo.Context) error {
 		return h.RespondWithError(c, err)
 	}
 
+	if handled, p, err := h.saveProfileAutoSelect(c, b.Profile); handled { // profiles-hook
+		if err != nil {
+			return h.RespondWithError(c, err)
+		}
+		return h.RespondWithData(c, p)
+	}
+
 	if err := db_bridge.SaveAutoSelectProfile(h.App.Database, b.Profile); err != nil {
 		return h.RespondWithError(c, err)
 	}
@@ -136,6 +149,12 @@ func (h *Handler) HandleSaveAutoSelectProfile(c echo.Context) error {
 //	@route /api/v1/auto-select/profile [DELETE]
 //	@returns bool
 func (h *Handler) HandleDeleteAutoSelectProfile(c echo.Context) error {
+	if handled, err := h.deleteProfileAutoSelect(c); handled { // profiles-hook
+		if err != nil {
+			return h.RespondWithError(c, err)
+		}
+		return h.RespondWithData(c, true)
+	}
 	if err := db_bridge.DeleteAutoSelectProfile(h.App.Database); err != nil {
 		return h.RespondWithError(c, err)
 	}

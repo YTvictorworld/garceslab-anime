@@ -114,8 +114,8 @@ func (a *App) initModulesOnce() {
 	// Playback Manager
 	a.PlaybackManager = playbackmanager.New(&playbackmanager.NewPlaybackManagerOptions{
 		Logger:              a.Logger,
-		WSEventManager:      a.WSEventManager,
-		PlatformRef:         a.AnilistPlatformRef,
+		WSEventManager:      a.playbackWS(),          // profiles-hook
+		PlatformRef:         a.playbackPlatformRef(), // profiles-hook
 		MetadataProviderRef: a.MetadataProviderRef,
 		Database:            a.Database,
 		DiscordPresence:     a.DiscordPresence,
@@ -195,12 +195,12 @@ func (a *App) initModulesOnce() {
 	// +---------------------+
 
 	a.VideoCore = videocore.New(videocore.NewVideoCoreOptions{
-		WsEventManager:      a.WSEventManager,
+		WsEventManager:      a.playbackWS(), // profiles-hook
 		Logger:              a.Logger,
 		ContinuityManager:   a.ContinuityManager,
 		MetadataProviderRef: a.MetadataProviderRef,
 		DiscordPresence:     a.DiscordPresence,
-		PlatformRef:         a.AnilistPlatformRef,
+		PlatformRef:         a.playbackPlatformRef(), // profiles-hook
 		RefreshAnimeCollectionFunc: func() {
 			_, _ = a.RefreshAnimeCollection()
 		},
@@ -212,12 +212,12 @@ func (a *App) initModulesOnce() {
 	// +---------------------+
 
 	a.MpvCore = mpvcore.New(mpvcore.NewMpvCoreOptions{
-		WsEventManager:      a.WSEventManager,
+		WsEventManager:      a.playbackWS(), // profiles-hook
 		Logger:              a.Logger,
 		ContinuityManager:   a.ContinuityManager,
 		MetadataProviderRef: a.MetadataProviderRef,
 		DiscordPresence:     a.DiscordPresence,
-		PlatformRef:         a.AnilistPlatformRef,
+		PlatformRef:         a.playbackPlatformRef(), // profiles-hook
 		RefreshAnimeCollectionFunc: func() {
 			_, _ = a.RefreshAnimeCollection()
 		},
@@ -229,7 +229,7 @@ func (a *App) initModulesOnce() {
 	// +---------------------+
 
 	a.NativePlayer = nativeplayer.New(nativeplayer.NewNativePlayerOptions{
-		WsEventManager: a.WSEventManager,
+		WsEventManager: a.playbackWS(), // profiles-hook
 		Logger:         a.Logger,
 		VideoCore:      a.VideoCore,
 	})
@@ -246,7 +246,7 @@ func (a *App) initModulesOnce() {
 		MetadataProviderRef: a.MetadataProviderRef,
 		ContinuityManager:   a.ContinuityManager,
 		DiscordPresence:     a.DiscordPresence,
-		PlatformRef:         a.AnilistPlatformRef,
+		PlatformRef:         a.playbackPlatformRef(), // profiles-hook
 		RefreshAnimeCollectionFunc: func() {
 			_, _ = a.RefreshAnimeCollection()
 		},
@@ -284,11 +284,11 @@ func (a *App) initModulesOnce() {
 
 	a.DirectStreamManager = directstream.NewManager(directstream.NewManagerOptions{
 		Logger:              a.Logger,
-		WSEventManager:      a.WSEventManager,
+		WSEventManager:      a.playbackWS(), // profiles-hook
 		ContinuityManager:   a.ContinuityManager,
 		MetadataProviderRef: a.MetadataProviderRef,
 		DiscordPresence:     a.DiscordPresence,
-		PlatformRef:         a.AnilistPlatformRef,
+		PlatformRef:         a.playbackPlatformRef(), // profiles-hook
 		RefreshAnimeCollectionFunc: func() {
 			_, _ = a.RefreshAnimeCollection()
 		},
@@ -315,7 +315,7 @@ func (a *App) initModulesOnce() {
 		CompleteAnimeCache:   anilist.NewCompleteAnimeCache(),
 		MetadataProviderRef:  a.MetadataProviderRef,
 		TorrentRepository:    a.TorrentRepository,
-		PlatformRef:          a.AnilistPlatformRef,
+		PlatformRef:          a.playbackPlatformRef(), // profiles-hook
 		PlaybackManager:      a.PlaybackManager,
 		WSEventManager:       a.WSEventManager,
 		Database:             a.Database,
@@ -332,7 +332,7 @@ func (a *App) initModulesOnce() {
 		WSEventManager:      a.WSEventManager,
 		Database:            a.Database,
 		MetadataProviderRef: a.MetadataProviderRef,
-		PlatformRef:         a.AnilistPlatformRef,
+		PlatformRef:         a.playbackPlatformRef(), // profiles-hook
 		PlaybackManager:     a.PlaybackManager,
 		TorrentRepository:   a.TorrentRepository,
 		DirectStreamManager: a.DirectStreamManager,
@@ -398,7 +398,7 @@ func (a *App) initModulesOnce() {
 		PlaybackManager:         a.PlaybackManager,
 		TorrentstreamRepository: a.TorrentstreamRepository,
 		DebridClientRepository:  a.DebridClientRepository,
-		PlatformRef:             a.AnilistPlatformRef,
+		PlatformRef:             a.playbackPlatformRef(), // profiles-hook
 		ServerHost:              a.Config.Server.Host,
 		ServerPort:              a.Config.Server.Port,
 		MediacoreCoordinator:    a.MediacoreCoordinator,
@@ -414,7 +414,7 @@ func (a *App) initModulesOnce() {
 		TorrentstreamRepository: a.TorrentstreamRepository,
 		DebridClientRepository:  a.DebridClientRepository,
 		DirectStreamManager:     a.DirectStreamManager,
-		PlatformRef:             a.AnilistPlatformRef,
+		PlatformRef:             a.playbackPlatformRef(), // profiles-hook
 		PlaybackManager:         a.PlaybackManager,
 		WSEventManager:          a.WSEventManager,
 		NakamaManager:           a.NakamaManager,
@@ -431,6 +431,8 @@ func (a *App) initModulesOnce() {
 		Logger:      a.Logger,
 		Database:    a.Database,
 	})
+
+	a.InstallProfilesRuntime() // profiles-hook: lane, per-profile watch history, native auto-watching
 
 }
 
@@ -897,7 +899,10 @@ func (a *App) InitOrRefreshAnilistData() {
 
 	var currUser *user.User
 	acc, err := a.Database.GetAccount()
-	if err != nil || acc.Username == "" {
+	if a.ProfilesRuntime != nil { // profiles-hook: the server's AniList account isn't a user anymore
+		acc, err = nil, errors.New("local profiles")
+	}
+	if err != nil || acc == nil || acc.Username == "" {
 		a.ServerReady = true
 		currUser = user.NewSimulatedUser() // Create a simulated user if no account is found
 	} else {

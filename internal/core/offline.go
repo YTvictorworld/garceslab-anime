@@ -11,6 +11,10 @@ import (
 // SetOfflineMode changes the offline mode.
 // It updates the config and active AniList platform.
 func (a *App) SetOfflineMode(enabled bool) {
+	if a.ProfilesRuntime != nil { // profiles-hook: offline mode isn't supported with local profiles
+		a.Logger.Warn().Msg("app: Offline mode is not available with local profiles")
+		return
+	}
 	// Update the config
 	a.Config.Server.Offline = enabled
 	viper.Set("server.offline", enabled)

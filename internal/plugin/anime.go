@@ -1,7 +1,6 @@
 package plugin
 
 import (
-	"context"
 	"seanime/internal/api/anilist"
 	"seanime/internal/api/metadata"
 	"seanime/internal/database/db_bridge"
@@ -138,7 +137,7 @@ func (m *Anime) getAnimeEntry(call goja.FunctionCall) goja.Value {
 		}
 
 		// Get the user's anilist collection
-		animeCollection, err := anilistPlatformRef.Get().GetAnimeCollection(context.Background(), false)
+		animeCollection, err := anilistPlatformRef.Get().GetAnimeCollection(ProfileContext(), false)
 		if err != nil {
 			m.scheduler.ScheduleAsync(func() error {
 				_ = reject(m.vm.ToValue(err.Error()))
@@ -156,7 +155,7 @@ func (m *Anime) getAnimeEntry(call goja.FunctionCall) goja.Value {
 		}
 
 		// Create a new media entry
-		entry, err := anime.NewEntry(context.Background(), &anime.NewEntryOptions{
+		entry, err := anime.NewEntry(ProfileContext(), &anime.NewEntryOptions{
 			MediaId:             int(mediaId),
 			LocalFiles:          lfs,
 			AnimeCollection:     animeCollection,
@@ -233,7 +232,7 @@ func (m *Anime) getEntryDownloadInfo(call goja.FunctionCall) goja.Value {
 			return
 		}
 
-		animeCollection, err := anilistPlatformRef.Get().GetAnimeCollection(context.Background(), false)
+		animeCollection, err := anilistPlatformRef.Get().GetAnimeCollection(ProfileContext(), false)
 		if err != nil {
 			m.scheduler.ScheduleAsync(func() error {
 				_ = reject(m.vm.ToValue(err.Error()))
@@ -259,7 +258,7 @@ func (m *Anime) getEntryDownloadInfo(call goja.FunctionCall) goja.Value {
 		}
 
 		if media == nil {
-			media, err = anilistPlatformRef.Get().GetAnime(context.Background(), int(mediaId))
+			media, err = anilistPlatformRef.Get().GetAnime(ProfileContext(), int(mediaId))
 			if err != nil {
 				m.scheduler.ScheduleAsync(func() error {
 					_ = reject(m.vm.ToValue(err.Error()))
@@ -325,7 +324,7 @@ func (m *Anime) getEpisodeCollection(call goja.FunctionCall) goja.Value {
 	}
 
 	go func() {
-		media, err := anilistPlatformRef.Get().GetAnime(context.Background(), int(mediaId))
+		media, err := anilistPlatformRef.Get().GetAnime(ProfileContext(), int(mediaId))
 		if err != nil {
 			m.scheduler.ScheduleAsync(func() error {
 				_ = reject(m.vm.ToValue(err.Error()))

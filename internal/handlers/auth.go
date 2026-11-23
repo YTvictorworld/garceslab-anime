@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"net/http"
+	"seanime/internal/core"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -22,6 +25,10 @@ func (h *Handler) HandleLogin(c echo.Context) error {
 
 	if err := c.Bind(&b); err != nil {
 		return h.RespondWithError(c, err)
+	}
+
+	if h.App.ProfilesRuntime != nil { // profiles-hook: profiles never log in to AniList
+		return h.RespondWithStatusError(c, http.StatusGone, core.ErrAnilistLoginDisabled)
 	}
 
 	if err := h.App.LoginToAnilist(b.Token); err != nil {

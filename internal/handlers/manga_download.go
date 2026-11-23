@@ -194,7 +194,7 @@ func (h *Handler) HandleDeleteMangaDownloadedChapters(c echo.Context) error {
 //	@returns []manga.DownloadListItem
 func (h *Handler) HandleGetMangaDownloadsList(c echo.Context) error {
 
-	mangaCollection, err := h.App.GetMangaCollection(false)
+	mangaCollection, err := h.App.GetMangaCollectionCtx(c.Request().Context(), false)
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}

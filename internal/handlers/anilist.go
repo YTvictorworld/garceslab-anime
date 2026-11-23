@@ -26,14 +26,14 @@ func (h *Handler) HandleGetAnimeCollection(c echo.Context) error {
 
 	if !bypassCache {
 		// Get the user's anilist collection
-		animeCollection, err := h.App.GetAnimeCollection(false)
+		animeCollection, err := h.App.GetAnimeCollectionCtx(c.Request().Context(), false)
 		if err != nil {
 			return h.RespondWithError(c, err)
 		}
 		return h.RespondWithData(c, animeCollection)
 	}
 
-	animeCollection, err := h.App.RefreshAnimeCollection()
+	animeCollection, err := h.App.RefreshAnimeCollectionCtx(c.Request().Context())
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}
@@ -56,7 +56,7 @@ func (h *Handler) HandleGetRawAnimeCollection(c echo.Context) error {
 	bypassCache := c.Request().Method == "POST"
 
 	// Get the user's anilist collection
-	animeCollection, err := h.App.GetRawAnimeCollection(bypassCache)
+	animeCollection, err := h.App.GetRawAnimeCollectionCtx(c.Request().Context(), bypassCache)
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}
@@ -137,11 +137,11 @@ func (h *Handler) HandleEditAnilistListEntry(c echo.Context) error {
 
 	switch p.Type {
 	case "anime":
-		_, _ = h.App.RefreshAnimeCollection()
+		_, _ = h.App.RefreshAnimeCollectionCtx(c.Request().Context())
 	case "manga":
 		_, _ = h.App.RefreshMangaCollection()
 	default:
-		_, _ = h.App.RefreshAnimeCollection()
+		_, _ = h.App.RefreshAnimeCollectionCtx(c.Request().Context())
 		_, _ = h.App.RefreshMangaCollection()
 	}
 
@@ -246,7 +246,7 @@ func (h *Handler) HandleDeleteAnilistListEntry(c echo.Context) error {
 	switch *p.Type {
 	case "anime":
 		// Get the list entry ID
-		animeCollection, err := h.App.GetAnimeCollection(false)
+		animeCollection, err := h.App.GetAnimeCollectionCtx(c.Request().Context(), false)
 		if err != nil {
 			return h.RespondWithError(c, err)
 		}
@@ -258,7 +258,7 @@ func (h *Handler) HandleDeleteAnilistListEntry(c echo.Context) error {
 		listEntryID = listEntry.ID
 	case "manga":
 		// Get the list entry ID
-		mangaCollection, err := h.App.GetMangaCollection(false)
+		mangaCollection, err := h.App.GetMangaCollectionCtx(c.Request().Context(), false)
 		if err != nil {
 			return h.RespondWithError(c, err)
 		}
@@ -278,7 +278,7 @@ func (h *Handler) HandleDeleteAnilistListEntry(c echo.Context) error {
 
 	switch *p.Type {
 	case "anime":
-		_, _ = h.App.RefreshAnimeCollection()
+		_, _ = h.App.RefreshAnimeCollectionCtx(c.Request().Context())
 	case "manga":
 		_, _ = h.App.RefreshMangaCollection()
 	}
@@ -440,7 +440,7 @@ func (h *Handler) HandleAnilistListRecentAiringAnime(c echo.Context) error {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var anilistMissedSequelsCache = result.NewCache[int, []*anilist.BaseAnime]()
+var anilistMissedSequelsCache = result.NewCache[int64, []*anilist.BaseAnime]() // profiles-hook: per profile
 
 // HandleAnilistListMissedSequels
 //
@@ -450,7 +450,7 @@ var anilistMissedSequelsCache = result.NewCache[int, []*anilist.BaseAnime]()
 //	@returns []anilist.BaseAnime
 func (h *Handler) HandleAnilistListMissedSequels(c echo.Context) error {
 
-	cached, ok := anilistMissedSequelsCache.Get(1)
+	cached, ok := anilistMissedSequelsCache.Get(requestProfileID(c)) // profiles-hook
 	if ok {
 		return h.RespondWithData(c, cached)
 	}
@@ -471,14 +471,14 @@ func (h *Handler) HandleAnilistListMissedSequels(c echo.Context) error {
 		return h.RespondWithError(c, err)
 	}
 
-	anilistMissedSequelsCache.SetT(1, ret, time.Hour*4)
+	anilistMissedSequelsCache.SetT(requestProfileID(c), ret, time.Hour*4)
 
 	return h.RespondWithData(c, ret)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var anilistStatsCache = result.NewCache[int, *anilist.Stats]()
+var anilistStatsCache = result.NewCache[int64, *anilist.Stats]() // profiles-hook: per profile
 
 // HandleGetAniListStats
 //
@@ -487,7 +487,8 @@ var anilistStatsCache = result.NewCache[int, *anilist.Stats]()
 //	@route /api/v1/anilist/stats [GET]
 //	@returns anilist.Stats
 func (h *Handler) HandleGetAniListStats(c echo.Context) error {
-	cached, ok := anilistStatsCache.Get(0)
+	h.App.AddOnRefreshAnilistCollectionFunc("HandleGetAniListStats", anilistStatsCache.Clear) // profiles-hook: local lists change often
+	cached, ok := anilistStatsCache.Get(requestProfileID(c))                                  // profiles-hook
 	if ok {
 		return h.RespondWithData(c, cached)
 	}
@@ -505,7 +506,7 @@ func (h *Handler) HandleGetAniListStats(c echo.Context) error {
 		return h.RespondWithError(c, err)
 	}
 
-	anilistStatsCache.SetT(0, ret, time.Hour*1)
+	anilistStatsCache.SetT(requestProfileID(c), ret, time.Hour*1)
 
 	return h.RespondWithData(c, ret)
 }

@@ -53,7 +53,7 @@ func (h *Handler) getAnimeEntry(c echo.Context, lfs []*anime.LocalFile, mId int)
 	}
 
 	// Get the user's anilist collection
-	animeCollection, err := h.App.GetAnimeCollection(false)
+	animeCollection, err := h.App.GetAnimeCollectionCtx(c.Request().Context(), false)
 	if err != nil {
 		return nil, err
 	}
@@ -469,14 +469,14 @@ func (h *Handler) HandleGetMissingEpisodes(c echo.Context) error {
 		anime.ClearMissingEpisodesCache()
 	})
 
-	if missingEpisodesCache, ok := anime.GetMissingEpisodesCache(); ok {
+	if missingEpisodesCache, ok := anime.GetMissingEpisodesCacheFor(requestProfileID(c)); ok { // profiles-hook
 		return h.RespondWithData(c, h.withMissingEpisodeAvailability(missingEpisodesCache))
 	}
 
 	// Get the user's anilist collection
 	// Do not bypass the cache, since this handler might be called multiple times, and we don't want to spam the API
 	// A cron job will refresh the cache every 10 minutes
-	animeCollection, err := h.App.GetAnimeCollection(false)
+	animeCollection, err := h.App.GetAnimeCollectionCtx(c.Request().Context(), false)
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}
@@ -502,7 +502,7 @@ func (h *Handler) HandleGetMissingEpisodes(c echo.Context) error {
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}
-	anime.SetMissingEpisodesCache(event.MissingEpisodes)
+	anime.SetMissingEpisodesCacheFor(requestProfileID(c), event.MissingEpisodes) // profiles-hook
 
 	return h.RespondWithData(c, h.withMissingEpisodeAvailability(event.MissingEpisodes))
 }
@@ -520,7 +520,7 @@ func (h *Handler) withMissingEpisodeAvailability(missing *anime.MissingEpisodes)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-var upcomingEpisodesCache *anime.UpcomingEpisodes
+var upcomingEpisodesCache = result.NewMap[int64, *anime.UpcomingEpisodes]() // profiles-hook: per profile
 
 // HandleGetUpcomingEpisodes
 //
@@ -531,15 +531,15 @@ var upcomingEpisodesCache *anime.UpcomingEpisodes
 //	@returns anime.UpcomingEpisodes
 func (h *Handler) HandleGetUpcomingEpisodes(c echo.Context) error {
 	h.App.AddOnRefreshAnilistCollectionFunc("HandleGetUpcomingEpisodes", func() {
-		upcomingEpisodesCache = nil
+		upcomingEpisodesCache.Clear()
 	})
 
-	if upcomingEpisodesCache != nil {
-		return h.RespondWithData(c, upcomingEpisodesCache)
+	if cached, ok := upcomingEpisodesCache.Get(requestProfileID(c)); ok && cached != nil {
+		return h.RespondWithData(c, cached)
 	}
 
 	// Get the user's anilist collection
-	animeCollection, err := h.App.GetAnimeCollection(false)
+	animeCollection, err := h.App.GetAnimeCollectionCtx(c.Request().Context(), false)
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}
@@ -555,7 +555,7 @@ func (h *Handler) HandleGetUpcomingEpisodes(c echo.Context) error {
 		return h.RespondWithError(c, err)
 	}
 
-	upcomingEpisodesCache = event.UpcomingEpisodes
+	upcomingEpisodesCache.Set(requestProfileID(c), event.UpcomingEpisodes)
 
 	return h.RespondWithData(c, event.UpcomingEpisodes)
 }
@@ -661,7 +661,7 @@ func (h *Handler) HandleUpdateAnimeEntryProgress(c echo.Context) error {
 		return h.RespondWithError(c, err)
 	}
 
-	_, _ = h.App.RefreshAnimeCollection() // Refresh the AniList collection
+	_, _ = h.App.RefreshAnimeCollectionCtx(c.Request().Context()) // Refresh the AniList collection
 
 	return h.RespondWithData(c, true)
 }
@@ -696,7 +696,7 @@ func (h *Handler) HandleUpdateAnimeEntryRepeat(c echo.Context) error {
 		return h.RespondWithError(c, err)
 	}
 
-	//_, _ = h.App.RefreshAnimeCollection() // Refresh the AniList collection
+	//_, _ = h.App.RefreshAnimeCollectionCtx(c.Request().Context()) // Refresh the AniList collection
 
 	return h.RespondWithData(c, true)
 }

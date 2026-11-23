@@ -102,7 +102,7 @@ func (m *Manga) getDownloadedChapterContainers() ([]*manga.ChapterContainer, err
 		return nil, errors.New("anilist platform not found")
 	}
 
-	mangaCollection, err := anilistPlatformRef.Get().GetMangaCollection(context.Background(), false)
+	mangaCollection, err := anilistPlatformRef.Get().GetMangaCollection(ProfileContext(), false)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func (m *Manga) getCollection() (*manga.Collection, error) {
 		return nil, errors.New("anilist platform not found")
 	}
 
-	mangaCollection, err := anilistPlatformRef.Get().GetMangaCollection(context.Background(), false)
+	mangaCollection, err := anilistPlatformRef.Get().GetMangaCollection(ProfileContext(), false)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +141,7 @@ func (m *Manga) refreshChapterContainers(selectedProviderMap map[int]string) goj
 		return m.vm.ToValue(promise)
 	}
 
-	mangaCollection, err := anilistPlatformRef.Get().GetMangaCollection(context.Background(), false)
+	mangaCollection, err := anilistPlatformRef.Get().GetMangaCollection(ProfileContext(), false)
 	if err != nil {
 		reject(err.Error())
 		return m.vm.ToValue(promise)
@@ -211,7 +211,7 @@ func (m *Manga) getMangaEntry(call goja.FunctionCall) goja.Value {
 
 	go func() {
 		// Get the user's manga collection
-		mangaCollection, err := anilistPlatformRef.Get().GetMangaCollection(context.Background(), false)
+		mangaCollection, err := anilistPlatformRef.Get().GetMangaCollection(ProfileContext(), false)
 		if err != nil {
 			m.scheduler.ScheduleAsync(func() error {
 				_ = reject(m.vm.ToValue(err.Error()))

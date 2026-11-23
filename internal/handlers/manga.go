@@ -106,7 +106,7 @@ func (h *Handler) HandleStartMangaSourceRefresh(c echo.Context) error {
 	if job != nil {
 		return h.RespondWithData(c, job)
 	}
-	collection, err := h.App.GetMangaCollection(false)
+	collection, err := h.App.GetMangaCollectionCtx(c.Request().Context(), false)
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}
@@ -164,7 +164,7 @@ func (h *Handler) HandleGetAnilistMangaCollection(c echo.Context) error {
 		return h.RespondWithError(c, err)
 	}
 
-	collection, err := h.App.GetMangaCollection(b.BypassCache)
+	collection, err := h.App.GetMangaCollectionCtx(c.Request().Context(), b.BypassCache)
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}
@@ -182,7 +182,7 @@ func (h *Handler) HandleGetRawAnilistMangaCollection(c echo.Context) error {
 	bypassCache := c.Request().Method == "POST"
 
 	// Get the user's anilist collection
-	mangaCollection, err := h.App.GetRawMangaCollection(bypassCache)
+	mangaCollection, err := h.App.GetRawMangaCollectionCtx(c.Request().Context(), bypassCache)
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}
@@ -233,7 +233,7 @@ func (h *Handler) HandleGetRawAnilistMangaCollectionTags(c echo.Context) error {
 //	@returns manga.Collection
 func (h *Handler) HandleGetMangaCollection(c echo.Context) error {
 
-	animeCollection, err := h.App.GetMangaCollection(false)
+	animeCollection, err := h.App.GetMangaCollectionCtx(c.Request().Context(), false)
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}
@@ -263,7 +263,7 @@ func (h *Handler) HandleGetMangaEntry(c echo.Context) error {
 		return h.RespondWithError(c, err)
 	}
 
-	animeCollection, err := h.App.GetMangaCollection(false)
+	animeCollection, err := h.App.GetMangaCollectionCtx(c.Request().Context(), false)
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}
@@ -346,7 +346,7 @@ func (h *Handler) HandleRefetchMangaChapterContainers(c echo.Context) error {
 		return h.RespondWithError(c, err)
 	}
 
-	mangaCollection, err := h.App.GetMangaCollection(false)
+	mangaCollection, err := h.App.GetMangaCollectionCtx(c.Request().Context(), false)
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}
@@ -474,7 +474,7 @@ func (h *Handler) HandleGetMangaEntryDownloadedChapters(c echo.Context) error {
 		return h.RespondWithError(c, err)
 	}
 
-	mangaCollection, err := h.App.GetMangaCollection(false)
+	mangaCollection, err := h.App.GetMangaCollectionCtx(c.Request().Context(), false)
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}

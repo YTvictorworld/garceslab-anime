@@ -95,7 +95,7 @@ func (a *AppContextImpl) BindScannerToContextObj(vm *goja.Runtime, obj *goja.Obj
 
 			scanSummaryLogger := summary.NewScanSummaryLogger()
 
-			animeCollection, err := platformRef.Get().GetAnimeCollection(context.Background(), false)
+			animeCollection, err := platformRef.Get().GetAnimeCollection(ProfileContext(), false)
 			if err != nil {
 				animeCollection = nil
 			}

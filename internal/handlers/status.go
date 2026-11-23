@@ -693,6 +693,9 @@ func (h *Handler) HandleForceGC(c echo.Context) error {
 func (h *Handler) HandleGetHomeItems(c echo.Context) error {
 
 	theme, err := h.App.Database.GetTheme()
+	if t, ok := h.profileTheme(c); ok { // profiles-hook
+		theme, err = t, nil
+	}
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}
@@ -723,10 +726,20 @@ func (h *Handler) HandleUpdateHomeItems(c echo.Context) error {
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}
+	if t, ok := h.profileTheme(c); ok { // profiles-hook
+		theme = t
+	}
 
 	theme.HomeItems, err = json.Marshal(b.Items)
 	if err != nil {
 		return h.RespondWithError(c, err)
+	}
+
+	if handled, err := h.saveProfileTheme(c, theme); handled { // profiles-hook
+		if err != nil {
+			return err
+		}
+		return nil
 	}
 
 	// update the settings

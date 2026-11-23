@@ -33,6 +33,7 @@ func (h *Handler) HandleGetSettings(c echo.Context) error {
 
 	clientSettings := db.CloneSettings(settings)
 	db.VirtualizeSettingsPaths(clientSettings)
+	clientSettings = h.App.EffectiveSettings(c.Request().Context(), clientSettings) // profiles-hook: global + profile overrides
 
 	return h.RespondWithData(c, clientSettings)
 }
@@ -255,6 +256,11 @@ func (h *Handler) HandleSaveSettings(c echo.Context) error {
 		}
 	}
 
+	// profiles-hook: the per-profile fields go to the profile, the rest stays global
+	if err := h.saveProfileSettingsFromBody(c, prevSettings, &b.Library, &b.Anilist); err != nil {
+		return h.respondProfileSettingsError(c, err)
+	}
+
 	autoDownloaderSettings := models.AutoDownloaderSettings{}
 	if prevSettings != nil && prevSettings.AutoDownloader != nil {
 		autoDownloaderSettings = *prevSettings.AutoDownloader
@@ -315,6 +321,10 @@ func (h *Handler) HandlePatchSetting(c echo.Context) error {
 	b.Path = strings.TrimSpace(b.Path)
 	if b.Path == "" {
 		return h.RespondWithError(c, errors.New("settings path is empty"))
+	}
+
+	if handled, err := h.patchProfileSetting(c, b.Path, b.Value); handled { // profiles-hook
+		return err
 	}
 
 	prevSettings, err := h.App.Database.GetSettings()
