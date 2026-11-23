@@ -1,5 +1,6 @@
 import { useServerMutation, useServerQuery } from "@/api/client/requests"
 import { getServerBaseUrl } from "@/api/client/server-url"
+import { getProfileToken } from "@/lib/server/profile-session"
 import { DeleteLogs_Variables, GetAnnouncements_Variables, UpdateHomeItems_Variables } from "@/api/generated/endpoint.types"
 import { API_ENDPOINTS } from "@/api/generated/endpoints"
 import { MemoryStatsResponse, Models_HomeItem, Status, Updater_Announcement } from "@/api/generated/types"
@@ -123,6 +124,9 @@ export function useDownloadMemoryProfile() {
                 if (password) {
                     headers["X-Seanime-Token"] = password
                 }
+                if (getProfileToken()) {
+                    headers["X-Seanime-Profile"] = getProfileToken()
+                }
 
                 const response = await fetch(downloadUrl, {
                     method: "GET",
@@ -182,6 +186,9 @@ export function useDownloadGoRoutineProfile() {
                 if (password) {
                     headers["X-Seanime-Token"] = password
                 }
+                if (getProfileToken()) {
+                    headers["X-Seanime-Profile"] = getProfileToken()
+                }
 
                 const response = await fetch(downloadUrl, {
                     method: "GET",
@@ -234,6 +241,9 @@ export function useDownloadCPUProfile() {
                 const headers: Record<string, string> = {}
                 if (password) {
                     headers["X-Seanime-Token"] = password
+                }
+                if (getProfileToken()) {
+                    headers["X-Seanime-Profile"] = getProfileToken()
                 }
 
                 const response = await fetch(downloadUrl, {

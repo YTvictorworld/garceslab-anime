@@ -1,6 +1,7 @@
 import { getServerBaseUrl } from "@/api/client/server-url"
 import { SERVER_AUTH_TOKEN_STORAGE_KEY, serverAuthTokenAtom } from "@/app/(main)/_atoms/server-status.atoms"
 import { getClientId, getClientIdProof, setClientIdentity } from "@/lib/server/client-id"
+import { clearProfileSession, getProfileToken, isProfileErrorCode } from "@/lib/server/profile-session"
 import { __clientPlatform__ } from "@/types/constants"
 import { useMutation, UseMutationOptions, useQuery, UseQueryOptions } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
@@ -18,6 +19,9 @@ type SeaQuery<D> = {
     data?: D
     params?: D
     password?: string
+    /** Overrides the tab's profile token (e.g. importing into a profile just created). */
+    profileToken?: string
+    signal?: AbortSignal
 }
 
 export function useSeaQuery() {
@@ -49,6 +53,9 @@ function getSeaErrorMessage(data: unknown): string {
 }
 
 function isAuthFailureResponse(status: number | undefined, data: unknown): boolean {
+    // PROFILE_* errors are about the profile, never about the server password.
+    if (isProfileErrorCode(getSeaErrorMessage(data))) return false
+
     const errorMessage = getSeaErrorMessage(data).toLowerCase()
 
     if (status === 401) {
@@ -87,6 +94,26 @@ function checkAuthError(error: SeaError | AxiosError | null | undefined) {
     }
 }
 
+/** 401 PROFILE_REQUIRED / PROFILE_INVALID_TOKEN: the tab's profile session is gone. */
+export function isProfileRequiredError(error: unknown): boolean {
+    if (!axios.isAxiosError(error)) return false
+    const code = getSeaErrorMessage(error.response?.data)
+    return error.response?.status === 401 && (code === "PROFILE_REQUIRED" || code === "PROFILE_INVALID_TOKEN")
+}
+
+function checkProfileError(error: AxiosError, sentProfileToken: string) {
+    // Only drop the session if the request carried the current token (not a stale or override one).
+    if (isProfileRequiredError(error) && sentProfileToken && sentProfileToken === getProfileToken()) {
+        clearProfileSession()
+    }
+}
+
+/** The server's error code, if any (e.g. "PROFILE_WRONG_PIN"). */
+export function getSeaErrorCode(error: unknown): string {
+    if (!axios.isAxiosError(error)) return ""
+    return getSeaErrorMessage(error.response?.data)
+}
+
 /**
  * Create axios query to the server
  * - First generic: Return type
@@ -99,11 +126,18 @@ export async function buildSeaQuery<T, D extends any = any>(
         data,
         params,
         password,
+        profileToken,
+        signal,
     }: SeaQuery<D>): Promise<T | undefined> {
     const headers: Record<string, string> = {}
 
     if (password) {
         headers["X-Seanime-Token"] = password
+    }
+
+    const sentProfileToken = profileToken ?? getProfileToken()
+    if (sentProfileToken) {
+        headers["X-Seanime-Profile"] = sentProfileToken
     }
 
     const clientId = getClientId()
@@ -127,11 +161,13 @@ export async function buildSeaQuery<T, D extends any = any>(
             params,
             headers,
             withCredentials: true,
+            signal,
         })
     }
     catch (error) {
         if (axios.isAxiosError(error)) {
             checkAuthError(error)
+            checkProfileError(error, sentProfileToken)
         }
         throw error
     }
@@ -199,6 +235,9 @@ export function useServerMutation<R = void, V = void>(
             if (isAuthFailureResponse(error.response?.status, error.response?.data)) {
                 return
             }
+            if (isProfileRequiredError(error)) {
+                return
+            }
             console.log("Mutation error", error)
             const errorMsg = _handleSeaError(error.response?.data)
             if (errorMsg.includes("feature disabled")) {
@@ -264,6 +303,9 @@ export function useServerQuery<R, V = any>(
                 _handleAuthFailure()
                 return
             }
+            if (isProfileRequiredError(props.error)) {
+                return
+            }
             console.log("Server error", props.error)
             const errorMsg = _handleSeaError(props.error?.response?.data)
             if (errorMsg.includes("feature disabled")) {
@@ -287,6 +329,9 @@ function _handleSeaError(data: any): string {
 
     if (!err) return "Unknown error"
 
+    const profileMessage = getProfileErrorMessage(err)
+    if (profileMessage) return profileMessage
+
     if (err.includes("Too many requests"))
         return "AniList: Too many requests, please wait a moment and try again."
 
@@ -304,6 +349,55 @@ function _handleSeaError(data: any): string {
         }
         return "Error: " + err
     }
+}
+
+/** User-facing messages for the profile and playback lane error codes. */
+export function getProfileErrorMessage(err: string): string {
+    const code = err.split(":")[0].trim()
+    switch (code) {
+        case "PLAYBACK_BUSY":
+            return "Someone else is playing something on this server right now. Try again when their playback ends."
+        case "LANES_FULL":
+            return "All playback slots on this server are in use. Try again when someone stops watching."
+        case "PROFILE_REQUIRED":
+        case "PROFILE_INVALID_TOKEN":
+            return "Choose a profile first."
+        case "PROFILE_NOT_FOUND":
+            return "This profile doesn't exist anymore."
+        case "PROFILE_NAME_TAKEN":
+            return "Another profile already has this name."
+        case "PROFILE_INVALID_NAME":
+            return "Enter a name (up to 32 characters)."
+        case "PROFILE_INVALID_AVATAR":
+            return "Choose an avatar."
+        case "PROFILE_INVALID_COLOR":
+            return "Invalid colour."
+        case "PROFILE_INVALID_PIN":
+            return "The PIN must be 4 to 6 digits."
+        case "PROFILE_PIN_REQUIRED":
+            return "Enter the PIN."
+        case "PROFILE_WRONG_PIN":
+            return "Wrong PIN."
+        case "PROFILE_PIN_LOCKED":
+            return "Too many wrong PINs. Try again in a few minutes."
+        case "PROFILE_DELETED":
+            return "This profile is in the trash."
+        case "PROFILE_NOT_DELETED":
+            return "This profile isn't in the trash."
+        case "PROFILE_NO_CLIENT_ID":
+            return "This device isn't identified yet. Reload the page and try again."
+        case "PROFILE_IMPORT_INVALID_USERNAME":
+            return "Enter a valid AniList username."
+        case "PROFILE_IMPORT_LIST_UNAVAILABLE":
+            return "That AniList list isn't available (unknown user or private list)."
+        case "PROFILE_IMPORT_INVALID_FILE":
+            return "This file isn't a Garceslab Anime profile export or an AniList collection."
+        case "PROFILE_IMPORT_NOTHING_TO_IMPORT":
+            return "There was nothing to import."
+        case "PROFILE_INVALID_SETTING":
+            return "Invalid setting: " + err.slice(code.length + 1).trim()
+    }
+    return ""
 }
 
 function _handleSeaResponse<T>(res: unknown): { data: T | undefined, error: string | undefined } {

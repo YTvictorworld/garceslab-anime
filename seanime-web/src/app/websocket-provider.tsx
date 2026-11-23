@@ -7,6 +7,7 @@ import { __openDrawersAtom } from "@/components/ui/drawer"
 import { useMainTab } from "@/hooks/use-main-tab"
 import { logger } from "@/lib/helpers/debug"
 import { getClientId, getClientIdentity, getClientIdProof, setClientIdentity, subscribeToClientIdentity } from "@/lib/server/client-id"
+import { getProfileToken, subscribeToProfileSession } from "@/lib/server/profile-session"
 import { WSEvents } from "@/lib/server/ws-events"
 import { __clientPlatform__, __isElectronDesktop__ } from "@/types/constants"
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai"
@@ -201,8 +202,14 @@ function WebsocketManagement() {
                 if (serverAuthTokenRef.current) {
                     queryParams.set("token", serverAuthTokenRef.current)
                 }
+                // Garceslab Anime: tags this connection with the tab's profile (plan §3.7.1).
+                const profileToken = getProfileToken()
+                if (profileToken) {
+                    queryParams.set("profile", profileToken)
+                }
                 const query = queryParams.toString()
-                socketRef.current = new WebSocket(query ? `${wsUrl}?${query}` : wsUrl)
+                const ws = new WebSocket(query ? `${wsUrl}?${query}` : wsUrl)
+                socketRef.current = ws
 
                 // Reset the last pong timestamp whenever we connect
                 lastPongRef.current = Date.now()
@@ -280,11 +287,14 @@ function WebsocketManagement() {
 
                 socketRef.current?.addEventListener("close", (event) => {
                     logger("WebsocketProvider").info(`WebSocket connection closed: ${event.code} ${event.reason}`)
+                    // A socket replaced on purpose (profile switch) must not schedule a reconnect.
+                    if (socketRef.current !== ws) return
                     handleDisconnection()
                 })
 
                 socketRef.current?.addEventListener("error", (event) => {
                     logger("WebsocketProvider").error("WebSocket encountered an error:", event)
+                    if (socketRef.current !== ws) return
                     reconnectSocket()
                 })
 
@@ -297,6 +307,14 @@ function WebsocketManagement() {
         }
 
         connectWebSocketRef.current = connectWebSocket
+
+        // Reconnect with the new ?profile= when the tab enters or leaves a profile.
+        const unsubscribeProfile = subscribeToProfileSession(() => {
+            if (shouldPauseForAuthRef.current) return
+            logger("WebsocketProvider").info("Profile changed, reconnecting")
+            setConnectionErrorCount(0)
+            connectWebSocket()
+        })
 
         function handleDisconnection() {
             clearAllIntervals()
@@ -343,6 +361,7 @@ function WebsocketManagement() {
         }
 
         return () => {
+            unsubscribeProfile()
             connectWebSocketRef.current = null
             clearAllIntervalsRef.current = null
             if (socketRef.current) {
