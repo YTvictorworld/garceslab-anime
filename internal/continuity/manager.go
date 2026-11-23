@@ -1,6 +1,8 @@
 package continuity
 
 import (
+	"context"
+
 	"github.com/rs/zerolog"
 	"github.com/samber/mo"
 	"seanime/internal/database/db"
@@ -27,6 +29,11 @@ type (
 		logger   *zerolog.Logger
 		settings *Settings
 		mu       sync.RWMutex
+
+		// profiles-hook: pluggable history storage (see store.go)
+		store         HistoryStore
+		backgroundCtx func() context.Context
+		settingsFor   func(ctx context.Context) *Settings
 	}
 
 	// ExternalPlayerEpisodeDetails is used to store the episode details when using an external player.
@@ -66,6 +73,7 @@ func NewManager(opts *NewManagerOptions) *Manager {
 		},
 		externalPlayerEpisodeDetails: mo.None[*ExternalPlayerEpisodeDetails](),
 	}
+	ret.store = &fileCacheHistoryStore{fileCacher: opts.FileCacher, bucket: &watchHistoryFileCacheBucket} // profiles-hook
 
 	ret.logger.Info().Msg("continuity: Initialized manager")
 
@@ -91,7 +99,7 @@ func (m *Manager) GetSettings() *Settings {
 
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	return m.settings
+	return m.settingsLocked(m.background()) // profiles-hook: per-profile switch
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
