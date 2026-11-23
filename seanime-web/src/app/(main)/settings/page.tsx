@@ -62,7 +62,7 @@ import {
     LuTabletSmartphone,
     LuWandSparkles,
 } from "react-icons/lu"
-import { LuCode, LuRefreshCw } from "react-icons/lu"
+import { LuCode, LuRefreshCw, LuUsers } from "react-icons/lu"
 import { MdOutlineConnectWithoutContact, MdOutlineDownloading, MdOutlinePalette } from "react-icons/md"
 import { RiFolderDownloadFill } from "react-icons/ri"
 import { SiBittorrent, SiQbittorrent, SiTransmission } from "react-icons/si"
@@ -70,6 +70,7 @@ import { TbDatabaseExclamation } from "react-icons/tb"
 import { VscDebugAlt } from "react-icons/vsc"
 import { toast } from "sonner"
 import { SettingsCard, SettingsNavCard, SettingsPageHeader } from "./_components/settings-card"
+import { ProfilesSettings } from "@/app/(main)/_features/profiles/profiles-settings"
 import { DenshiSettings } from "./_containers/denshi-settings"
 import { DiscordRichPresenceSettings } from "./_containers/discord-rich-presence-settings"
 import { LocalSettings } from "./_containers/local-settings"
@@ -195,6 +196,11 @@ export default function Page() {
                                         value="ui"
                                         className="group"
                                     ><MdOutlinePalette className="text-base mr-2 transition-transform duration-200" /> User Interface</TabsTrigger>
+                                    {status?.profiles?.enabled && <TabsTrigger
+                                        value="profiles"
+                                        className="group"
+                                        data-settings-tab-profiles
+                                    ><LuUsers className="text-base mr-2 transition-transform duration-200" /> Profiles</TabsTrigger>}
                                     {/* <TabsTrigger
                                      value="local"
                                      className="group"
@@ -1006,6 +1012,18 @@ export default function Page() {
                             <MediastreamSettings />
 
                         </TabsContent>
+
+                        {status?.profiles?.enabled && <TabsContent value="profiles" className={tabContentClass}>
+
+                            <SettingsPageHeader
+                                title="Profiles"
+                                description="Create, edit, delete, import and export profiles"
+                                icon={LuUsers}
+                            />
+
+                            <ProfilesSettings />
+
+                        </TabsContent>}
 
                         <TabsContent value="ui" className={tabContentClass}>
 
