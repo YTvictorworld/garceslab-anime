@@ -29229,6 +29229,17 @@
         "required": false,
         "public": true,
         "comments": []
+      },
+      {
+        "name": "EpisodeTags",
+        "jsonName": "EpisodeTags",
+        "goType": "episodetags.Manager",
+        "typescriptType": "EpisodeTags_Manager",
+        "usedTypescriptType": "EpisodeTags_Manager",
+        "usedStructName": "episodetags.Manager",
+        "required": false,
+        "public": true,
+        "comments": []
       }
     ],
     "comments": []
@@ -40029,6 +40040,513 @@
       }
     ],
     "comments": []
+  },
+  {
+    "filepath": "../internal/episodetags/manager.go",
+    "filename": "manager.go",
+    "name": "Options",
+    "formattedName": "EpisodeTags_Options",
+    "package": "episodetags",
+    "fields": [
+      {
+        "name": "Dir",
+        "jsonName": "Dir",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Logger",
+        "jsonName": "Logger",
+        "goType": "zerolog.Logger",
+        "typescriptType": "Logger",
+        "usedTypescriptType": "Logger",
+        "usedStructName": "zerolog.Logger",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Providers",
+        "jsonName": "Providers",
+        "goType": "[]Provider",
+        "typescriptType": "Array\u003cEpisodeTags_Provider\u003e",
+        "usedTypescriptType": "EpisodeTags_Provider",
+        "usedStructName": "episodetags.Provider",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "IsOffline",
+        "jsonName": "IsOffline",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "HTTPClient",
+        "jsonName": "HTTPClient",
+        "goType": "http.Client",
+        "typescriptType": "Client",
+        "usedTypescriptType": "Client",
+        "usedStructName": "http.Client",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "FinishedTTL",
+        "jsonName": "FinishedTTL",
+        "goType": "time.Duration",
+        "typescriptType": "Duration",
+        "usedTypescriptType": "Duration",
+        "usedStructName": "time.Duration",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "AiringTTL",
+        "jsonName": "AiringTTL",
+        "goType": "time.Duration",
+        "typescriptType": "Duration",
+        "usedTypescriptType": "Duration",
+        "usedStructName": "time.Duration",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "NotFoundTTL",
+        "jsonName": "NotFoundTTL",
+        "goType": "time.Duration",
+        "typescriptType": "Duration",
+        "usedTypescriptType": "Duration",
+        "usedStructName": "time.Duration",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "RetryAfterFailure",
+        "jsonName": "RetryAfterFailure",
+        "goType": "time.Duration",
+        "typescriptType": "Duration",
+        "usedTypescriptType": "Duration",
+        "usedStructName": "time.Duration",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Options configures a Manager."
+    ]
+  },
+  {
+    "filepath": "../internal/episodetags/manager.go",
+    "filename": "manager.go",
+    "name": "Manager",
+    "formattedName": "EpisodeTags_Manager",
+    "package": "episodetags",
+    "fields": [
+      {
+        "name": "opts",
+        "jsonName": "opts",
+        "goType": "Options",
+        "typescriptType": "EpisodeTags_Options",
+        "usedTypescriptType": "EpisodeTags_Options",
+        "usedStructName": "episodetags.Options",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "pool",
+        "jsonName": "pool",
+        "goType": "pool",
+        "typescriptType": "EpisodeTags_pool",
+        "usedTypescriptType": "EpisodeTags_pool",
+        "usedStructName": "episodetags.pool",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "now",
+        "jsonName": "now",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "mu",
+        "jsonName": "mu",
+        "goType": "sync.Mutex",
+        "typescriptType": "Mutex",
+        "usedTypescriptType": "Mutex",
+        "usedStructName": "sync.Mutex",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "entries",
+        "jsonName": "entries",
+        "goType": "map[int]Entry",
+        "typescriptType": "Record\u003cnumber, EpisodeTags_Entry\u003e",
+        "usedTypescriptType": "EpisodeTags_Entry",
+        "usedStructName": "episodetags.Entry",
+        "required": false,
+        "public": false,
+        "comments": [
+          " loaded from disk on first use"
+        ]
+      },
+      {
+        "name": "queued",
+        "jsonName": "queued",
+        "goType": "map[int]bool",
+        "typescriptType": "Record\u003cnumber, boolean\u003e",
+        "required": false,
+        "public": false,
+        "comments": [
+          " queued or being fetched"
+        ]
+      },
+      {
+        "name": "failedAt",
+        "jsonName": "failedAt",
+        "goType": "map[int]time.Time",
+        "typescriptType": "Record\u003cnumber, string\u003e",
+        "usedStructName": "time.Time",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "queue",
+        "jsonName": "queue",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "cancel",
+        "jsonName": "cancel",
+        "goType": "context.CancelFunc",
+        "typescriptType": "CancelFunc",
+        "usedTypescriptType": "CancelFunc",
+        "usedStructName": "context.CancelFunc",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "done",
+        "jsonName": "done",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Manager serves episode tags from the disk cache and fetches missing or stale",
+      " ones in the background, one anime at a time, through the provider pool."
+    ]
+  },
+  {
+    "filepath": "../internal/episodetags/pool.go",
+    "filename": "pool.go",
+    "name": "ProviderStatus",
+    "formattedName": "EpisodeTags_ProviderStatus",
+    "package": "episodetags",
+    "fields": [
+      {
+        "name": "Name",
+        "jsonName": "Name",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CooldownUntil",
+        "jsonName": "CooldownUntil",
+        "goType": "time.Time",
+        "typescriptType": "string",
+        "usedStructName": "time.Time",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Failures",
+        "jsonName": "Failures",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ProviderStatus is a provider's rotation state (for logs and tests)."
+    ]
+  },
+  {
+    "filepath": "../internal/episodetags/provider.go",
+    "filename": "provider.go",
+    "name": "Format",
+    "formattedName": "EpisodeTags_Format",
+    "package": "episodetags",
+    "fields": [],
+    "aliasOf": {
+      "goType": "string",
+      "typescriptType": "string",
+      "declaredValues": [
+        "\"jikan4\"",
+        "\"edge\""
+      ]
+    },
+    "comments": [
+      " Format is a provider's response shape."
+    ]
+  },
+  {
+    "filepath": "../internal/episodetags/provider.go",
+    "filename": "provider.go",
+    "name": "Provider",
+    "formattedName": "EpisodeTags_Provider",
+    "package": "episodetags",
+    "fields": [
+      {
+        "name": "Name",
+        "jsonName": "Name",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "BaseURL",
+        "jsonName": "BaseURL",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Format",
+        "jsonName": "Format",
+        "goType": "Format",
+        "typescriptType": "EpisodeTags_Format",
+        "usedTypescriptType": "EpisodeTags_Format",
+        "usedStructName": "episodetags.Format",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MinInterval",
+        "jsonName": "MinInterval",
+        "goType": "time.Duration",
+        "typescriptType": "Duration",
+        "usedTypescriptType": "Duration",
+        "usedStructName": "time.Duration",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Provider is one Jikan-compatible API."
+    ]
+  },
+  {
+    "filepath": "../internal/episodetags/tags.go",
+    "filename": "tags.go",
+    "name": "Kind",
+    "formattedName": "EpisodeTags_Kind",
+    "package": "episodetags",
+    "fields": [],
+    "aliasOf": {
+      "goType": "string",
+      "typescriptType": "string",
+      "declaredValues": [
+        "\"canon\"",
+        "\"filler\"",
+        "\"recap\"",
+        "\"mixed\""
+      ]
+    },
+    "comments": [
+      " Kind is what an episode is."
+    ]
+  },
+  {
+    "filepath": "../internal/episodetags/tags.go",
+    "filename": "tags.go",
+    "name": "Status",
+    "formattedName": "EpisodeTags_Status",
+    "package": "episodetags",
+    "fields": [],
+    "aliasOf": {
+      "goType": "string",
+      "typescriptType": "string",
+      "declaredValues": [
+        "\"ready\"",
+        "\"pending\"",
+        "\"unavailable\""
+      ]
+    },
+    "comments": [
+      " Status says whether a Response has data."
+    ]
+  },
+  {
+    "filepath": "../internal/episodetags/tags.go",
+    "filename": "tags.go",
+    "name": "Response",
+    "formattedName": "EpisodeTags_Response",
+    "package": "episodetags",
+    "fields": [
+      {
+        "name": "Status",
+        "jsonName": "status",
+        "goType": "Status",
+        "typescriptType": "EpisodeTags_Status",
+        "usedTypescriptType": "EpisodeTags_Status",
+        "usedStructName": "episodetags.Status",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MalID",
+        "jsonName": "malId",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Episodes",
+        "jsonName": "episodes",
+        "goType": "map[string]Kind",
+        "typescriptType": "Record\u003cstring, EpisodeTags_Kind\u003e",
+        "usedTypescriptType": "EpisodeTags_Kind",
+        "usedStructName": "episodetags.Kind",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "HasNonCanon",
+        "jsonName": "hasNonCanon",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "FetchedAt",
+        "jsonName": "fetchedAt",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Source",
+        "jsonName": "source",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Response is what GET /api/v1/anime/episode-tags/{id} returns."
+    ]
+  },
+  {
+    "filepath": "../internal/episodetags/tags.go",
+    "filename": "tags.go",
+    "name": "Entry",
+    "formattedName": "EpisodeTags_Entry",
+    "package": "episodetags",
+    "fields": [
+      {
+        "name": "MalID",
+        "jsonName": "malId",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "FetchedAt",
+        "jsonName": "fetchedAt",
+        "goType": "time.Time",
+        "typescriptType": "string",
+        "usedStructName": "time.Time",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Source",
+        "jsonName": "source",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "NotFound",
+        "jsonName": "notFound",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Episodes",
+        "jsonName": "episodes",
+        "goType": "map[int]Kind",
+        "typescriptType": "Record\u003cnumber, EpisodeTags_Kind\u003e",
+        "usedTypescriptType": "EpisodeTags_Kind",
+        "usedStructName": "episodetags.Kind",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Entry is the cached data for one MAL anime."
+    ]
   },
   {
     "filepath": "../internal/events/events.go",
