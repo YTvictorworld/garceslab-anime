@@ -1,4 +1,6 @@
+import { useEpisodeTag } from "@/api/hooks/episode_tags.hooks"
 import { AutoplayState } from "@/app/(main)/_features/autoplay/autoplay"
+import { EpisodeTagPill } from "@/app/(main)/_features/anime/_components/episode-tag-pill"
 import { Button } from "@/components/ui/button"
 import { Modal } from "@/components/ui/modal"
 import { logger } from "@/lib/helpers/debug"
@@ -17,6 +19,8 @@ export function AutoplayCountdownModal({
 }: AutoplayCountdownModalProps) {
 
     const { isActive, countdown, nextEpisode, streamingType } = autoplayState
+    // Garceslab Anime: the next episode's canon/filler tag, when there is one to show.
+    const nextEpisodeTag = useEpisodeTag(isActive && nextEpisode?.type === "main" ? nextEpisode.baseAnime?.id : null, nextEpisode?.episodeNumber)
 
     const handleClose = () => {
         logger("AutoplayCountdownModal").info("User cancelled autoplay")
@@ -76,6 +80,12 @@ export function AutoplayCountdownModal({
             <div className="text-center space-y-4">
                 <div className="rounded-[--radius-md] text-center">
                     <h3 className="text-5xl font-bold">{countdown}</h3>
+                    {nextEpisode && nextEpisodeTag && (
+                        <p className="mt-2 flex items-center justify-center gap-2 text-[--muted]" data-autoplay-next-episode-tag={nextEpisodeTag}>
+                            <span className="line-clamp-1">{nextEpisode.displayTitle}</span>
+                            <EpisodeTagPill kind={nextEpisodeTag} />
+                        </p>
+                    )}
                     {/* <p className="text-[--muted] text-sm mt-1">
                      {countdown === 1 ? "second" : "seconds"}
                      </p> */}

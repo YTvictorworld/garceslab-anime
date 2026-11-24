@@ -17,6 +17,8 @@ import (
 
 // TVPlayerPrefs are the TV app's player preferences that follow the profile.
 // Every field is optional: nil = the app's default (or its local value).
+// SkipFillerEpisodes: "next episode" jumps over filler and recap episodes
+// when the anime's episode tags are known (Garceslab Anime).
 type TVPlayerPrefs struct {
 	PreferredAudioLanguages    *string  `json:"preferredAudioLanguages,omitempty"`
 	PreferredSubtitleLanguages *string  `json:"preferredSubtitleLanguages,omitempty"`
@@ -26,6 +28,7 @@ type TVPlayerPrefs struct {
 	AssRendering               *bool    `json:"assRendering,omitempty"`
 	AutoPlay                   *bool    `json:"autoPlay,omitempty"`
 	AutoNextEpisode            *bool    `json:"autoNextEpisode,omitempty"`
+	SkipFillerEpisodes         *bool    `json:"skipFillerEpisodes,omitempty"`
 	AutoSkipOpEd               *bool    `json:"autoSkipOpEd,omitempty"`
 	SkipDurationSec            *int     `json:"skipDurationSec,omitempty"`
 	ButtonSeekSec              *int     `json:"buttonSeekSec,omitempty"`
@@ -211,6 +214,9 @@ func mergeTV(dst, src *TVPlayerPrefs) {
 	}
 	if src.AutoNextEpisode != nil {
 		dst.AutoNextEpisode = src.AutoNextEpisode
+	}
+	if src.SkipFillerEpisodes != nil {
+		dst.SkipFillerEpisodes = src.SkipFillerEpisodes
 	}
 	if src.AutoSkipOpEd != nil {
 		dst.AutoSkipOpEd = src.AutoSkipOpEd
