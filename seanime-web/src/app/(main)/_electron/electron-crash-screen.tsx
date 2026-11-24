@@ -53,7 +53,7 @@ export function ElectronCrashScreenError() {
                 intent="warning"
                 description={isRendererCrash 
                     ? "You can try reloading the window to resume your session." 
-                    : "Make sure another instance of Seanime is not running or check the logs for more details."
+                    : "Make sure another instance of Garceslab Anime is not running or check the logs for more details."
                 }
             />
 

@@ -515,6 +515,7 @@ func (h *Handler) respondImportError(c echo.Context, err error) error {
 }
 
 func (h *Handler) afterImport(c echo.Context, p *profiles.Profile) {
+	h.auditProfileImport(c, p) // phase 4: profiles_audit.go
 	ctx := profiles.WithProfile(context.WithoutCancel(c.Request().Context()), p)
 	_, _ = h.App.RefreshAnimeCollectionCtx(ctx)
 }
@@ -624,6 +625,7 @@ func (h *Handler) HandleExportProfile(c echo.Context) error {
 	if err != nil {
 		return h.RespondWithError(c, err)
 	}
+	h.App.Profiles.RecordAudit(c.Request().Context(), target, profiles.AuditExport, "") // phase 4
 	if c.QueryParam("download") == "true" {
 		c.Response().Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="garceslab-anime-profile-%d.json"`, target.ID))
 	}

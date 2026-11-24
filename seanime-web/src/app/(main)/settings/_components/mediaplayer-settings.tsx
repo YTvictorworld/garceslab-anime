@@ -33,7 +33,7 @@ export function MediaplayerSettings(props: MediaplayerSettingsProps) {
         <>
             <SettingsPageHeader
                 title="Desktop Media Player"
-                description="Seanime has built-in support for MPV, VLC, IINA, and MPC-HC."
+                description="Garceslab Anime has built-in support for MPV, VLC, IINA, and MPC-HC."
                 icon={LuMonitorPlay}
             />
 
@@ -52,7 +52,7 @@ export function MediaplayerSettings(props: MediaplayerSettingsProps) {
                 />
                 {selectedPlayer === "iina" && <Alert
                     intent="info-basic"
-                    description={<p>For IINA to work correctly with Seanime, make sure <strong>Quit after all windows are closed</strong> is <span
+                    description={<p>For IINA to work correctly with Garceslab Anime, make sure <strong>Quit after all windows are closed</strong> is <span
                         className="underline"
                     >checked</span> and <strong>Keep window open after playback finishes</strong> is <span className="underline">unchecked</span> in
                         your IINA general settings.</p>}
@@ -64,7 +64,7 @@ export function MediaplayerSettings(props: MediaplayerSettingsProps) {
                     side="right"
                     name="autoPlayNextEpisode"
                     label="Automatically play next episode"
-                    help="If enabled, Seanime will play the next episode after a delay when the current episode is completed."
+                    help="If enabled, Garceslab Anime will play the next episode after a delay when the current episode is completed."
                 />
             </SettingsCard>
 
@@ -149,7 +149,7 @@ export function MediaplayerSettings(props: MediaplayerSettingsProps) {
                                     name="mpvSocket"
                                     label="Socket"
                                     placeholder="Leave empty for an auto-generated socket"
-                                    help="Set this only if you want Seanime to attach to a specific mpv IPC socket."
+                                    help="Set this only if you want Garceslab Anime to attach to a specific mpv IPC socket."
                                 />
                                 <Field.Text
                                     name="mpvPath"

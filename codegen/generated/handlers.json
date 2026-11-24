@@ -10378,6 +10378,48 @@
     }
   },
   {
+    "name": "auditProfileImport",
+    "trimmedName": "auditProfileImport",
+    "comments": [
+      "auditProfileImport records an import into p. The source comes from the route.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_audit.go",
+    "filename": "profiles_audit.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "importAuditSource",
+    "trimmedName": "importAuditSource",
+    "comments": [
+      "importAuditSource names the import source of an import route.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_audit.go",
+    "filename": "profiles_audit.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
     "name": "tagWebsocketProfile",
     "trimmedName": "tagWebsocketProfile",
     "comments": [
@@ -10973,6 +11015,127 @@
       "returns": "bool",
       "returnGoType": "bool",
       "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "TestPlayerPrefsEndpointsArePerProfile",
+    "trimmedName": "TestPlayerPrefsEndpointsArePerProfile",
+    "comments": [
+      "Phase 4: player preferences follow the profile, not the device or the client.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_phase4_test.go",
+    "filename": "profiles_phase4_test.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "TestProfileAuditRecordsImportAndExport",
+    "trimmedName": "TestProfileAuditRecordsImportAndExport",
+    "comments": [
+      "Phase 4: exports and imports are in the profile audit log, with the actor.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_phase4_test.go",
+    "filename": "profiles_phase4_test.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "HandleGetMyPlayerPrefs",
+    "trimmedName": "GetMyPlayerPrefs",
+    "comments": [
+      "HandleGetMyPlayerPrefs",
+      "",
+      "\t@summary returns the current profile's player preferences (one section per client: tv, web).",
+      "\t@desc Empty sections mean the profile has not saved any yet: the client keeps its local values.",
+      "\t@route /api/v1/profiles/me/player-prefs [GET]",
+      "\t@returns settings.PlayerPrefs",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_player.go",
+    "filename": "profiles_player.go",
+    "api": {
+      "summary": "returns the current profile's player preferences (one section per client: tv, web).",
+      "descriptions": [
+        "Empty sections mean the profile has not saved any yet: the client keeps its local values."
+      ],
+      "endpoint": "/api/v1/profiles/me/player-prefs",
+      "methods": [
+        "GET"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "settings.PlayerPrefs",
+      "returnGoType": "settings.PlayerPrefs",
+      "returnTypescriptType": "PlayerPrefs"
+    }
+  },
+  {
+    "name": "HandlePatchMyPlayerPrefs",
+    "trimmedName": "PatchMyPlayerPrefs",
+    "comments": [
+      "HandlePatchMyPlayerPrefs",
+      "",
+      "\t@summary updates the current profile's player preferences.",
+      "\t@desc Only the sections and fields sent change. \"tv\": the fields sent replace the saved ones. \"web\": videoCore and mediaCore are replaced as a whole. A section set to null is cleared.",
+      "\t@route /api/v1/profiles/me/player-prefs [PATCH]",
+      "\t@returns settings.PlayerPrefs",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_player.go",
+    "filename": "profiles_player.go",
+    "api": {
+      "summary": "updates the current profile's player preferences.",
+      "descriptions": [
+        "Only the sections and fields sent change. \"tv\": the fields sent replace the saved ones. \"web\": videoCore and mediaCore are replaced as a whole. A section set to null is cleared."
+      ],
+      "endpoint": "/api/v1/profiles/me/player-prefs",
+      "methods": [
+        "PATCH"
+      ],
+      "params": [],
+      "bodyFields": [
+        {
+          "name": "TV",
+          "jsonName": "tv",
+          "goType": "settings.TVPlayerPrefs",
+          "usedStructType": "settings.TVPlayerPrefs",
+          "typescriptType": "TVPlayerPrefs",
+          "required": false,
+          "descriptions": []
+        },
+        {
+          "name": "Web",
+          "jsonName": "web",
+          "goType": "settings.WebPlayerPrefs",
+          "usedStructType": "settings.WebPlayerPrefs",
+          "typescriptType": "WebPlayerPrefs",
+          "required": false,
+          "descriptions": []
+        }
+      ],
+      "returns": "settings.PlayerPrefs",
+      "returnGoType": "settings.PlayerPrefs",
+      "returnTypescriptType": "PlayerPrefs"
     }
   },
   {

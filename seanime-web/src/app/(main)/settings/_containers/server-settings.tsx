@@ -71,7 +71,7 @@ export function ServerSettings(props: ServerSettingsProps) {
 
     const confirmDialog = useConfirmationDialog({
         title: "Upload to AniList",
-        description: "This will upload your local Seanime collection to your AniList account. Are you sure you want to proceed?",
+        description: "This will upload your local Garceslab Anime collection to your AniList account. Are you sure you want to proceed?",
         actionText: "Upload",
         actionIntent: "primary",
         onConfirm: async () => {
@@ -107,7 +107,7 @@ export function ServerSettings(props: ServerSettingsProps) {
                     side="right"
                     name="enableWatchContinuity"
                     label="Enable watch history"
-                    help="If enabled, Seanime will remember your watch progress and resume from where you left off."
+                    help="If enabled, Garceslab Anime will remember your watch progress and resume from where you left off."
                     moreHelp="Only applies to desktop and integrated players."
                     icon={<TbClockPlay className="" />}
                 />
@@ -214,7 +214,7 @@ export function ServerSettings(props: ServerSettingsProps) {
                         side="right"
                         name="enableExtensionSecureMode"
                         label="Enable Extension Secure Mode"
-                        help="If enabled, Seanime will prompt you for confirmation whenever an extension tries to perform a sensitive action, even if permissions have been granted."
+                        help="If enabled, Garceslab Anime will prompt you for confirmation whenever an extension tries to perform a sensitive action, even if permissions have been granted."
                         icon={<LuShield className="" />}
                     />
                 </div>
@@ -264,7 +264,7 @@ export function ServerSettings(props: ServerSettingsProps) {
                     side="right"
                     name="autoSaveCurrentMediaOffline"
                     label="Auto-save currently watched/read media"
-                    help="If enabled, Seanime will automatically save all media you're currently watching/reading for offline use."
+                    help="If enabled, Garceslab Anime will automatically save all media you're currently watching/reading for offline use."
                     icon={<TbChecklist className="" />}
                 />
 
@@ -276,8 +276,8 @@ export function ServerSettings(props: ServerSettingsProps) {
                         side="right"
                         name="disableCacheLayer"
                         label="Disable AniList caching"
-                        help="If enabled, Seanime will stop caching AniList requests to disk."
-                        moreHelp="By default, all requests made to AniList are cached. This allows Seanime to keep being usable when AniList goes down. The cache directory is modifiable in the config file."
+                        help="If enabled, Garceslab Anime will stop caching AniList requests to disk."
+                        moreHelp="By default, all requests made to AniList are cached. This allows Garceslab Anime to keep being usable when AniList goes down. The cache directory is modifiable in the config file."
                         icon={<LuDatabaseBackup className="" />}
                     />
                     {!f.watch("disableCacheLayer") && (
@@ -287,7 +287,7 @@ export function ServerSettings(props: ServerSettingsProps) {
                                 onValueChange={v => toggleCacheLayer()}
                                 disabled={isTogglingCacheLayer}
                                 label="Enable cache-only mode"
-                                moreHelp="Seanime will use cached data instead of making API requests."
+                                moreHelp="Garceslab Anime will use cached data instead of making API requests."
                             />
                         </div>
                     )}
@@ -296,7 +296,7 @@ export function ServerSettings(props: ServerSettingsProps) {
                     side="right"
                     name="useFallbackMetadataProvider"
                     label="Use fallback episode metadata"
-                    help="If enabled, Seanime will use an alternative source to fetch episode metadata."
+                    help="If enabled, Garceslab Anime will use an alternative source to fetch episode metadata."
                     icon={<LuImages className="" />}
                 />
             </SettingsCard>
@@ -310,7 +310,7 @@ export function ServerSettings(props: ServerSettingsProps) {
                     help={__isElectronDesktop__ ? (<span className="flex gap-2 items-center">
                         <LuCircleAlert className="size-4 text-[--blue]" />
                         <span>If enabled, new releases won't be displayed. Seanime Denshi may still auto-update in the background.</span>
-                    </span>) : "If enabled, Seanime will not check for new releases."}
+                    </span>) : "If enabled, Garceslab Anime will not check for new releases."}
                     moreHelp={__isElectronDesktop__ ? "You cannot disable auto-updates for Seanime Denshi." : undefined}
                     icon={<TbDownloadOff className="" />}
                 />

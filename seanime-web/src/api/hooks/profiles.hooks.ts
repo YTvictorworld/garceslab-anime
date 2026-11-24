@@ -2,7 +2,8 @@
 
 import { buildSeaQuery, useServerMutation, useServerQuery } from "@/api/client/requests"
 import { API_ENDPOINTS } from "@/api/generated/endpoints"
-import { Avatar, Profile, ProfileAuditEntry, ProfileImportResult, ProfileSession } from "@/api/generated/types"
+import { PatchMyPlayerPrefs_Variables } from "@/api/generated/endpoint.types"
+import { Avatar, PlayerPrefs, Profile, ProfileAuditEntry, ProfileImportResult, ProfileSession } from "@/api/generated/types"
 import { serverAuthTokenAtom } from "@/app/(main)/_atoms/server-status.atoms"
 import { useQueryClient } from "@tanstack/react-query"
 import { useAtomValue } from "jotai"
@@ -198,4 +199,23 @@ export function describeImportResult(r: ProfileImportResult | undefined): string
     if (r.updated) parts.push(`${r.updated} updated`)
     if (r.skipped) parts.push(`${r.skipped} skipped`)
     return "Import finished: " + parts.join(", ")
+}
+
+// Player preferences of the tab's profile (phase 4). Sent with the tab's profile token.
+
+export function getMyPlayerPrefsRequest(password?: string) {
+    return buildSeaQuery<PlayerPrefs>({
+        endpoint: API_ENDPOINTS.PROFILES_PLAYER.GetMyPlayerPrefs.endpoint,
+        method: "GET",
+        password,
+    })
+}
+
+export function patchMyPlayerPrefsRequest(patch: PatchMyPlayerPrefs_Variables, password?: string) {
+    return buildSeaQuery<PlayerPrefs, PatchMyPlayerPrefs_Variables>({
+        endpoint: API_ENDPOINTS.PROFILES_PLAYER.PatchMyPlayerPrefs.endpoint,
+        method: "PATCH",
+        data: patch,
+        password,
+    })
 }

@@ -55,7 +55,9 @@ type ProfileAuditEntry struct {
 	TargetProfileID int64  `gorm:"column:target_profile_id" json:"targetProfileId"`
 	TargetName      string `gorm:"column:target_name" json:"targetName"`
 	Action          string `gorm:"column:action" json:"action"`
-	CreatedAt       int64  `gorm:"column:created_at" json:"createdAt"`
+	// Detail is a short note (old and new name, changed fields, import source).
+	Detail    *string `gorm:"column:detail" json:"detail,omitempty"`
+	CreatedAt int64   `gorm:"column:created_at" json:"createdAt"`
 }
 
 func (ProfileAuditEntry) TableName() string { return "profile_audit" }
@@ -69,7 +71,14 @@ const (
 	AuditPinSet    = "pin_set"
 	AuditPinChange = "pin_change"
 	AuditPinRemove = "pin_remove"
+	// Phase 4 (schema v2).
+	AuditRename = "rename"
+	AuditImport = "import"
+	AuditExport = "export"
 )
+
+// MaxAuditDetail is the longest detail kept (in characters).
+const MaxAuditDetail = 300
 
 // ProfilesStatus is what /api/v1/status exposes about profiles.
 type ProfilesStatus struct {

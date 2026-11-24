@@ -1,8 +1,9 @@
 //go:build ignore
 
 // check-avatars verifies the bundled profile avatar catalog: every entry has an id,
-// a license and a source, the license is in the allowed list, ids are unique and the
-// file exists. Every file in files/ must be in the catalog.
+// a license and a source, the license is in the allowed list, CC BY entries carry an
+// attribution and a creator that LICENSES.md credits, ids are unique and the file
+// exists. Every file in files/ must be in the catalog.
 //
 //	go run .github/scripts/check-avatars.go [internal/profiles/avatars]
 package main
@@ -15,13 +16,15 @@ import (
 	"strings"
 )
 
-var allowedLicenses = map[string]bool{"CC0 1.0": true}
+var allowedLicenses = map[string]bool{"CC0 1.0": true, "CC BY 4.0": true}
 
 type avatar struct {
-	ID      string `json:"id"`
-	File    string `json:"file"`
-	License string `json:"license"`
-	Source  string `json:"source"`
+	ID          string `json:"id"`
+	File        string `json:"file"`
+	License     string `json:"license"`
+	Source      string `json:"source"`
+	Creator     string `json:"creator"`
+	Attribution string `json:"attribution"`
 }
 
 func main() {
@@ -37,7 +40,8 @@ func main() {
 	if err := json.Unmarshal(data, &list); err != nil {
 		fail("catalog.json: " + err.Error())
 	}
-	if _, err := os.Stat(filepath.Join(dir, "LICENSES.md")); err != nil {
+	licensesMD, err := os.ReadFile(filepath.Join(dir, "LICENSES.md"))
+	if err != nil {
 		fail("LICENSES.md is missing")
 	}
 
@@ -57,6 +61,13 @@ func main() {
 			problems = append(problems, name+": missing license")
 		} else if !allowedLicenses[a.License] {
 			problems = append(problems, fmt.Sprintf("%s: license %q is not allowed", name, a.License))
+		} else if strings.HasPrefix(a.License, "CC BY") {
+			switch {
+			case strings.TrimSpace(a.Attribution) == "" || strings.TrimSpace(a.Creator) == "":
+				problems = append(problems, fmt.Sprintf("%s: %s needs an attribution and a creator", name, a.License))
+			case !strings.Contains(string(licensesMD), a.Attribution):
+				problems = append(problems, fmt.Sprintf("%s: LICENSES.md does not credit %q", name, a.Attribution))
+			}
 		}
 		if !strings.HasPrefix(a.Source, "https://") {
 			problems = append(problems, name+": missing or non-https source")

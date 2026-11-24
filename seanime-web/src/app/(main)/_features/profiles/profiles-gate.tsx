@@ -1,5 +1,6 @@
 import { Status } from "@/api/generated/types"
 import { CreateProfileScreen } from "@/app/(main)/_features/profiles/create-profile-screen"
+import { ProfilePlayerPrefsSync } from "@/app/(main)/_features/profiles/profile-player-prefs-sync"
 import { useProfileSwitcher } from "@/app/(main)/_features/profiles/use-profile-switcher"
 import { WhosWatching } from "@/app/(main)/_features/profiles/whos-watching"
 import { clearProfileSession, useProfileSession } from "@/lib/server/profile-session"
@@ -52,5 +53,8 @@ export function ProfilesGate({ status, children }: ProfilesGateProps) {
     }
 
     // Remount everything when the profile changes so no per-profile state survives.
-    return <React.Fragment key={session.profileId}>{children}</React.Fragment>
+    return <React.Fragment key={session.profileId}>
+        <ProfilePlayerPrefsSync profileId={session.profileId} />
+        {children}
+    </React.Fragment>
 }

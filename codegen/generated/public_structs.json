@@ -89814,6 +89814,15 @@
         "comments": []
       },
       {
+        "name": "Attribution",
+        "jsonName": "attribution",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
         "name": "URL",
         "jsonName": "url",
         "goType": "string",
@@ -91794,6 +91803,15 @@
         "comments": []
       },
       {
+        "name": "Detail",
+        "jsonName": "detail",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
         "name": "CreatedAt",
         "jsonName": "createdAt",
         "goType": "int64",
@@ -92544,6 +92562,240 @@
     ]
   },
   {
+    "filepath": "../internal/profiles/settings/player.go",
+    "filename": "player.go",
+    "name": "TVPlayerPrefs",
+    "formattedName": "TVPlayerPrefs",
+    "package": "settings",
+    "fields": [
+      {
+        "name": "PreferredAudioLanguages",
+        "jsonName": "preferredAudioLanguages",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "PreferredSubtitleLanguages",
+        "jsonName": "preferredSubtitleLanguages",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "IgnoredSubtitleLabels",
+        "jsonName": "ignoredSubtitleLabels",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ShowSubtitles",
+        "jsonName": "showSubtitles",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "SubtitleFontSize",
+        "jsonName": "subtitleFontSize",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "AssRendering",
+        "jsonName": "assRendering",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "AutoPlay",
+        "jsonName": "autoPlay",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "AutoNextEpisode",
+        "jsonName": "autoNextEpisode",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "AutoSkipOpEd",
+        "jsonName": "autoSkipOpEd",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "SkipDurationSec",
+        "jsonName": "skipDurationSec",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ButtonSeekSec",
+        "jsonName": "buttonSeekSec",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "DoubleTapSeekSec",
+        "jsonName": "doubleTapSeekSec",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Speed",
+        "jsonName": "speed",
+        "goType": "float64",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "LongPressFastForwardSpeed",
+        "jsonName": "longPressFastForwardSpeed",
+        "goType": "float64",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " TVPlayerPrefs are the TV app's player preferences that follow the profile.",
+      " Every field is optional: nil = the app's default (or its local value)."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/settings/player.go",
+    "filename": "player.go",
+    "name": "WebPlayerPrefs",
+    "formattedName": "WebPlayerPrefs",
+    "package": "settings",
+    "fields": [
+      {
+        "name": "VideoCore",
+        "jsonName": "videoCore",
+        "goType": "json.RawMessage",
+        "typescriptType": "RawMessage",
+        "usedTypescriptType": "RawMessage",
+        "usedStructName": "json.RawMessage",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaCore",
+        "jsonName": "mediaCore",
+        "goType": "json.RawMessage",
+        "typescriptType": "RawMessage",
+        "usedTypescriptType": "RawMessage",
+        "usedStructName": "json.RawMessage",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " WebPlayerPrefs are the web player's preferences: the video core settings",
+      " (languages, subtitle and caption styles, video enhancement) and the media",
+      " core preferences (autoplay, auto next, auto skip, volume, speed). They are",
+      " stored as the web app writes them (JSON objects, size-capped)."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/settings/player.go",
+    "filename": "player.go",
+    "name": "PlayerPrefs",
+    "formattedName": "PlayerPrefs",
+    "package": "settings",
+    "fields": [
+      {
+        "name": "TV",
+        "jsonName": "tv",
+        "goType": "TVPlayerPrefs",
+        "typescriptType": "TVPlayerPrefs",
+        "usedTypescriptType": "TVPlayerPrefs",
+        "usedStructName": "settings.TVPlayerPrefs",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Web",
+        "jsonName": "web",
+        "goType": "WebPlayerPrefs",
+        "typescriptType": "WebPlayerPrefs",
+        "usedTypescriptType": "WebPlayerPrefs",
+        "usedStructName": "settings.WebPlayerPrefs",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "UpdatedAt",
+        "jsonName": "updatedAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " PlayerPrefs is profile_settings.value.player."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/settings/player.go",
+    "filename": "player.go",
+    "name": "PlayerPrefsPatch",
+    "formattedName": "PlayerPrefsPatch",
+    "package": "settings",
+    "fields": [],
+    "aliasOf": {
+      "goType": "map[string]json.RawMessage",
+      "typescriptType": "Record\u003cstring, RawMessage\u003e",
+      "declaredValues": null,
+      "usedStructName": "json.RawMessage"
+    },
+    "comments": null
+  },
+  {
     "filepath": "../internal/profiles/settings/settings.go",
     "filename": "settings.go",
     "name": "ProfileLibraryOverrides",
@@ -92738,6 +92990,17 @@
         "typescriptType": "Record\u003cnumber, ProfileSettings\u003e",
         "usedTypescriptType": "ProfileSettings",
         "usedStructName": "settings.ProfileSettings",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "playerMu",
+        "jsonName": "playerMu",
+        "goType": "sync.Mutex",
+        "typescriptType": "Mutex",
+        "usedTypescriptType": "Mutex",
+        "usedStructName": "sync.Mutex",
         "required": false,
         "public": false,
         "comments": []

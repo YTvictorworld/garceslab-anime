@@ -432,7 +432,7 @@ export function UISettings() {
 
     function handleSave(data: z.infer<typeof themeSchema>) {
         if (colord(data.backgroundColor).isLight()) {
-            toast.error("Seanime does not support light themes")
+            toast.error("Garceslab Anime does not support light themes")
             return
         }
 

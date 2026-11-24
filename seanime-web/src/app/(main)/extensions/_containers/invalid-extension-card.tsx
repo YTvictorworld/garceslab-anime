@@ -56,7 +56,7 @@ export function InvalidExtensionCard(props: InvalidExtensionCardProps) {
                     contentClass="max-w-2xl"
                 >
                     <p>
-                        Seanime failed to load this extension. If you aren't sure what this means, please contact the author.
+                        Garceslab Anime failed to load this extension. If you aren't sure what this means, please contact the author.
                     </p>
                     <p>
                         Code: <strong>{extension.code}</strong>
@@ -248,7 +248,7 @@ export function UnauthorizedExtensionPluginCard(props: UnauthorizedExtensionPlug
                     {isUnsafe && <Alert
                         intent="warning"
                         className="!text-[--muted] !bg-gray-800"
-                        description="This plugin relies on unsafe flags to function. Seanime cannot guarantee that it is safe to use."
+                        description="This plugin relies on unsafe flags to function. Garceslab Anime cannot guarantee that it is safe to use."
                         // className="mb-4"
                     />}
 
