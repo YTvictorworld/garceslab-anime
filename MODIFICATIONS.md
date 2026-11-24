@@ -34,6 +34,18 @@ Maintained independently since 2026-11 by YTvictorworld.
 Nothing else differs from Seanime v3.10.5 yet. Planned changes (local profiles without an
 AniList account, several playbacks at the same time) will be listed here as they land.
 
+## 2026-11 (search suggestions)
+
+- **Prefix search suggestions** (`internal/titleindex`, `internal/core/title_index.go`,
+  `internal/handlers/search_suggest.go`, route in `internal/handlers/routes.go`, public route in
+  `internal/profiles/public_routes.go`): `GET /api/v1/search/suggest?q=&limit=` suggests anime
+  from the first letters of a title or synonym ("ble" -> Bleach), which AniList's search can't
+  do. The index is built from manami-project's anime-offline-database (ODbL), downloaded at
+  runtime into the data directory and refreshed weekly; only entries with an AniList id are kept.
+  Without the database the endpoint returns an empty list. The web search page's typeahead uses
+  it first and falls back to AniList. `SEANIME_TITLE_INDEX_DISABLED=true` turns it off.
+  Codegen gives the `titleindex` package the `TitleIndex_` prefix.
+
 ## GPL-3.0 compliance checklist
 
 - [x] **Prominent modification notices with dates (§5a):** this file, `NOTICE`, the README's

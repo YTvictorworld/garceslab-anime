@@ -222,6 +222,9 @@ func InitRoutes(app *core.App, e *echo.Echo) {
 
 	v1Anilist.POST("/list-recent-anime", h.HandleAnilistListRecentAiringAnime)
 
+	// Garceslab Anime: prefix suggestions from the local title index (public, like list-anime)
+	v1.GET("/search/suggest", h.HandleSearchSuggest)
+
 	v1Anilist.GET("/list-missed-sequels", h.HandleAnilistListMissedSequels)
 
 	v1Anilist.GET("/stats", h.HandleGetAniListStats)

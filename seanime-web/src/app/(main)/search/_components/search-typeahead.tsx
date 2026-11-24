@@ -1,6 +1,6 @@
 import { buildSeaQuery } from "@/api/client/requests"
 import { API_ENDPOINTS } from "@/api/generated/endpoints"
-import { AL_BaseAnime, AL_ListAnime } from "@/api/generated/types"
+import { AL_BaseAnime, AL_ListAnime, TitleIndex_Suggestion } from "@/api/generated/types"
 import { serverAuthTokenAtom } from "@/app/(main)/_atoms/server-status.atoms"
 import { SeaImage } from "@/components/shared/sea-image"
 import { cn } from "@/components/ui/core/styling"
@@ -15,19 +15,71 @@ export const TYPEAHEAD_MIN_CHARS = 2
 const TYPEAHEAD_DEBOUNCE_MS = 250
 const TYPEAHEAD_LIMIT = 8
 
+/** One row of the dropdown, from the title index or from AniList. */
+export type TypeaheadItem = {
+    id: number
+    title: string
+    /** Second line: the matched synonym or the English title, format and year. */
+    detail: string
+    image?: string
+}
+
+function fromIndex(s: TitleIndex_Suggestion): TypeaheadItem {
+    return {
+        id: s.mediaId,
+        title: s.title,
+        detail: [s.matched, s.format?.replace(/_/g, " "), s.year].filter(Boolean).join(" · "),
+        image: s.thumbnail || s.picture,
+    }
+}
+
+function fromAnilist(m: AL_BaseAnime): TypeaheadItem {
+    const title = m.title?.userPreferred || m.title?.romaji || ""
+    const year = m.seasonYear ?? m.startDate?.year
+    const alt = m.title?.english && m.title.english !== m.title?.userPreferred ? m.title.english : m.title?.romaji
+    return {
+        id: m.id,
+        title,
+        detail: [alt !== title ? alt : null, m.format?.replace(/_/g, " "), year].filter(Boolean).join(" · "),
+        image: m.coverImage?.medium,
+    }
+}
+
 /**
- * Suggestions while typing (release 1.0 "search as you type"). Uses the public AniList
- * search the server proxies (POST /anilist/list-anime, no profile needed). Changing the
- * query aborts the previous request (React Query's signal) and results are cached.
+ * Suggestions while typing (release 1.0 "search as you type"). First the server's
+ * title index (GET /search/suggest: prefix matches, "ble" finds Bleach); when it has
+ * nothing (not downloaded yet, disabled, or no match) the public AniList search the
+ * server proxies (POST /anilist/list-anime, whole words only). Neither needs a
+ * profile. Changing the query aborts the previous requests (React Query's signal)
+ * and results are cached.
  */
 export function useAnimeSuggestions(query: string) {
     const password = useAtomValue(serverAuthTokenAtom)
     const debounced = useDebounce(query.trim(), TYPEAHEAD_DEBOUNCE_MS)
     const enabled = debounced.length >= TYPEAHEAD_MIN_CHARS
 
-    const q = useQuery({
-        queryKey: ["search-typeahead", debounced],
+    const indexQuery = useQuery({
+        queryKey: ["search-typeahead-index", debounced],
         enabled,
+        staleTime: 5 * 60 * 1000,
+        placeholderData: keepPreviousData,
+        retry: false,
+        queryFn: ({ signal }) => buildSeaQuery<TitleIndex_Suggestion[] | undefined, { q: string, limit: number }>({
+            endpoint: API_ENDPOINTS.SEARCH_SUGGEST.SearchSuggest.endpoint,
+            method: "GET",
+            params: { q: debounced, limit: TYPEAHEAD_LIMIT },
+            password,
+            signal,
+        }),
+    })
+    // Fall back to AniList once the index answered nothing for this query (an older
+    // server without the endpoint fails the request, which counts as nothing).
+    const indexSettled = !indexQuery.isFetching && !indexQuery.isPlaceholderData
+    const useAnilist = enabled && indexSettled && (indexQuery.isError || !indexQuery.data?.length)
+
+    const anilistQuery = useQuery({
+        queryKey: ["search-typeahead", debounced],
+        enabled: useAnilist,
         staleTime: 5 * 60 * 1000,
         placeholderData: keepPreviousData,
         retry: false,
@@ -46,11 +98,15 @@ export function useAnimeSuggestions(query: string) {
         }),
     })
 
-    const media = React.useMemo(
-        () => (enabled ? (q.data?.Page?.media?.filter(Boolean) as AL_BaseAnime[] | undefined) : undefined) ?? [],
-        [q.data, enabled],
-    )
-    return { media, isFetching: enabled && q.isFetching, enabled, debounced }
+    const items = React.useMemo(() => {
+        if (!enabled) return []
+        if (useAnilist) return ((anilistQuery.data?.Page?.media?.filter(Boolean) ?? []) as AL_BaseAnime[]).map(fromAnilist)
+        // While the index runs, the previous query's rows stay up (keepPreviousData).
+        return (indexQuery.data ?? []).map(fromIndex)
+    }, [enabled, useAnilist, anilistQuery.data, indexQuery.data])
+
+    const isFetching = enabled && (indexQuery.isFetching || (useAnilist && anilistQuery.isFetching))
+    return { items, isFetching, enabled, debounced }
 }
 
 type SearchTypeaheadProps = {
@@ -64,7 +120,7 @@ type SearchTypeaheadProps = {
 /** Dropdown of matching anime under the search input (↑/↓ to move, Enter to open, Esc to close). */
 export function SearchTypeahead({ query, open, onOpenChange, inputRef }: SearchTypeaheadProps) {
     const router = useRouter()
-    const { media, isFetching, enabled } = useAnimeSuggestions(query)
+    const { items: media, isFetching, enabled } = useAnimeSuggestions(query)
     const [highlighted, setHighlighted] = React.useState(-1)
     const listId = React.useId()
 
@@ -72,7 +128,7 @@ export function SearchTypeahead({ query, open, onOpenChange, inputRef }: SearchT
 
     const visible = open && query.trim().length >= TYPEAHEAD_MIN_CHARS && (media.length > 0 || isFetching || enabled)
 
-    const select = React.useCallback((m: AL_BaseAnime) => {
+    const select = React.useCallback((m: TypeaheadItem) => {
         onOpenChange(false)
         router.push(`/entry?id=${m.id}`)
     }, [onOpenChange, router])
@@ -125,41 +181,35 @@ export function SearchTypeahead({ query, open, onOpenChange, inputRef }: SearchT
             {media.length === 0 && !isFetching && <p className="p-3 text-sm text-[--muted]">No matches</p>}
             {media.length > 0 && (
                 <ul id={listId} role="listbox" className="max-h-[60vh] overflow-y-auto py-1">
-                    {media.map((m, i) => {
-                        const year = m.seasonYear ?? m.startDate?.year
-                        const alt = m.title?.english && m.title.english !== m.title?.userPreferred ? m.title.english : m.title?.romaji
-                        return (
-                            <li
-                                key={m.id}
-                                id={`${listId}-${i}`}
-                                role="option"
-                                aria-selected={i === highlighted}
-                                data-typeahead-item={m.id}
-                                onMouseEnter={() => setHighlighted(i)}
-                                onClick={() => select(m)}
-                                className={cn(
-                                    "flex items-center gap-3 px-3 py-2 cursor-pointer",
-                                    i === highlighted && "bg-[--subtle]",
-                                )}
-                            >
-                                <div className="relative w-9 h-12 shrink-0 overflow-hidden rounded-sm bg-[--subtle]">
-                                    {!!m.coverImage?.medium && <SeaImage
-                                        src={m.coverImage.medium}
-                                        alt=""
-                                        fill
-                                        sizes="36px"
-                                        className="object-cover"
-                                    />}
-                                </div>
-                                <div className="min-w-0">
-                                    <p className="truncate text-sm font-medium">{m.title?.userPreferred || m.title?.romaji}</p>
-                                    <p className="truncate text-xs text-[--muted]">
-                                        {[alt !== m.title?.userPreferred ? alt : null, m.format?.replace(/_/g, " "), year].filter(Boolean).join(" · ")}
-                                    </p>
-                                </div>
-                            </li>
-                        )
-                    })}
+                    {media.map((m, i) => (
+                        <li
+                            key={m.id}
+                            id={`${listId}-${i}`}
+                            role="option"
+                            aria-selected={i === highlighted}
+                            data-typeahead-item={m.id}
+                            onMouseEnter={() => setHighlighted(i)}
+                            onClick={() => select(m)}
+                            className={cn(
+                                "flex items-center gap-3 px-3 py-2 cursor-pointer",
+                                i === highlighted && "bg-[--subtle]",
+                            )}
+                        >
+                            <div className="relative w-9 h-12 shrink-0 overflow-hidden rounded-sm bg-[--subtle]">
+                                {!!m.image && <SeaImage
+                                    src={m.image}
+                                    alt=""
+                                    fill
+                                    sizes="36px"
+                                    className="object-cover"
+                                />}
+                            </div>
+                            <div className="min-w-0">
+                                <p className="truncate text-sm font-medium">{m.title}</p>
+                                <p className="truncate text-xs text-[--muted]">{m.detail}</p>
+                            </div>
+                        </li>
+                    ))}
                 </ul>
             )}
         </div>
