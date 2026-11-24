@@ -102,6 +102,31 @@ AniList account, several playbacks at the same time) will be listed here as they
 - **Docs:** `docs/self-hosting-webos.md` (Docker Compose, TV app, first run, profiles, PINs,
   optional AniList).
 
+## 2026-11 (profiles, phase 2: up to three people watching at once)
+
+- **Per-client debrid streams** (`internal/debrid/client/stream.go`, `repository.go`):
+  direct streams (the client plays the debrid link itself: `externalPlayerLink`, `none`,
+  `noneAndAwait`) get one slot per client id, with their status events sent to that client
+  only; relayed streams keep upstream's single slot. A relayed start never cancels another
+  client's direct stream and vice versa. The link sent to an external player is no longer
+  logged. The torrent auto-select status of a direct stream goes to its client only
+  (`internal/torrents/autoselect`), and its auto-select profile is the requesting profile's
+  (`db_bridge.FindAutoSelectProfileCtx`).
+- **Viewer sessions** (`internal/profiles/sessions`, `internal/handlers/profiles_viewers.go`,
+  `internal/core/profiles.go`): at most `SEANIME_MAX_VIEWERS` (default 3) devices watch at
+  once; a fourth gets `409 LANES_FULL` naming who is watching. Sessions end on stop, after
+  the websocket stays closed for `SEANIME_VIEWER_DISCONNECT_GRACE` (45 s), after
+  `SEANIME_VIEWER_IDLE_TIMEOUT` (15 min), from Settings → Profiles → Now watching
+  (`GET /api/v1/profiles/viewers`, `POST /api/v1/profiles/viewers/:sessionId/stop`), or when
+  the profile is deleted. Manual progress tracking is per session. The phase 1 playback lane
+  stays for relayed playback and takes one of the slots.
+- **Web:** the LANES_FULL message names who is watching; Settings → Profiles shows "Now
+  watching" with Stop.
+- **Tests and docs:** `internal/profiles/sessions/sessions_test.go`,
+  `internal/debrid/client/stream_sessions_test.go`, `internal/handlers/profiles_viewers_test.go`,
+  an end-to-end check against a throwaway server (`scripts/e2e-phase2.sh`,
+  `internal/e2e/phase2`), and `docs/phase2-direct-play.md`.
+
 ## GPL-3.0 compliance checklist
 
 - [x] **Prominent modification notices with dates (§5a):** this file, `NOTICE`, the README's
