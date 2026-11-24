@@ -54,6 +54,20 @@ New files: `internal/profiles/settings/player.go`, `internal/handlers/profiles_p
 | `internal/profiles/store/migrations.go` | Step 2 rebuilds `profile_audit` (`detail`, no action CHECK) |
 | `internal/constants/constants.go`, `internal/updater/announcement.go` | Empty `AnnouncementURL` turns the upstream announcement feed off |
 
+## Phase 3: AniList-like features
+
+New files: `internal/handlers/profiles_library.go`, `internal/handlers/profiles_p3_test.go`,
+`internal/profiles/localplatform/{favourites,editor}.go`, `internal/profiles/importer/anilist_account.go`.
+No schema change: favourites, custom lists and activity use the v1 tables.
+
+| File | Hook |
+|---|---|
+| `internal/handlers/profiles_data.go` | `registerProfileLibraryRoutes(v1)` at the end of `registerProfileDataRoutes`; `HandleImportProfileAnilist` takes `{token}` / `{favourites}` and names token imports in the audit |
+| `internal/handlers/profiles_audit.go` | `auditProfileImport` uses the handler's `importAuditSourceKey` when set |
+| `seanime-web/.../media-page-header-components.tsx` | `ProfileFavouriteButton` next to the list editor |
+| `seanime-web/.../anilist-media-entry-modal.tsx` | With a profile, anime entries save through `PATCH /profiles/me/entries/:mediaId` with `ProfileEntryExtras` (notes, private, custom lists) |
+| `seanime-web/.../lists/_containers/anilist-collection-lists.tsx` | Favourites section, "Manage lists", recently watched on the Stats tab |
+
 ## Runtime switches
 
 - `SEANIME_PROFILES_ENFORCE=true`: routes outside `internal/profiles/public_routes.go`
