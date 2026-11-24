@@ -42,6 +42,18 @@ The router is installed unless the server runs in offline mode (`profilesPlatfor
 | `internal/handlers/websocket.go` | `tagWebsocketProfile` tags the connection with its `?profile=` profile |
 | `internal/handlers/profiles.go` (own file) | Middleware `OnProfile` tags the client id (HTTP requests too), `RejectBusy` = `409 PLAYBACK_BUSY`; delete/logout untag and drop caches; `registerProfileDataRoutes` |
 
+## Phase 4: polish
+
+New files: `internal/profiles/settings/player.go`, `internal/handlers/profiles_player.go`,
+`internal/handlers/profiles_audit.go`, `internal/profiles/store/migrations_phase4_test.go`.
+
+| File | Hook |
+|---|---|
+| `internal/handlers/profiles.go` | `registerProfilePlayerRoutes(v1)` after `registerProfileDataRoutes` |
+| `internal/handlers/profiles_data.go` | `afterImport` writes an `import` audit entry; `HandleExportProfile` an `export` entry |
+| `internal/profiles/store/migrations.go` | Step 2 rebuilds `profile_audit` (`detail`, no action CHECK) |
+| `internal/constants/constants.go`, `internal/updater/announcement.go` | Empty `AnnouncementURL` turns the upstream announcement feed off |
+
 ## Runtime switches
 
 - `SEANIME_PROFILES_ENFORCE=true`: routes outside `internal/profiles/public_routes.go`
