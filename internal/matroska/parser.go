@@ -776,6 +776,8 @@ func (mp *MatroskaParser) parseTrackEntry(data []byte) (*TrackInfo, error) {
 			}
 		case IDLanguageIETF:
 			track.LanguageIETF = element.ReadString()
+		case IDFlagForced: // Garceslab Anime: forced (signs-only) subtitle tracks
+			track.Forced = element.ReadUInt() != 0
 		case IDCodecID:
 			track.CodecID = element.ReadString()
 		case IDCodecPriv:

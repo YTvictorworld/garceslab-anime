@@ -90,6 +90,7 @@ const (
 	IDTrackName             = 0x536E     // The name of the track
 	IDLanguage              = 0x22B59C   // The language of the track
 	IDLanguageIETF          = 0x22B59D   // The IETF language code of the track
+	IDFlagForced            = 0x55AA     // Whether the track must be played regardless of user preferences (Garceslab Anime)
 	IDCodecID               = 0x86       // The ID of the codec used for this track
 	IDCodecPriv             = 0x63A2     // Private data specific to the codec
 	IDCodecName             = 0x258688   // The name of the codec used for this track
