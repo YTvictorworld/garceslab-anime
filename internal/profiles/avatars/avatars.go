@@ -34,7 +34,7 @@ type Avatar struct {
 	Origin     string `json:"origin"`
 	// Attribution is the credit line a CC BY licence requires (empty for CC0).
 	Attribution string `json:"attribution,omitempty"`
-	URL        string `json:"url"` // Filled at load time: URLPrefix + File
+	URL         string `json:"url"` // Filled at load time: URLPrefix + File
 }
 
 // AllowedLicenses are the licences a bundled avatar may have. CC BY needs an
