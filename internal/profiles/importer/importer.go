@@ -14,6 +14,7 @@ import (
 	"seanime/internal/profiles/history"
 	"seanime/internal/profiles/localplatform"
 	"seanime/internal/profiles/settings"
+	"sort"
 	"strings"
 	"time"
 
@@ -270,7 +271,7 @@ func ImportJSON(ctx context.Context, db *gorm.DB, p *localplatform.Platform, dat
 	if len(entries) > MaxImportEntries {
 		return nil, fmt.Errorf("%w: too many entries", ErrInvalidFile)
 	}
-	if len(entries) == 0 && (exp == nil || len(exp.WatchHistory) == 0) {
+	if len(entries) == 0 && (exp == nil || (len(exp.WatchHistory) == 0 && len(exp.Favourites) == 0)) {
 		return nil, ErrNothingToImport
 	}
 	res := &localplatform.ProfileImportResult{}
@@ -283,6 +284,24 @@ func ImportJSON(ctx context.Context, db *gorm.DB, p *localplatform.Platform, dat
 	if exp != nil {
 		if err := importContinuity(ctx, db, p.ProfileID(), exp, mode); err != nil {
 			return nil, err
+		}
+		if len(exp.Favourites) > 0 {
+			favs := make([]localplatform.ProfileFavourite, 0, len(exp.Favourites))
+			for _, f := range exp.Favourites {
+				favs = append(favs, localplatform.ProfileFavourite{Kind: f.Kind, RefID: f.RefID, Position: f.Position})
+			}
+			// Keep the exported order: sort by kind then position.
+			sort.SliceStable(favs, func(i, j int) bool {
+				if favs[i].Kind != favs[j].Kind {
+					return favs[i].Kind < favs[j].Kind
+				}
+				return favs[i].Position < favs[j].Position
+			})
+			n, err := p.ImportFavourites(ctx, favs, mode)
+			if err != nil {
+				return nil, err
+			}
+			res.Favourites = n
 		}
 	}
 	return res, nil
