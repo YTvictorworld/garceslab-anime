@@ -90028,6 +90028,247 @@
     "comments": []
   },
   {
+    "filepath": "../internal/profiles/importer/anilist_account.go",
+    "filename": "anilist_account.go",
+    "name": "AnilistFavourites",
+    "formattedName": "AnilistFavourites",
+    "package": "importer",
+    "fields": [
+      {
+        "name": "Anime",
+        "jsonName": "Anime",
+        "goType": "[]int",
+        "typescriptType": "Array\u003cnumber\u003e",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Manga",
+        "jsonName": "Manga",
+        "goType": "[]int",
+        "typescriptType": "Array\u003cnumber\u003e",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Characters",
+        "jsonName": "Characters",
+        "goType": "[]int",
+        "typescriptType": "Array\u003cnumber\u003e",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Staff",
+        "jsonName": "Staff",
+        "goType": "[]int",
+        "typescriptType": "Array\u003cnumber\u003e",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Studios",
+        "jsonName": "Studios",
+        "goType": "[]int",
+        "typescriptType": "Array\u003cnumber\u003e",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " AnilistFavourites are the ids of an AniList user's favourites, per kind."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/importer/anilist_account.go",
+    "filename": "anilist_account.go",
+    "name": "PublicFavourites",
+    "formattedName": "PublicFavourites",
+    "package": "importer",
+    "fields": [
+      {
+        "name": "Query",
+        "jsonName": "Query",
+        "goType": "QueryFunc",
+        "typescriptType": "QueryFunc",
+        "usedTypescriptType": "QueryFunc",
+        "usedStructName": "importer.QueryFunc",
+        "required": true,
+        "public": true,
+        "comments": [
+          " nil = anilist.CustomQuery"
+        ]
+      },
+      {
+        "name": "Logger",
+        "jsonName": "Logger",
+        "goType": "zerolog.Logger",
+        "typescriptType": "Logger",
+        "usedTypescriptType": "Logger",
+        "usedStructName": "zerolog.Logger",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " PublicFavourites reads public favourites anonymously."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/importer/anilist_account.go",
+    "filename": "anilist_account.go",
+    "name": "TokenClient",
+    "formattedName": "TokenClient",
+    "package": "importer",
+    "fields": [
+      {
+        "name": "token",
+        "jsonName": "token",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "client",
+        "jsonName": "client",
+        "goType": "anilist.AnilistClientImpl",
+        "typescriptType": "AL_AnilistClientImpl",
+        "usedTypescriptType": "AL_AnilistClientImpl",
+        "usedStructName": "anilist.AnilistClientImpl",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "query",
+        "jsonName": "query",
+        "goType": "QueryFunc",
+        "typescriptType": "QueryFunc",
+        "usedTypescriptType": "QueryFunc",
+        "usedStructName": "importer.QueryFunc",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "logger",
+        "jsonName": "logger",
+        "goType": "zerolog.Logger",
+        "typescriptType": "Logger",
+        "usedTypescriptType": "Logger",
+        "usedStructName": "zerolog.Logger",
+        "required": false,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " TokenClient reads the account of an AniList access token. Create one per import."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/importer/anilist_account.go",
+    "filename": "anilist_account.go",
+    "name": "AnilistSources",
+    "formattedName": "AnilistSources",
+    "package": "importer",
+    "fields": [
+      {
+        "name": "Public",
+        "jsonName": "Public",
+        "goType": "AnimeCollectionFetcher",
+        "typescriptType": "AnimeCollectionFetcher",
+        "usedTypescriptType": "AnimeCollectionFetcher",
+        "usedStructName": "importer.AnimeCollectionFetcher",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "PublicFavourites",
+        "jsonName": "PublicFavourites",
+        "goType": "FavouritesFetcher",
+        "typescriptType": "FavouritesFetcher",
+        "usedTypescriptType": "FavouritesFetcher",
+        "usedStructName": "importer.FavouritesFetcher",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "NewAccount",
+        "jsonName": "NewAccount",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " AnilistSources are the AniList readers of an import (fakes in tests)."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/importer/anilist_account.go",
+    "filename": "anilist_account.go",
+    "name": "AnilistImportOptions",
+    "formattedName": "AnilistImportOptions",
+    "package": "importer",
+    "fields": [
+      {
+        "name": "Username",
+        "jsonName": "Username",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Token",
+        "jsonName": "Token",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Mode",
+        "jsonName": "Mode",
+        "goType": "localplatform.ImportMode",
+        "typescriptType": "ImportMode",
+        "usedTypescriptType": "ImportMode",
+        "usedStructName": "localplatform.ImportMode",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Favourites",
+        "jsonName": "Favourites",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " AnilistImportOptions selects what to import. With Token, the token owner's list",
+      " (private entries included) is imported and Username is ignored."
+    ]
+  },
+  {
     "filepath": "../internal/profiles/importer/importer.go",
     "filename": "importer.go",
     "name": "ClientFetcher",
@@ -90582,6 +90823,414 @@
     ]
   },
   {
+    "filepath": "../internal/profiles/localplatform/editor.go",
+    "filename": "editor.go",
+    "name": "ProfileEntryEdit",
+    "formattedName": "ProfileEntryEdit",
+    "package": "localplatform",
+    "fields": [
+      {
+        "name": "Status",
+        "jsonName": "status",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ScoreRaw",
+        "jsonName": "scoreRaw",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": [
+          " 0-100, 0 clears it"
+        ]
+      },
+      {
+        "name": "Progress",
+        "jsonName": "progress",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Repeat",
+        "jsonName": "repeat",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Private",
+        "jsonName": "private",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "HiddenFromStatusLists",
+        "jsonName": "hiddenFromStatusLists",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Notes",
+        "jsonName": "notes",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "StartedAt",
+        "jsonName": "startedAt",
+        "goType": "ProfileFuzzyDate",
+        "typescriptType": "ProfileFuzzyDate",
+        "usedTypescriptType": "ProfileFuzzyDate",
+        "usedStructName": "localplatform.ProfileFuzzyDate",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CompletedAt",
+        "jsonName": "completedAt",
+        "goType": "ProfileFuzzyDate",
+        "typescriptType": "ProfileFuzzyDate",
+        "usedTypescriptType": "ProfileFuzzyDate",
+        "usedStructName": "localplatform.ProfileFuzzyDate",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CustomListIDs",
+        "jsonName": "customListIds",
+        "goType": "[]int64",
+        "typescriptType": "Array\u003cnumber\u003e",
+        "usedStructName": "localplatform.[]int64",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ProfileEntryEdit is a partial edit of a list entry. Nil fields are unchanged.",
+      " A date with every part null clears it; empty notes clear them."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/localplatform/editor.go",
+    "filename": "editor.go",
+    "name": "ProfileEntryDetails",
+    "formattedName": "ProfileEntryDetails",
+    "package": "localplatform",
+    "fields": [
+      {
+        "name": "ID",
+        "jsonName": "id",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaID",
+        "jsonName": "mediaId",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Status",
+        "jsonName": "status",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Progress",
+        "jsonName": "progress",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ScoreRaw",
+        "jsonName": "scoreRaw",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Repeat",
+        "jsonName": "repeat",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Private",
+        "jsonName": "private",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "HiddenFromStatusLists",
+        "jsonName": "hiddenFromStatusLists",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Notes",
+        "jsonName": "notes",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "StartedAt",
+        "jsonName": "startedAt",
+        "goType": "ProfileFuzzyDate",
+        "typescriptType": "ProfileFuzzyDate",
+        "usedTypescriptType": "ProfileFuzzyDate",
+        "usedStructName": "localplatform.ProfileFuzzyDate",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CompletedAt",
+        "jsonName": "completedAt",
+        "goType": "ProfileFuzzyDate",
+        "typescriptType": "ProfileFuzzyDate",
+        "usedTypescriptType": "ProfileFuzzyDate",
+        "usedStructName": "localplatform.ProfileFuzzyDate",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CustomListIDs",
+        "jsonName": "customListIds",
+        "goType": "[]int64",
+        "typescriptType": "Array\u003cnumber\u003e",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "IsFavourite",
+        "jsonName": "isFavourite",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CreatedAt",
+        "jsonName": "createdAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "UpdatedAt",
+        "jsonName": "updatedAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ProfileEntryDetails is one entry with every editable field."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/localplatform/editor.go",
+    "filename": "editor.go",
+    "name": "ProfileRecentlyWatched",
+    "formattedName": "ProfileRecentlyWatched",
+    "package": "localplatform",
+    "fields": [
+      {
+        "name": "MediaID",
+        "jsonName": "mediaId",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "EpisodeNumber",
+        "jsonName": "episodeNumber",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "PositionSec",
+        "jsonName": "positionSec",
+        "goType": "float64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Duration",
+        "jsonName": "duration",
+        "goType": "float64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "UpdatedAt",
+        "jsonName": "updatedAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ListStatus",
+        "jsonName": "listStatus",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ListProgress",
+        "jsonName": "listProgress",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Media",
+        "jsonName": "media",
+        "goType": "anilist.BaseAnime",
+        "typescriptType": "AL_BaseAnime",
+        "usedTypescriptType": "AL_BaseAnime",
+        "usedStructName": "anilist.BaseAnime",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ProfileRecentlyWatched is a media the profile watched recently (its latest",
+      " watch history position) with its list entry, if any."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/localplatform/favourites.go",
+    "filename": "favourites.go",
+    "name": "ProfileFavourite",
+    "formattedName": "ProfileFavourite",
+    "package": "localplatform",
+    "fields": [
+      {
+        "name": "Kind",
+        "jsonName": "kind",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "RefID",
+        "jsonName": "refId",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Position",
+        "jsonName": "position",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CreatedAt",
+        "jsonName": "createdAt",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Media",
+        "jsonName": "media",
+        "goType": "anilist.BaseAnime",
+        "typescriptType": "AL_BaseAnime",
+        "usedTypescriptType": "AL_BaseAnime",
+        "usedStructName": "anilist.BaseAnime",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ProfileFavourite is one of the profile's favourites. Media is set for anime",
+      " favourites when the metadata is available."
+    ]
+  },
+  {
     "filepath": "../internal/profiles/localplatform/import.go",
     "filename": "import.go",
     "name": "ImportMode",
@@ -90783,6 +91432,15 @@
         "jsonName": "errors",
         "goType": "[]string",
         "typescriptType": "Array\u003cstring\u003e",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Favourites",
+        "jsonName": "favourites",
+        "goType": "int",
+        "typescriptType": "number",
         "required": false,
         "public": true,
         "comments": []
