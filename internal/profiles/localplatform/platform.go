@@ -421,7 +421,11 @@ type entryPatch struct {
 	Repeat      *int
 	StartedAt   *ProfileFuzzyDate
 	CompletedAt *ProfileFuzzyDate
-	mustExist   bool
+	// Phase 3 entry editor fields (no platform.Platform method sets them).
+	Private   *bool
+	Notes     *string // "" clears the notes
+	Hidden    *bool   // hidden_from_status_lists
+	mustExist bool
 	// totalEpisodes clamps the progress when known.
 	totalEpisodes *int
 }
@@ -515,6 +519,15 @@ func (p *Platform) upsert(ctx context.Context, mediaID int, patch entryPatch) er
 		if patch.CompletedAt != nil {
 			row.setCompletedAt(*patch.CompletedAt)
 		}
+		if patch.Private != nil {
+			row.Private = *patch.Private
+		}
+		if patch.Notes != nil {
+			row.Notes = strPtr(*patch.Notes)
+		}
+		if patch.Hidden != nil {
+			row.HiddenFromStatusLists = *patch.Hidden
+		}
 		row.UpdatedAt = now
 
 		if isNew {
@@ -530,6 +543,7 @@ func (p *Platform) upsert(ctx context.Context, mediaID int, patch entryPatch) er
 				"status": row.Status, "progress": row.Progress, "score_raw": row.ScoreRaw, "repeat": row.Repeat,
 				"started_y": row.StartedY, "started_m": row.StartedM, "started_d": row.StartedD,
 				"completed_y": row.CompletedY, "completed_m": row.CompletedM, "completed_d": row.CompletedD,
+				"private": row.Private, "notes": row.Notes, "hidden_from_status_lists": row.HiddenFromStatusLists,
 				"updated_at": row.UpdatedAt,
 			}).Error; err != nil {
 				return err

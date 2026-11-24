@@ -150,3 +150,110 @@ func (p *Platform) setInCustomListTx(ctx context.Context, tx *gorm.DB, listID in
 	}
 	return tx.Exec("DELETE FROM custom_list_items WHERE list_id = ? AND entry_id = ?", listID, entry.ID).Error
 }
+
+// ErrDuplicateListName: another custom list of the profile has that name.
+var ErrDuplicateListName = errors.New("a custom list with that name already exists")
+
+// UpdateCustomList renames a custom list and/or moves it to another position
+// (0-based; the other lists are renumbered). Nil fields are unchanged.
+func (p *Platform) UpdateCustomList(ctx context.Context, listID int64, name *string, position *int) error {
+	if name != nil {
+		n, err := normalizeListName(*name)
+		if err != nil {
+			return err
+		}
+		name = &n
+	}
+	p.writeMu.Lock()
+	defer p.writeMu.Unlock()
+	err := p.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var lists []CustomListRow
+		if err := tx.Where("profile_id = ? AND media_type = ?", p.profileID, mediaTypeAnime).Order("position, id").Find(&lists).Error; err != nil {
+			return err
+		}
+		idx := -1
+		for i, l := range lists {
+			if l.ID == listID {
+				idx = i
+			}
+		}
+		if idx < 0 {
+			return ErrCustomListNotFound
+		}
+		if name != nil && *name != lists[idx].Name {
+			for i, l := range lists {
+				if i != idx && strings.EqualFold(l.Name, *name) {
+					return ErrDuplicateListName
+				}
+			}
+			if err := tx.Model(&CustomListRow{}).Where("id = ? AND profile_id = ?", listID, p.profileID).Update("name", *name).Error; err != nil {
+				return err
+			}
+		}
+		if position != nil {
+			target := min(max(*position, 0), len(lists)-1)
+			moved := lists[idx]
+			lists = append(lists[:idx], lists[idx+1:]...)
+			lists = append(lists[:target], append([]CustomListRow{moved}, lists[target:]...)...)
+			for i, l := range lists {
+				if l.Position == i {
+					continue
+				}
+				if err := tx.Model(&CustomListRow{}).Where("id = ? AND profile_id = ?", l.ID, p.profileID).Update("position", i).Error; err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	p.Invalidate()
+	return nil
+}
+
+// EntryCustomListIDs returns the ids of the custom lists that hold the media.
+func (p *Platform) EntryCustomListIDs(ctx context.Context, mediaID int) ([]int64, error) {
+	ids := make([]int64, 0)
+	err := p.db.WithContext(ctx).Raw(`SELECT i.list_id FROM custom_list_items i
+JOIN custom_lists l ON l.id = i.list_id
+JOIN list_entries e ON e.id = i.entry_id
+WHERE l.profile_id = ? AND e.profile_id = ? AND e.media_id = ? ORDER BY l.position, l.id`, p.profileID, p.profileID, mediaID).Scan(&ids).Error
+	return ids, err
+}
+
+// setEntryCustomListsTx makes the media's entry belong to exactly listIDs.
+func (p *Platform) setEntryCustomListsTx(ctx context.Context, tx *gorm.DB, mediaID int, listIDs []int64) error {
+	entry, err := p.findEntry(ctx, tx, mediaID)
+	if err != nil {
+		return err
+	}
+	want := map[int64]bool{}
+	for _, id := range listIDs {
+		want[id] = true
+	}
+	var lists []CustomListRow
+	if err := tx.Where("profile_id = ? AND media_type = ?", p.profileID, mediaTypeAnime).Find(&lists).Error; err != nil {
+		return err
+	}
+	owned := map[int64]bool{}
+	for _, l := range lists {
+		owned[l.ID] = true
+	}
+	for id := range want {
+		if !owned[id] {
+			return ErrCustomListNotFound
+		}
+	}
+	for _, l := range lists {
+		if want[l.ID] {
+			if err := tx.Exec("INSERT OR IGNORE INTO custom_list_items (list_id, entry_id, added_at) VALUES (?, ?, ?)", l.ID, entry.ID, p.now().Unix()).Error; err != nil {
+				return err
+			}
+		} else if err := tx.Exec("DELETE FROM custom_list_items WHERE list_id = ? AND entry_id = ?", l.ID, entry.ID).Error; err != nil {
+			return err
+		}
+	}
+	return nil
+}

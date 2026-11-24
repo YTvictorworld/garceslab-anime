@@ -45,6 +45,8 @@ type ProfileImportResult struct {
 	Updated  int      `json:"updated"`
 	Skipped  int      `json:"skipped"`
 	Errors   []string `json:"errors,omitempty"`
+	// Favourites is how many favourites were added (phase 3).
+	Favourites int `json:"favourites,omitempty"`
 }
 
 // Import writes entries into the profile's list in one transaction, with an

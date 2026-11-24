@@ -2,6 +2,7 @@
 package events
 
 const (
+	AddMyFavouriteEndpoint                             = "PROFILES-LIBRARY-add-my-favourite"
 	AddToMyCustomListEndpoint                          = "PROFILES-DATA-add-to-my-custom-list"
 	AddUnknownMediaEndpoint                            = "ANIME-COLLECTION-add-unknown-media"
 	AnilistListAnimeEndpoint                           = "ANILIST-anilist-list-anime"
@@ -54,6 +55,7 @@ const (
 	DownloadTorrentFileEndpoint                        = "DOWNLOAD-download-torrent-file"
 	EditAnilistListEntryEndpoint                       = "ANILIST-edit-anilist-list-entry"
 	EditMALListEntryProgressEndpoint                   = "MAL-edit-mal-list-entry-progress"
+	EditMyListEntryEndpoint                            = "PROFILES-LIBRARY-edit-my-list-entry"
 	EmptyMangaEntryCacheEndpoint                       = "MANGA-empty-manga-entry-cache"
 	ExportProfileEndpoint                              = "PROFILES-DATA-export-profile"
 	FetchAnimeEntrySuggestionsEndpoint                 = "ANIME-ENTRIES-fetch-anime-entry-suggestions"
@@ -124,8 +126,11 @@ const (
 	GetMissingEpisodesEndpoint                         = "ANIME-ENTRIES-get-missing-episodes"
 	GetMyActivityEndpoint                              = "PROFILES-DATA-get-my-activity"
 	GetMyCustomListsEndpoint                           = "PROFILES-DATA-get-my-custom-lists"
+	GetMyFavouritesEndpoint                            = "PROFILES-LIBRARY-get-my-favourites"
+	GetMyListEntryEndpoint                             = "PROFILES-LIBRARY-get-my-list-entry"
 	GetMyPlayerPrefsEndpoint                           = "PROFILES-PLAYER-get-my-player-prefs"
 	GetMyProfileSettingsEndpoint                       = "PROFILES-DATA-get-my-profile-settings"
+	GetMyRecentlyWatchedEndpoint                       = "PROFILES-LIBRARY-get-my-recently-watched"
 	GetNakamaAnimeAllLibraryFilesEndpoint              = "NAKAMA-get-nakama-anime-all-library-files"
 	GetNakamaAnimeLibraryEndpoint                      = "NAKAMA-get-nakama-anime-library"
 	GetNakamaAnimeLibraryFilesEndpoint                 = "NAKAMA-get-nakama-anime-library-files"
@@ -233,6 +238,7 @@ const (
 	RemoveFillerDataEndpoint                           = "METADATA-remove-filler-data"
 	RemoveFromMyCustomListEndpoint                     = "PROFILES-DATA-remove-from-my-custom-list"
 	RemoveMangaMappingEndpoint                         = "MANGA-remove-manga-mapping"
+	RemoveMyFavouriteEndpoint                          = "PROFILES-LIBRARY-remove-my-favourite"
 	RemoveOnlinestreamMappingEndpoint                  = "ONLINESTREAM-remove-onlinestream-mapping"
 	RequestMediastreamMediaContainerEndpoint           = "MEDIASTREAM-request-mediastream-media-container"
 	ResetErroredChapterDownloadQueueEndpoint           = "MANGA-DOWNLOAD-reset-errored-chapter-download-queue"
@@ -291,6 +297,7 @@ const (
 	UpdateLocalFileDataEndpoint                        = "LOCALFILES-update-local-file-data"
 	UpdateLocalFilesEndpoint                           = "LOCALFILES-update-local-files"
 	UpdateMangaProgressEndpoint                        = "MANGA-update-manga-progress"
+	UpdateMyCustomListEndpoint                         = "PROFILES-LIBRARY-update-my-custom-list"
 	UpdatePlaylistEndpoint                             = "PLAYLIST-update-playlist"
 	UpdateProfileEndpoint                              = "PROFILES-update-profile"
 	UpdateThemeEndpoint                                = "THEME-update-theme"

@@ -1,6 +1,13 @@
 import { AL_BaseAnime, AL_BaseManga, AL_MediaListStatus, Anime_EntryListData, Manga_EntryListData } from "@/api/generated/types"
 import { useDeleteAnilistListEntry, useEditAnilistListEntry } from "@/api/hooks/anilist.hooks"
 import { useUpdateAnimeEntryRepeat } from "@/api/hooks/anime_entries.hooks"
+import { useEditMyListEntry, useGetMyListEntry } from "@/api/hooks/profiles_library.hooks"
+import {
+    EMPTY_ENTRY_EXTRAS,
+    ProfileEntryExtras,
+    ProfileEntryExtrasState,
+} from "@/app/(main)/_features/profiles/profile-entry-extras"
+import { useCurrentProfile } from "@/app/(main)/_features/profiles/profile-menu"
 import { PluginWebviewSlot } from "@/app/(main)/_features/plugin/webview/plugin-webviews"
 import { useCurrentUser } from "@/app/(main)/_hooks/use-server-status"
 import { SeaImage } from "@/components/shared/sea-image"
@@ -92,6 +99,21 @@ export const AnilistMediaEntryModal = (props: AnilistMediaEntryModalProps) => {
 
     const user = useCurrentUser()
 
+    // Garceslab Anime: with a profile, anime entries use the full local editor
+    // (private, notes, custom lists, clearable dates) in one request.
+    const profileEditor = !!useCurrentProfile() && type === "anime"
+    const [extras, setExtras] = React.useState<ProfileEntryExtrasState>(EMPTY_ENTRY_EXTRAS)
+    const { data: profileEntry } = useGetMyListEntry(media?.id, profileEditor && open)
+    const { mutate: editProfileEntry, isPending: isEditingProfile } = useEditMyListEntry(media?.id, () => toggle(false))
+    React.useEffect(() => {
+        if (!profileEntry) return
+        setExtras({
+            private: profileEntry.private,
+            notes: profileEntry.notes ?? "",
+            customListIds: profileEntry.customListIds ?? [],
+        })
+    }, [profileEntry])
+
     const { mutate, isPending: isEditing, isSuccess, reset } = useEditAnilistListEntry(media?.id, type)
     const { mutate: mutateRepeat, isPending: _isPending2 } = useUpdateAnimeEntryRepeat(media?.id)
     const { mutate: deleteEntry, isPending: isDeleting } = useDeleteAnilistListEntry(media?.id, type, () => {
@@ -104,6 +126,23 @@ export const AnilistMediaEntryModal = (props: AnilistMediaEntryModalProps) => {
 
     const handleSubmit = React.useCallback((data: z.infer<typeof mediaListDataSchema>) => {
         const normalizedRepeat = repeat === "" ? 0 : repeat
+        if (profileEditor) {
+            const toDate = (d: Date | null | undefined) => d
+                ? { year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() }
+                : { year: undefined, month: undefined, day: undefined } // clears it
+            editProfileEntry({
+                status: data.status || "PLANNING",
+                scoreRaw: data.score ? Math.round(data.score * 10) : 0,
+                progress: data.progress || 0,
+                repeat: normalizedRepeat,
+                startedAt: toDate(data.startedAt),
+                completedAt: toDate(data.completedAt),
+                private: extras.private,
+                notes: extras.notes,
+                customListIds: extras.customListIds,
+            })
+            return
+        }
         if (normalizedRepeat !== (listData?.repeat ?? 0)) {
             mutateRepeat({
                 mediaId: media?.id || 0,
@@ -129,7 +168,7 @@ export const AnilistMediaEntryModal = (props: AnilistMediaEntryModalProps) => {
             } : undefined,
             type: type,
         })
-    }, [repeat, listData?.repeat, media?.id, type, mutate, mutateRepeat])
+    }, [repeat, listData?.repeat, media?.id, type, mutate, mutateRepeat, profileEditor, editProfileEntry, extras])
 
 
     if (!user) return null
@@ -189,10 +228,12 @@ export const AnilistMediaEntryModal = (props: AnilistMediaEntryModalProps) => {
                     setRepeat={setRepeat}
                     handleSubmit={handleSubmit}
                     deleteEntry={deleteEntry}
-                    isEditing={isEditing}
+                    isEditing={isEditing || isEditingProfile}
                     isDeleting={isDeleting}
                     {...props}
-                />}
+                >
+                    {profileEditor && <ProfileEntryExtras value={extras} onChange={setExtras} />}
+                </Content>}
 
             </IsomorphicPopover>}
         </>
@@ -309,6 +350,8 @@ function Content(props: AnilistMediaEntryModalProps & {
                         }}
                     />
                 </div>}
+
+                {children}
 
                 <div className="flex w-full items-center justify-between mt-4">
                     <div>

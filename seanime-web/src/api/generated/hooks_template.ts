@@ -2685,6 +2685,81 @@
 // }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// profiles_library
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// export function useGetMyFavourites() {
+//     return useServerQuery<Array<ProfileFavourite>>({
+//         endpoint: API_ENDPOINTS.PROFILES_LIBRARY.GetMyFavourites.endpoint,
+//         method: API_ENDPOINTS.PROFILES_LIBRARY.GetMyFavourites.methods[0],
+//         queryKey: [API_ENDPOINTS.PROFILES_LIBRARY.GetMyFavourites.key],
+//         enabled: true,
+//     })
+// }
+
+// export function useAddMyFavourite(kind: string, refId: number) {
+//     return useServerMutation<boolean>({
+//         endpoint: API_ENDPOINTS.PROFILES_LIBRARY.AddMyFavourite.endpoint.replace("{kind}", String(kind)).replace("{refId}", String(refId)),
+//         method: API_ENDPOINTS.PROFILES_LIBRARY.AddMyFavourite.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES_LIBRARY.AddMyFavourite.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useRemoveMyFavourite(kind: string, refId: number) {
+//     return useServerMutation<boolean>({
+//         endpoint: API_ENDPOINTS.PROFILES_LIBRARY.RemoveMyFavourite.endpoint.replace("{kind}", String(kind)).replace("{refId}", String(refId)),
+//         method: API_ENDPOINTS.PROFILES_LIBRARY.RemoveMyFavourite.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES_LIBRARY.RemoveMyFavourite.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useUpdateMyCustomList(listId: number) {
+//     return useServerMutation<Array<ProfileCustomList>>({
+//         endpoint: API_ENDPOINTS.PROFILES_LIBRARY.UpdateMyCustomList.endpoint.replace("{listId}", String(listId)),
+//         method: API_ENDPOINTS.PROFILES_LIBRARY.UpdateMyCustomList.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES_LIBRARY.UpdateMyCustomList.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useGetMyListEntry(mediaId: number) {
+//     return useServerQuery<ProfileEntryDetails>({
+//         endpoint: API_ENDPOINTS.PROFILES_LIBRARY.GetMyListEntry.endpoint.replace("{mediaId}", String(mediaId)),
+//         method: API_ENDPOINTS.PROFILES_LIBRARY.GetMyListEntry.methods[0],
+//         queryKey: [API_ENDPOINTS.PROFILES_LIBRARY.GetMyListEntry.key],
+//         enabled: true,
+//     })
+// }
+
+// export function useEditMyListEntry(mediaId: number) {
+//     return useServerMutation<ProfileEntryDetails>({
+//         endpoint: API_ENDPOINTS.PROFILES_LIBRARY.EditMyListEntry.endpoint.replace("{mediaId}", String(mediaId)),
+//         method: API_ENDPOINTS.PROFILES_LIBRARY.EditMyListEntry.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES_LIBRARY.EditMyListEntry.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useGetMyRecentlyWatched() {
+//     return useServerQuery<Array<ProfileRecentlyWatched>>({
+//         endpoint: API_ENDPOINTS.PROFILES_LIBRARY.GetMyRecentlyWatched.endpoint,
+//         method: API_ENDPOINTS.PROFILES_LIBRARY.GetMyRecentlyWatched.methods[0],
+//         queryKey: [API_ENDPOINTS.PROFILES_LIBRARY.GetMyRecentlyWatched.key],
+//         enabled: true,
+//     })
+// }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // profiles_player
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

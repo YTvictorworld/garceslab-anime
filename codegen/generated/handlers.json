@@ -10834,7 +10834,8 @@
     "comments": [
       "HandleImportProfileAnilist",
       "",
-      "\t@summary imports the public AniList anime list of a user into a profile (anonymous, no token).",
+      "\t@summary imports an AniList anime list (and optionally the favourites) into a profile.",
+      "\t@desc Body: {\"username\": string} for a public list (anonymous), or {\"token\": string} for a private list: the token is used for this import only and is never stored or logged. Also \"mode\" (merge|replace) and \"favourites\" (default true).",
       "\t@route /api/v1/profiles/{id}/import/anilist [POST]",
       "\t@param id - int - true - \"The profile ID\"",
       "\t@returns localplatform.ProfileImportResult",
@@ -10843,8 +10844,10 @@
     "filepath": "internal/handlers/profiles_data.go",
     "filename": "profiles_data.go",
     "api": {
-      "summary": "imports the public AniList anime list of a user into a profile (anonymous, no token).",
-      "descriptions": [],
+      "summary": "imports an AniList anime list (and optionally the favourites) into a profile.",
+      "descriptions": [
+        "Body: {\"username\": string} for a public list (anonymous), or {\"token\": string} for a private list: the token is used for this import only and is never stored or logged. Also \"mode\" (merge|replace) and \"favourites\" (default true)."
+      ],
       "endpoint": "/api/v1/profiles/{id}/import/anilist",
       "methods": [
         "POST"
@@ -10992,6 +10995,296 @@
       "returns": "importer.ProfileExport",
       "returnGoType": "importer.ProfileExport",
       "returnTypescriptType": "ProfileExport"
+    }
+  },
+  {
+    "name": "HandleGetMyFavourites",
+    "trimmedName": "GetMyFavourites",
+    "comments": [
+      "HandleGetMyFavourites",
+      "",
+      "\t@summary returns the current profile's favourites (anime favourites carry their media).",
+      "\t@desc Optional query `kind`: ANIME, MANGA, CHARACTER, STAFF or STUDIO.",
+      "\t@route /api/v1/profiles/me/favourites [GET]",
+      "\t@returns []localplatform.ProfileFavourite",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_library.go",
+    "filename": "profiles_library.go",
+    "api": {
+      "summary": "returns the current profile's favourites (anime favourites carry their media).",
+      "descriptions": [
+        "Optional query `kind`: ANIME, MANGA, CHARACTER, STAFF or STUDIO."
+      ],
+      "endpoint": "/api/v1/profiles/me/favourites",
+      "methods": [
+        "GET"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "[]localplatform.ProfileFavourite",
+      "returnGoType": "localplatform.ProfileFavourite",
+      "returnTypescriptType": "Array\u003cProfileFavourite\u003e"
+    }
+  },
+  {
+    "name": "HandleAddMyFavourite",
+    "trimmedName": "AddMyFavourite",
+    "comments": [
+      "HandleAddMyFavourite",
+      "",
+      "\t@summary adds a favourite to the current profile.",
+      "\t@route /api/v1/profiles/me/favourites/{kind}/{refId} [POST]",
+      "\t@param kind - string - true - \"ANIME, MANGA, CHARACTER, STAFF or STUDIO\"",
+      "\t@param refId - int - true - \"The AniList ID\"",
+      "\t@returns bool",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_library.go",
+    "filename": "profiles_library.go",
+    "api": {
+      "summary": "adds a favourite to the current profile.",
+      "descriptions": [],
+      "endpoint": "/api/v1/profiles/me/favourites/{kind}/{refId}",
+      "methods": [
+        "POST"
+      ],
+      "params": [
+        {
+          "name": "kind",
+          "jsonName": "kind",
+          "goType": "string",
+          "usedStructType": "",
+          "typescriptType": "string",
+          "required": true,
+          "descriptions": [
+            "ANIME, MANGA, CHARACTER, STAFF or STUDIO"
+          ]
+        },
+        {
+          "name": "refId",
+          "jsonName": "refId",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The AniList ID"
+          ]
+        }
+      ],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "HandleRemoveMyFavourite",
+    "trimmedName": "RemoveMyFavourite",
+    "comments": [
+      "HandleRemoveMyFavourite",
+      "",
+      "\t@summary removes a favourite from the current profile.",
+      "\t@route /api/v1/profiles/me/favourites/{kind}/{refId} [DELETE]",
+      "\t@param kind - string - true - \"ANIME, MANGA, CHARACTER, STAFF or STUDIO\"",
+      "\t@param refId - int - true - \"The AniList ID\"",
+      "\t@returns bool",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_library.go",
+    "filename": "profiles_library.go",
+    "api": {
+      "summary": "removes a favourite from the current profile.",
+      "descriptions": [],
+      "endpoint": "/api/v1/profiles/me/favourites/{kind}/{refId}",
+      "methods": [
+        "DELETE"
+      ],
+      "params": [
+        {
+          "name": "kind",
+          "jsonName": "kind",
+          "goType": "string",
+          "usedStructType": "",
+          "typescriptType": "string",
+          "required": true,
+          "descriptions": [
+            "ANIME, MANGA, CHARACTER, STAFF or STUDIO"
+          ]
+        },
+        {
+          "name": "refId",
+          "jsonName": "refId",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The AniList ID"
+          ]
+        }
+      ],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "HandleUpdateMyCustomList",
+    "trimmedName": "UpdateMyCustomList",
+    "comments": [
+      "HandleUpdateMyCustomList",
+      "",
+      "\t@summary renames and/or moves one of the current profile's custom lists.",
+      "\t@desc Body: {\"name\"?: string, \"position\"?: int (0-based)}.",
+      "\t@route /api/v1/profiles/me/lists/{listId} [PATCH]",
+      "\t@param listId - int - true - \"The custom list ID\"",
+      "\t@returns []localplatform.ProfileCustomList",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_library.go",
+    "filename": "profiles_library.go",
+    "api": {
+      "summary": "renames and/or moves one of the current profile's custom lists.",
+      "descriptions": [
+        "Body: {\"name\"?: string, \"position\"?: int (0-based)}."
+      ],
+      "endpoint": "/api/v1/profiles/me/lists/{listId}",
+      "methods": [
+        "PATCH"
+      ],
+      "params": [
+        {
+          "name": "listId",
+          "jsonName": "listId",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The custom list ID"
+          ]
+        }
+      ],
+      "bodyFields": [],
+      "returns": "[]localplatform.ProfileCustomList",
+      "returnGoType": "localplatform.ProfileCustomList",
+      "returnTypescriptType": "Array\u003cProfileCustomList\u003e"
+    }
+  },
+  {
+    "name": "HandleGetMyListEntry",
+    "trimmedName": "GetMyListEntry",
+    "comments": [
+      "HandleGetMyListEntry",
+      "",
+      "\t@summary returns the current profile's list entry for a media with every editable field (null if it isn't in the list).",
+      "\t@route /api/v1/profiles/me/entries/{mediaId} [GET]",
+      "\t@param mediaId - int - true - \"The AniList media ID\"",
+      "\t@returns localplatform.ProfileEntryDetails",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_library.go",
+    "filename": "profiles_library.go",
+    "api": {
+      "summary": "returns the current profile's list entry for a media with every editable field (null if it isn't in the list).",
+      "descriptions": [],
+      "endpoint": "/api/v1/profiles/me/entries/{mediaId}",
+      "methods": [
+        "GET"
+      ],
+      "params": [
+        {
+          "name": "mediaId",
+          "jsonName": "mediaId",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The AniList media ID"
+          ]
+        }
+      ],
+      "bodyFields": [],
+      "returns": "localplatform.ProfileEntryDetails",
+      "returnGoType": "localplatform.ProfileEntryDetails",
+      "returnTypescriptType": "ProfileEntryDetails"
+    }
+  },
+  {
+    "name": "HandleEditMyListEntry",
+    "trimmedName": "EditMyListEntry",
+    "comments": [
+      "HandleEditMyListEntry",
+      "",
+      "\t@summary edits (or adds) the current profile's list entry for a media: status, score, progress, dates, rewatches, private, notes and custom lists.",
+      "\t@desc Only the fields sent change. A date with null parts clears it, \"\" clears the notes. A new entry is PLANNING unless a status is sent.",
+      "\t@route /api/v1/profiles/me/entries/{mediaId} [PATCH]",
+      "\t@param mediaId - int - true - \"The AniList media ID\"",
+      "\t@returns localplatform.ProfileEntryDetails",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_library.go",
+    "filename": "profiles_library.go",
+    "api": {
+      "summary": "edits (or adds) the current profile's list entry for a media: status, score, progress, dates, rewatches, private, notes and custom lists.",
+      "descriptions": [
+        "Only the fields sent change. A date with null parts clears it, \"\" clears the notes. A new entry is PLANNING unless a status is sent."
+      ],
+      "endpoint": "/api/v1/profiles/me/entries/{mediaId}",
+      "methods": [
+        "PATCH"
+      ],
+      "params": [
+        {
+          "name": "mediaId",
+          "jsonName": "mediaId",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "The AniList media ID"
+          ]
+        }
+      ],
+      "bodyFields": [],
+      "returns": "localplatform.ProfileEntryDetails",
+      "returnGoType": "localplatform.ProfileEntryDetails",
+      "returnTypescriptType": "ProfileEntryDetails"
+    }
+  },
+  {
+    "name": "HandleGetMyRecentlyWatched",
+    "trimmedName": "GetMyRecentlyWatched",
+    "comments": [
+      "HandleGetMyRecentlyWatched",
+      "",
+      "\t@summary returns the media the current profile watched most recently (latest position, list status and media).",
+      "\t@desc Optional query `limit` (default 20, max 200).",
+      "\t@route /api/v1/profiles/me/recently-watched [GET]",
+      "\t@returns []localplatform.ProfileRecentlyWatched",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_library.go",
+    "filename": "profiles_library.go",
+    "api": {
+      "summary": "returns the media the current profile watched most recently (latest position, list status and media).",
+      "descriptions": [
+        "Optional query `limit` (default 20, max 200)."
+      ],
+      "endpoint": "/api/v1/profiles/me/recently-watched",
+      "methods": [
+        "GET"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "[]localplatform.ProfileRecentlyWatched",
+      "returnGoType": "localplatform.ProfileRecentlyWatched",
+      "returnTypescriptType": "Array\u003cProfileRecentlyWatched\u003e"
     }
   },
   {
