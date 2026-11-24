@@ -118,7 +118,7 @@ export function SeaCommandSearch() {
                                 className="h-[10rem] w-[10rem] mx-auto flex-none rounded-[--radius-md] object-cover object-center relative overflow-hidden"
                             >
                                 <SeaImage
-                                    src="/luffy-01.png"
+                                    src="/garceslab-logo.png"
                                     alt={""}
                                     fill
                                     quality={100}

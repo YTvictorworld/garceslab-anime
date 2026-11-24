@@ -17,8 +17,11 @@ Based on Seanime and Seanime Tenji (GPL-3.0).
 > authors keep their copyright; this project only adds modifications, under the same GPL-3.0
 > license. See [Credits & License](#credits--license).
 
-**Status: early development.** The current version is Seanime v3.10.5 with a few fixes and the
-update checker turned off. The features below that are marked *planned* don't exist yet.
+**Status: early development.** Based on Seanime v3.10.5, with local profiles, a few fixes
+and the update checker turned off. The features below that are marked *planned* don't exist yet.
+
+**Setting it up with an LG TV:** see [Self-hosting with LG webOS](docs/self-hosting-webos.md)
+(Docker Compose, installing the TV app, first run, profiles, PINs, optional AniList import).
 
 ## What it is
 
@@ -45,8 +48,13 @@ this project. You install and run it on your own hardware.
   server.
 - **No auto-update to Seanime:** the update check and self-update are turned off, so the server
   is never replaced by a Seanime release.
-- *Planned:* local Netflix-style profiles without an AniList account, and up to three playbacks
-  at the same time.
+- **Local profiles** ("Who's watching?") without an AniList account: each profile has its own
+  list, progress, history, settings and player preferences, an optional PIN, and avatars from a
+  bundled free-licensed catalog. AniList is only used anonymously for public data; a public
+  AniList list can be imported once. Profile changes are listed in **Settings → Profiles →
+  Recent changes**.
+- **No upstream announcements:** the server doesn't fetch Seanime's announcement feed.
+- *Planned:* up to three playbacks at the same time.
 
 ## Run it with Docker
 
@@ -62,6 +70,7 @@ docker run -d --name garceslab-anime-server \
   garceslab-anime-server
 ```
 
+Or with Docker Compose, as in the [self-hosting guide](docs/self-hosting-webos.md).
 Then open `http://<server>:43211`. The container runs as the unprivileged user `seanime`
 (uid 1000) and keeps its data in `/home/seanime/.config/Seanime` (same layout as the community
 rootless Seanime images, so an existing volume can be reused). Streams are buffered in `/tmp`,
@@ -91,6 +100,14 @@ manami-project, available under the [Open Database License (ODbL) v1.0](https://
 server downloads it at runtime into its data directory (`title-index/`, about 6 MB, refreshed
 weekly) and serves `GET /api/v1/search/suggest` from it. Set `SEANIME_TITLE_INDEX_DISABLED=true`
 to turn it off; clients then use the AniList search only.
+
+Profile avatars are generated with [DiceBear](https://www.dicebear.com) (code under MIT) from
+styles licensed CC0 1.0 (Lorelei, Notionists, Critters, Thumbs, Open Peeps by Pablo Stanley,
+Pixel Art, Voxel Bot, Clay, Sprouts, Planets) and CC BY 4.0 (**Adventurer** by Lisa Wischofsky,
+[source](https://www.figma.com/community/file/1184595184137881796),
+[licence](https://creativecommons.org/licenses/by/4.0/)). Every image's licence and source is in
+[`internal/profiles/avatars/catalog.json`](internal/profiles/avatars/catalog.json) and
+[`LICENSES.md`](internal/profiles/avatars/LICENSES.md); CI rejects avatars without one.
 
 Episode tags (CANON / FILLER / RECAP on episode cards) use [MyAnimeList](https://myanimelist.net)
 episode data, read through the Jikan-compatible APIs [Tenrai](https://tenrai.org),

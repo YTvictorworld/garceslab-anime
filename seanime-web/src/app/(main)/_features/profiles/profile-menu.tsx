@@ -46,7 +46,13 @@ export function ProfileMenu({ showName, className, avatarClass }: ProfileMenuPro
                 {showName && <span className="truncate text-sm text-[--muted]">{profile.name}</span>}
             </button>}
         >
-            <div className="px-2 py-1.5 text-sm font-semibold truncate">{profile.name}</div>
+            <div data-profile-menu-header className="flex items-center gap-3 px-2 py-2">
+                <ProfileAvatar url={profile.avatarUrl} name={profile.name} color={profile.color} className="w-10" />
+                <div className="min-w-0">
+                    <p className="text-sm font-semibold truncate">{profile.name}</p>
+                    <p className="text-xs text-[--muted]">Current profile</p>
+                </div>
+            </div>
             <DropdownMenuItem onClick={switchProfile} data-switch-profile>
                 <LuArrowLeftRight /> Switch profile
             </DropdownMenuItem>

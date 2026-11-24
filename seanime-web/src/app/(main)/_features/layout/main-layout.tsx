@@ -38,7 +38,6 @@ import { __isElectronDesktop__ } from "@/types/constants"
 import React from "react"
 import { useServerStatus } from "../../_hooks/use-server-status"
 import { useInvalidateQueriesListener } from "../../_listeners/invalidate-queries.listeners"
-import { Announcements } from "../announcements"
 import { NakamaManager } from "../nakama/nakama-manager"
 import { NakamaWatchPartyChat, NakamaWatchPartyChatProvider } from "../nakama/nakama-watch-party-chat"
 import { RateLimitLoader } from "../rate-limit-loader"
@@ -84,7 +83,7 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
             <NakamaWatchPartyChat />
             <TopIndefiniteLoader />
             <RateLimitLoader />
-            <Announcements />
+            {/* Garceslab Anime: no upstream announcement feed (constants.AnnouncementURL). */}
             <LibraryExplorerDrawer />
             <PluginWebviewSlot slot="fixed" />
 

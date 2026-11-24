@@ -33,6 +33,7 @@ func (h *Handler) registerProfileRoutes(e *echo.Echo, v1 *echo.Group) {
 	v1.POST("/profiles/:id/select", h.HandleSelectProfile)
 
 	h.registerProfileDataRoutes(v1)
+	h.registerProfilePlayerRoutes(v1) // phase 4: profiles_player.go
 }
 
 // profilesMiddleware resolves the request's profile. Registered right after the

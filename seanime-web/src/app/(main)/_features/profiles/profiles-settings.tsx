@@ -1,4 +1,5 @@
 import { getProfileErrorMessage, getSeaErrorCode } from "@/api/client/requests"
+import { API_ENDPOINTS } from "@/api/generated/endpoints"
 import { Profile, ProfileAuditEntry } from "@/api/generated/types"
 import {
     describeImportResult,
@@ -132,35 +133,45 @@ function TrashRow({ profile }: { profile: Profile }) {
 const AUDIT_SENTENCES: Record<string, (actor: string, target: string) => string> = {
     create: (a, t) => `${a} created ${t}`,
     update: (a, t) => `${a} edited ${t}`,
+    rename: (a, t) => `${a} renamed ${t}`,
     delete: (a, t) => `${a} moved ${t} to the trash`,
     restore: (a, t) => `${a} restored ${t}`,
     purge: (_, t) => `${t} was purged from the trash`,
     pin_set: (a, t) => `${a} set the PIN of ${t}`,
     pin_change: (a, t) => `${a} changed the PIN of ${t}`,
     pin_remove: (a, t) => `${a} removed the PIN of ${t}`,
+    import: (a, t) => `${a} imported a list into ${t}`,
+    export: (a, t) => `${a} exported ${t}`,
 }
 
 function AuditCard({ profiles }: { profiles: Profile[] }) {
     const { data: audit } = useGetProfileAudit()
-    const names = React.useMemo(() => new Map(profiles.map(p => [p.id, p.name])), [profiles])
+    const byId = React.useMemo(() => new Map(profiles.map(p => [p.id, p])), [profiles])
 
     function sentence(e: ProfileAuditEntry) {
-        const actor = e.actorProfileId ? (names.get(e.actorProfileId) ?? "A deleted profile") : "Someone (no profile)"
+        const actor = e.actorProfileId ? (byId.get(e.actorProfileId)?.name ?? "A deleted profile") : "Someone (no profile)"
         const self = e.actorProfileId === e.targetProfileId && e.action !== "create"
         const target = self ? "their profile" : e.targetName
         return (AUDIT_SENTENCES[e.action] ?? ((a, t) => `${a}: ${e.action} ${t}`))(actor, target)
     }
 
     return (
-        <SettingsCard title="Recent changes" description="Who changed which profile, and when.">
+        <SettingsCard title="Recent changes" description="Who changed which profile, and when. Kept after a profile is purged.">
             {!audit?.length ? <p className="text-sm text-[--muted]">Nothing yet.</p> : (
-                <ul data-profile-audit className="space-y-1 text-sm max-h-72 overflow-y-auto">
-                    {audit.map(e => (
-                        <li key={e.id} className="flex justify-between gap-4">
-                            <span>{sentence(e)}</span>
-                            <span className="text-[--muted] shrink-0">{formatDate(e.createdAt)}</span>
-                        </li>
-                    ))}
+                <ul data-profile-audit className="space-y-2 text-sm max-h-80 overflow-y-auto">
+                    {audit.map(e => {
+                        const actor = e.actorProfileId ? byId.get(e.actorProfileId) : undefined
+                        return (
+                            <li key={e.id} data-audit-action={e.action} className="flex items-center gap-3">
+                                <ProfileAvatar url={actor?.avatarUrl} name={actor?.name} className="w-7" />
+                                <div className="flex-1 min-w-0">
+                                    <p className="truncate">{sentence(e)}</p>
+                                    {e.detail && <p className="text-xs text-[--muted] truncate">{e.detail}</p>}
+                                </div>
+                                <span className="text-xs text-[--muted] shrink-0">{formatDate(e.createdAt)}</span>
+                            </li>
+                        )
+                    })}
                 </ul>
             )}
         </SettingsCard>
@@ -325,6 +336,7 @@ function DeleteProfileModal({ profile, isCurrent, onClose }: { profile: Profile,
 
 function ExportButton({ profile }: { profile: Profile }) {
     const password = useAtomValue(serverAuthTokenAtom)
+    const qc = useQueryClient()
     const [busy, setBusy] = React.useState(false)
 
     async function download() {
@@ -340,6 +352,7 @@ function ExportButton({ profile }: { profile: Profile }) {
             a.click()
             a.remove()
             setTimeout(() => URL.revokeObjectURL(url), 1000)
+            void qc.invalidateQueries({ queryKey: [API_ENDPOINTS.PROFILES.GetProfileAudit.key] })
         }
         catch (err) {
             toast.error(getProfileErrorMessage(getSeaErrorCode(err)) || "The export failed")
@@ -398,6 +411,7 @@ function ImportModal({ profile, onClose }: { profile: Profile, onClose: () => vo
             if (res?.errors?.length) toast.warning(`${res.errors.length} entries couldn't be imported`)
             // The current profile's lists changed: refetch everything.
             if (current?.id === profile.id) await qc.invalidateQueries()
+            else void qc.invalidateQueries({ queryKey: [API_ENDPOINTS.PROFILES.GetProfileAudit.key] })
             onClose()
         }
         catch (err) {

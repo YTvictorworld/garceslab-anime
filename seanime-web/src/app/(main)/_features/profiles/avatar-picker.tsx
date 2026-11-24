@@ -9,6 +9,13 @@ const CATEGORY_LABELS: Record<string, string> = {
     characters: "Characters",
     creatures: "Creatures",
     fun: "Fun",
+    retro: "Retro",
+    space: "Space",
+}
+
+/** Credits the CC BY avatars need (one line per artist and style). */
+export function avatarCredits(avatars: Avatar[] | undefined): string[] {
+    return [...new Set((avatars ?? []).map(a => a.attribution).filter((a): a is string => !!a))]
 }
 
 function categoryLabel(c: string) {
@@ -48,7 +55,7 @@ export function AvatarPicker({ value, onChange }: AvatarPickerProps) {
                             <button
                                 key={a.id}
                                 type="button"
-                                title={a.label}
+                                title={a.attribution ? `${a.label}. ${a.attribution}` : a.label}
                                 aria-label={a.label}
                                 aria-pressed={value === a.id}
                                 data-avatar-id={a.id}
@@ -64,9 +71,10 @@ export function AvatarPicker({ value, onChange }: AvatarPickerProps) {
                     </div>
                 </div>
             ))}
-            <p className="text-xs text-[--muted]">
-                Avatars from DiceBear styles, free licences. See LICENSES.md for credits.
-            </p>
+            <div data-avatar-credits className="text-xs text-[--muted] space-y-1">
+                <p>Avatars made with DiceBear styles under CC0 1.0 or CC BY 4.0 (see LICENSES.md).</p>
+                {avatarCredits(catalog).map(line => <p key={line}>{line}</p>)}
+            </div>
         </div>
     )
 }
