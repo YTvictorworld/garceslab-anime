@@ -2,6 +2,7 @@ package profiles
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"testing"
 	"time"
@@ -71,15 +72,15 @@ func TestMiddlewareTakesTheLane(t *testing.T) {
 	})
 	ok := func(c echo.Context) error { return c.String(200, "ok") }
 	v1 := e.Group("/api/v1", mw)
-	v1.POST("/debrid/stream/start", ok)
+	v1.POST("/torrentstream/start", ok)
 	v1.GET("/anilist/collection", ok)
 
 	as := func(token string) func(*http.Request) {
 		return func(r *http.Request) { r.Header.Set(HeaderName, token) }
 	}
-	assert.Equal(t, 200, do(e, "POST", "/api/v1/debrid/stream/start", "tv", as(sa.ProfileToken)).Code)
+	assert.Equal(t, 200, do(e, "POST", "/api/v1/torrentstream/start", "tv", as(sa.ProfileToken)).Code)
 	assert.Equal(t, pa.ID, s.Lane().OwnerID())
-	rec := do(e, "POST", "/api/v1/debrid/stream/start", "web", as(sb.ProfileToken))
+	rec := do(e, "POST", "/api/v1/torrentstream/start", "web", as(sb.ProfileToken))
 	assert.Equal(t, http.StatusConflict, rec.Code)
 	assert.Contains(t, rec.Body.String(), "PLAYBACK_BUSY")
 	assert.Equal(t, pa.ID, s.Lane().OwnerID())
@@ -87,5 +88,44 @@ func TestMiddlewareTakesTheLane(t *testing.T) {
 	assert.Equal(t, 200, do(e, "GET", "/api/v1/anilist/collection", "web", as(sb.ProfileToken)).Code)
 	assert.Equal(t, map[string]int64{"tv": pa.ID, "web": pb.ID}, tagged)
 	// A client without profile can't take over either.
-	assert.Equal(t, http.StatusConflict, do(e, "POST", "/api/v1/debrid/stream/start", "anon", nil).Code)
+	assert.Equal(t, http.StatusConflict, do(e, "POST", "/api/v1/torrentstream/start", "anon", nil).Code)
+	// Phase 2: debrid starts and manual tracking take a slot in their handlers
+	// (direct = viewer session, relayed = this lane), not in the middleware.
+	v1.POST("/debrid/stream/start", ok)
+	v1.POST("/playback-manager/manual-tracking/start", ok)
+	assert.Equal(t, 200, do(e, "POST", "/api/v1/debrid/stream/start", "web", as(sb.ProfileToken)).Code)
+	assert.Equal(t, 200, do(e, "POST", "/api/v1/playback-manager/manual-tracking/start", "web", as(sb.ProfileToken)).Code)
+	assert.Equal(t, pa.ID, s.Lane().OwnerID())
+}
+
+func TestLaneCapacityAndActiveOwner(t *testing.T) {
+	now := time.Date(2026, 11, 24, 20, 0, 0, 0, time.UTC)
+	l := &PlaybackLane{now: func() time.Time { return now }}
+	_, busy := l.ActiveOwner()
+	assert.False(t, busy)
+
+	full := errors.New("LANES_FULL: test")
+	var askedFor string
+	l.SetCapacityFunc(func(p *Profile, clientID string) error {
+		askedFor = clientID
+		if p != nil && p.ID == 3 {
+			return full
+		}
+		return nil
+	})
+	assert.ErrorIs(t, l.AcquireFor(&Profile{ID: 3, Name: "Carl"}, "web"), full)
+	assert.Equal(t, "web", askedFor)
+	assert.Equal(t, int64(0), l.OwnerID(), "a full server gives the lane to nobody")
+
+	assert.NoError(t, l.AcquireFor(&Profile{ID: 1, Name: "Ana"}, "tv"))
+	p, busy := l.ActiveOwner()
+	assert.True(t, busy)
+	assert.Equal(t, int64(1), p.ID)
+
+	now = now.Add(laneGrace + time.Second)
+	_, busy = l.ActiveOwner()
+	assert.False(t, busy, "after the grace, only an active media core session keeps it")
+	l.SetActiveFunc(func() bool { return true })
+	_, busy = l.ActiveOwner()
+	assert.True(t, busy)
 }

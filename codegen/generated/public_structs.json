@@ -30228,6 +30228,17 @@
         "comments": []
       },
       {
+        "name": "Viewers",
+        "jsonName": "Viewers",
+        "goType": "sessions.Registry",
+        "typescriptType": "Registry",
+        "usedTypescriptType": "Registry",
+        "usedStructName": "sessions.Registry",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
         "name": "Settings",
         "jsonName": "Settings",
         "goType": "settings.Store",
@@ -30308,6 +30319,17 @@
         "goType": "map[string]time.Time",
         "typescriptType": "Record\u003cstring, string\u003e",
         "usedStructName": "time.Time",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "viewersRunOnce",
+        "jsonName": "viewersRunOnce",
+        "goType": "sync.Once",
+        "typescriptType": "Once",
+        "usedTypescriptType": "Once",
+        "usedStructName": "sync.Once",
         "required": false,
         "public": false,
         "comments": []
@@ -35121,6 +35143,19 @@
         "required": true,
         "public": false,
         "comments": []
+      },
+      {
+        "name": "directStreamObserver",
+        "jsonName": "directStreamObserver",
+        "goType": "DirectStreamObserver",
+        "typescriptType": "DebridClient_DirectStreamObserver",
+        "usedTypescriptType": "DebridClient_DirectStreamObserver",
+        "usedStructName": "debrid_client.DirectStreamObserver",
+        "required": true,
+        "public": false,
+        "comments": [
+          " Garceslab Anime: viewer sessions"
+        ]
       }
     ],
     "comments": []
@@ -35247,43 +35282,91 @@
         "comments": []
       },
       {
-        "name": "currentTorrentItemId",
-        "jsonName": "currentTorrentItemId",
-        "goType": "string",
-        "typescriptType": "string",
-        "required": true,
-        "public": false,
-        "comments": []
-      },
-      {
-        "name": "downloadCtxCancelFunc",
-        "jsonName": "downloadCtxCancelFunc",
-        "goType": "context.CancelFunc",
-        "typescriptType": "CancelFunc",
-        "usedTypescriptType": "CancelFunc",
-        "usedStructName": "context.CancelFunc",
+        "name": "mu",
+        "jsonName": "mu",
+        "goType": "sync.Mutex",
+        "typescriptType": "Mutex",
+        "usedTypescriptType": "Mutex",
+        "usedStructName": "sync.Mutex",
         "required": false,
         "public": false,
         "comments": []
       },
       {
-        "name": "currentStreamUrl",
-        "jsonName": "currentStreamUrl",
-        "goType": "string",
-        "typescriptType": "string",
-        "required": true,
+        "name": "relayed",
+        "jsonName": "relayed",
+        "goType": "streamSlot",
+        "typescriptType": "DebridClient_streamSlot",
+        "usedTypescriptType": "DebridClient_streamSlot",
+        "usedStructName": "debrid_client.streamSlot",
+        "required": false,
         "public": false,
         "comments": []
       },
       {
-        "name": "playbackSubscriberCtxCancelFunc",
-        "jsonName": "playbackSubscriberCtxCancelFunc",
-        "goType": "context.CancelFunc",
-        "typescriptType": "CancelFunc",
-        "usedTypescriptType": "CancelFunc",
-        "usedStructName": "context.CancelFunc",
+        "name": "direct",
+        "jsonName": "direct",
+        "goType": "map[string]streamSlot",
+        "typescriptType": "Record\u003cstring, DebridClient_streamSlot\u003e",
+        "usedTypescriptType": "DebridClient_streamSlot",
+        "usedStructName": "debrid_client.streamSlot",
         "required": false,
         "public": false,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/debrid/client/stream.go",
+    "filename": "stream.go",
+    "name": "DirectStreamEvent",
+    "formattedName": "DebridClient_DirectStreamEvent",
+    "package": "debrid_client",
+    "fields": [],
+    "aliasOf": {
+      "goType": "string",
+      "typescriptType": "string",
+      "declaredValues": [
+        "\"resolving\"",
+        "\"ready\"",
+        "\"failed\""
+      ]
+    },
+    "comments": []
+  },
+  {
+    "filepath": "../internal/debrid/client/stream.go",
+    "filename": "stream.go",
+    "name": "DirectStreamInfo",
+    "formattedName": "DebridClient_DirectStreamInfo",
+    "package": "debrid_client",
+    "fields": [
+      {
+        "name": "MediaId",
+        "jsonName": "MediaId",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "EpisodeNumber",
+        "jsonName": "EpisodeNumber",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaTitle",
+        "jsonName": "MediaTitle",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
         "comments": []
       }
     ],
@@ -46724,6 +46807,79 @@
     ],
     "comments": [
       " ProfileActivity is a row of the current profile's activity log."
+    ]
+  },
+  {
+    "filepath": "../internal/handlers/profiles_viewers.go",
+    "filename": "profiles_viewers.go",
+    "name": "ViewerSessionsResponse",
+    "formattedName": "ViewerSessionsResponse",
+    "package": "handlers",
+    "fields": [
+      {
+        "name": "Max",
+        "jsonName": "max",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Sessions",
+        "jsonName": "sessions",
+        "goType": "[]sessions.ViewerSession",
+        "typescriptType": "Array\u003cViewerSession\u003e",
+        "usedTypescriptType": "ViewerSession",
+        "usedStructName": "sessions.ViewerSession",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Relayed",
+        "jsonName": "relayed",
+        "goType": "ViewerRelayedPlayback",
+        "typescriptType": "ViewerRelayedPlayback",
+        "usedTypescriptType": "ViewerRelayedPlayback",
+        "usedStructName": "handlers.ViewerRelayedPlayback",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ViewerSessionsResponse is the \"Now watching\" list."
+    ]
+  },
+  {
+    "filepath": "../internal/handlers/profiles_viewers.go",
+    "filename": "profiles_viewers.go",
+    "name": "ViewerRelayedPlayback",
+    "formattedName": "ViewerRelayedPlayback",
+    "package": "handlers",
+    "fields": [
+      {
+        "name": "ProfileID",
+        "jsonName": "profileId",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ProfileName",
+        "jsonName": "profileName",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ViewerRelayedPlayback is the playback that holds the relayed lane."
     ]
   },
   {
@@ -90707,6 +90863,15 @@
         "required": true,
         "public": false,
         "comments": []
+      },
+      {
+        "name": "capacity",
+        "jsonName": "capacity",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
       }
     ],
     "comments": [
@@ -93217,6 +93382,529 @@
     ],
     "comments": [
       " ProfileSession is the result of selecting a profile."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/sessions/sessions.go",
+    "filename": "sessions.go",
+    "name": "FullError",
+    "formattedName": "FullError",
+    "package": "sessions",
+    "fields": [
+      {
+        "name": "Max",
+        "jsonName": "Max",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Viewers",
+        "jsonName": "Viewers",
+        "goType": "[]string",
+        "typescriptType": "Array\u003cstring\u003e",
+        "required": false,
+        "public": true,
+        "comments": [
+          " profile names (or \"Guest\"), sorted"
+        ]
+      }
+    ],
+    "comments": [
+      " FullError is ErrLanesFull with who holds the slots."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/sessions/sessions.go",
+    "filename": "sessions.go",
+    "name": "ViewerState",
+    "formattedName": "ViewerState",
+    "package": "sessions",
+    "fields": [],
+    "aliasOf": {
+      "goType": "string",
+      "typescriptType": "string",
+      "declaredValues": [
+        "\"preparing\"",
+        "\"ready\"",
+        "\"playing\""
+      ]
+    },
+    "comments": [
+      " ViewerState is the state of a session."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/sessions/sessions.go",
+    "filename": "sessions.go",
+    "name": "Reason",
+    "formattedName": "Reason",
+    "package": "sessions",
+    "fields": [],
+    "aliasOf": {
+      "goType": "string",
+      "typescriptType": "string",
+      "declaredValues": [
+        "\"stopped\"",
+        "\"replaced\"",
+        "\"disconnected\"",
+        "\"idle\"",
+        "\"admin\"",
+        "\"failed\"",
+        "\"profile-gone\"",
+        "\"new-session\""
+      ]
+    },
+    "comments": [
+      " Reason a session ended."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/sessions/sessions.go",
+    "filename": "sessions.go",
+    "name": "ViewerTracking",
+    "formattedName": "ViewerTracking",
+    "package": "sessions",
+    "fields": [
+      {
+        "name": "MediaID",
+        "jsonName": "mediaId",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "EpisodeNumber",
+        "jsonName": "episodeNumber",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaTitle",
+        "jsonName": "mediaTitle",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "TotalEpisodes",
+        "jsonName": "totalEpisodes",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "CurrentProgress",
+        "jsonName": "currentProgress",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ViewerTracking is the per-session manual progress tracking (upstream's",
+      " playbackmanager manual tracking, which is global)."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/sessions/sessions.go",
+    "filename": "sessions.go",
+    "name": "ViewerSession",
+    "formattedName": "ViewerSession",
+    "package": "sessions",
+    "fields": [
+      {
+        "name": "ID",
+        "jsonName": "id",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ClientID",
+        "jsonName": "",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ProfileID",
+        "jsonName": "profileId",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ProfileName",
+        "jsonName": "profileName",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Device",
+        "jsonName": "device",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaID",
+        "jsonName": "mediaId",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Episode",
+        "jsonName": "episodeNumber",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaTitle",
+        "jsonName": "mediaTitle",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "State",
+        "jsonName": "state",
+        "goType": "ViewerState",
+        "typescriptType": "ViewerState",
+        "usedTypescriptType": "ViewerState",
+        "usedStructName": "sessions.ViewerState",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "StartedAt",
+        "jsonName": "startedAt",
+        "goType": "time.Time",
+        "typescriptType": "string",
+        "usedStructName": "time.Time",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "LastSeen",
+        "jsonName": "lastSeen",
+        "goType": "time.Time",
+        "typescriptType": "string",
+        "usedStructName": "time.Time",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Tracking",
+        "jsonName": "tracking",
+        "goType": "ViewerTracking",
+        "typescriptType": "ViewerTracking",
+        "usedTypescriptType": "ViewerTracking",
+        "usedStructName": "sessions.ViewerTracking",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Disconnected",
+        "jsonName": "disconnected",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ViewerSession is a snapshot of one viewer session."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/sessions/sessions.go",
+    "filename": "sessions.go",
+    "name": "SessionEndedPayload",
+    "formattedName": "SessionEndedPayload",
+    "package": "sessions",
+    "fields": [
+      {
+        "name": "SessionID",
+        "jsonName": "sessionId",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Reason",
+        "jsonName": "reason",
+        "goType": "Reason",
+        "typescriptType": "Reason",
+        "usedTypescriptType": "Reason",
+        "usedStructName": "sessions.Reason",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaID",
+        "jsonName": "mediaId",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Episode",
+        "jsonName": "episodeNumber",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " SessionEndedPayload is the payload of EventSessionEnded."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/sessions/sessions.go",
+    "filename": "sessions.go",
+    "name": "AcquireRequest",
+    "formattedName": "AcquireRequest",
+    "package": "sessions",
+    "fields": [
+      {
+        "name": "ClientID",
+        "jsonName": "ClientID",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ProfileID",
+        "jsonName": "ProfileID",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": [
+          " 0: a client without profile"
+        ]
+      },
+      {
+        "name": "ProfileName",
+        "jsonName": "ProfileName",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Device",
+        "jsonName": "Device",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaID",
+        "jsonName": "MediaID",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Episode",
+        "jsonName": "Episode",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaTitle",
+        "jsonName": "MediaTitle",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " AcquireRequest asks for a slot."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/sessions/sessions.go",
+    "filename": "sessions.go",
+    "name": "Options",
+    "formattedName": "Options",
+    "package": "sessions",
+    "fields": [
+      {
+        "name": "Max",
+        "jsonName": "Max",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "DisconnectGrace",
+        "jsonName": "DisconnectGrace",
+        "goType": "time.Duration",
+        "typescriptType": "Duration",
+        "usedTypescriptType": "Duration",
+        "usedStructName": "time.Duration",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "IdleTimeout",
+        "jsonName": "IdleTimeout",
+        "goType": "time.Duration",
+        "typescriptType": "Duration",
+        "usedTypescriptType": "Duration",
+        "usedStructName": "time.Duration",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Events",
+        "jsonName": "Events",
+        "goType": "EventSender",
+        "typescriptType": "EventSender",
+        "usedTypescriptType": "EventSender",
+        "usedStructName": "sessions.EventSender",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "OnRelease",
+        "jsonName": "OnRelease",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "RelayedBusy",
+        "jsonName": "RelayedBusy",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Now",
+        "jsonName": "Now",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Options configure a Registry. Zero values take the defaults."
+    ]
+  },
+  {
+    "filepath": "../internal/profiles/sessions/sessions.go",
+    "filename": "sessions.go",
+    "name": "Registry",
+    "formattedName": "Registry",
+    "package": "sessions",
+    "fields": [
+      {
+        "name": "opts",
+        "jsonName": "opts",
+        "goType": "Options",
+        "typescriptType": "Options",
+        "usedTypescriptType": "Options",
+        "usedStructName": "sessions.Options",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "mu",
+        "jsonName": "mu",
+        "goType": "sync.Mutex",
+        "typescriptType": "Mutex",
+        "usedTypescriptType": "Mutex",
+        "usedStructName": "sync.Mutex",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "byClient",
+        "jsonName": "byClient",
+        "goType": "map[string]session",
+        "typescriptType": "Record\u003cstring, session\u003e",
+        "usedTypescriptType": "session",
+        "usedStructName": "sessions.session",
+        "required": false,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Registry holds the viewer sessions."
     ]
   },
   {
@@ -101546,6 +102234,15 @@
         "comments": []
       },
       {
+        "name": "onStatusCtx",
+        "jsonName": "onStatusCtx",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
         "name": "statusMu",
         "jsonName": "statusMu",
         "goType": "sync.Mutex",
@@ -101618,6 +102315,15 @@
       {
         "name": "OnStatus",
         "jsonName": "OnStatus",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "OnStatusCtx",
+        "jsonName": "OnStatusCtx",
         "goType": "",
         "typescriptType": "any",
         "required": true,

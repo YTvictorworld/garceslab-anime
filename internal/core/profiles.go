@@ -12,6 +12,7 @@ import (
 	"seanime/internal/database/db"
 	"seanime/internal/database/db_bridge"
 	"seanime/internal/database/models"
+	debrid_client "seanime/internal/debrid/client"
 	"seanime/internal/events"
 	"seanime/internal/extension"
 	"seanime/internal/library/anime"
@@ -26,6 +27,7 @@ import (
 	"seanime/internal/profiles/metadata"
 	"seanime/internal/profiles/profilews"
 	"seanime/internal/profiles/router"
+	"seanime/internal/profiles/sessions"
 	"seanime/internal/profiles/settings"
 	"seanime/internal/user"
 	"seanime/internal/util"
@@ -63,11 +65,14 @@ func initProfiles(cfg *Config, logger *zerolog.Logger) *profiles.Service {
 // playback, owned by the profile that started it), websocket tagging, the
 // per-profile settings and watch history.
 type ProfilesRuntime struct {
-	Service  *profiles.Service
-	Router   *router.Router
-	Meta     *metadata.Service
-	Lane     *profiles.PlaybackLane
-	Tags     *profilews.Tags
+	Service *profiles.Service
+	Router  *router.Router
+	Meta    *metadata.Service
+	Lane    *profiles.PlaybackLane
+	Tags    *profilews.Tags
+	// Viewers are the phase 2 viewer sessions: up to SEANIME_MAX_VIEWERS (3)
+	// debrid streams played directly by their devices at the same time.
+	Viewers  *sessions.Registry
 	Settings *settings.Store
 	History  *history.Store
 	// DirectAnilist is the anonymous client without the cache layer (public list
@@ -80,6 +85,8 @@ type ProfilesRuntime struct {
 
 	watchMu     sync.Mutex
 	watchRecent map[string]time.Time
+
+	viewersRunOnce sync.Once
 }
 
 // profilesPlatformEnabled: the router replaces the AniList/simulated platforms
@@ -124,6 +131,7 @@ func NewProfilesRuntime(svc *profiles.Service, wsEventManager events.WSEventMana
 		Router:        router.New(router.Options{Meta: meta, DB: svc.DB(), Logger: logger}),
 		Lane:          svc.Lane(),
 		Tags:          profilews.NewTags(),
+		Viewers:       newViewerSessions(wsEventManager),
 		Settings:      settings.NewStore(svc.DB()),
 		History:       history.New(svc.DB()),
 		DirectAnilist: direct,
@@ -136,6 +144,18 @@ func NewProfilesRuntime(svc *profiles.Service, wsEventManager events.WSEventMana
 
 	// Plugins act on behalf of the profile that owns the playback (or none).
 	plugin.ProfileContext = func() context.Context { return rt.Lane.Context(context.Background()) }
+	// Phase 2: a debrid stream start uses the auto-select profile of the profile that asked.
+	db_bridge.ProfileAutoSelectCtxHook = func(ctx context.Context) (*anime.AutoSelectProfile, bool) {
+		pid := profiles.IDFromContext(ctx)
+		if pid <= 0 {
+			return nil, false
+		}
+		p, found, err := rt.Settings.AutoSelect(ctx, pid)
+		if err != nil || !found {
+			return nil, true
+		}
+		return p, true
+	}
 	// Torrent auto-selection during a stream start uses the lane owner's profile.
 	db_bridge.ProfileAutoSelectHook = func() (*anime.AutoSelectProfile, bool) {
 		ctx := rt.Lane.Context(context.Background())
@@ -166,6 +186,7 @@ func (a *App) InstallProfilesRuntime() {
 		}
 		return false
 	})
+	a.installViewerSessions()
 	rt.Lane.SetOnAcquire(func(p *profiles.Profile) {
 		// The playback modules get the collection of the profile that plays.
 		ctx := profiles.WithProfile(context.Background(), p)
@@ -361,7 +382,22 @@ func (a *App) onProfilePlaybackLoaded(state player.PlaybackState) {
 	if rt == nil || info == nil || info.Media == nil || info.Episode == nil || info.IsNakamaWatchParty {
 		return
 	}
-	ctx := rt.Lane.Context(context.Background())
+	episode := info.Episode.GetProgressNumber()
+	if info.Episode.Type != "" && info.Episode.Type != anime.LocalFileTypeMain {
+		episode = 0
+	}
+	a.markProfileWatchingOnStart(rt.Lane.Context(context.Background()), info.Media.GetID(), episode)
+}
+
+// markProfileWatchingOnStart is the native auto-watching for the profile in ctx:
+// the anime goes to "Watching" when an episode starts (phase 1: from the media
+// core of the relayed lane; phase 2: also when a direct session's player starts).
+func (a *App) markProfileWatchingOnStart(ctx context.Context, mediaID int, episode int) {
+	defer util.HandlePanicInModuleThen("core/markProfileWatchingOnStart", func() {})
+	rt := a.ProfilesRuntime
+	if rt == nil || mediaID <= 0 {
+		return
+	}
 	pid := profiles.IDFromContext(ctx)
 	if pid <= 0 {
 		return
@@ -374,11 +410,6 @@ func (a *App) onProfilePlaybackLoaded(state player.PlaybackState) {
 	if !enabled {
 		return
 	}
-	episode := info.Episode.GetProgressNumber()
-	if info.Episode.Type != "" && info.Episode.Type != anime.LocalFileTypeMain {
-		episode = 0
-	}
-	mediaID := info.Media.GetID()
 
 	key := strconv.FormatInt(pid, 10) + "|" + strconv.Itoa(mediaID) + "|" + strconv.Itoa(episode)
 	rt.watchMu.Lock()
@@ -408,6 +439,78 @@ func (a *App) onProfilePlaybackLoaded(state player.PlaybackState) {
 	if action != localplatform.WatchingNone {
 		_, _ = a.RefreshAnimeCollectionCtx(ctx)
 	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// Phase 2: viewer sessions (internal/profiles/sessions, docs/phase2-direct-play.md)
+
+func newViewerSessions(ws events.WSEventManagerInterface) *sessions.Registry {
+	opts := sessions.OptionsFromEnv()
+	opts.Events = ws
+	return sessions.New(opts)
+}
+
+// installViewerSessions connects the viewer sessions to the relayed playback
+// lane and to the debrid streams.
+func (a *App) installViewerSessions() {
+	rt := a.ProfilesRuntime
+	if rt == nil || rt.Viewers == nil {
+		return
+	}
+	viewers := rt.Viewers
+	// The relayed lane takes a viewing slot too.
+	viewers.SetRelayedBusy(func() (int64, string, bool) {
+		p, busy := rt.Lane.ActiveOwner()
+		if !busy {
+			return 0, "", false
+		}
+		if p == nil {
+			return 0, "", true
+		}
+		return p.ID, p.Name, true
+	})
+	rt.Lane.SetCapacityFunc(func(p *profiles.Profile, clientID string) error {
+		var pid int64
+		if p != nil {
+			pid = p.ID
+		}
+		return viewers.Capacity(pid, clientID)
+	})
+	// A session that ends (disconnect, idle, Settings → Stop, another device of
+	// the same profile) stops its client's pending debrid resolve.
+	viewers.SetOnRelease(func(s sessions.ViewerSession, reason sessions.Reason) {
+		if a.DebridClientRepository != nil {
+			a.DebridClientRepository.CancelDirectStream(s.ClientID, &debrid_client.CancelStreamOptions{RemoveTorrent: false})
+		}
+		a.Logger.Debug().Str("session", s.ID).Int64("profileId", s.ProfileID).Str("reason", string(reason)).Msg("profiles: Viewer session ended")
+	})
+	if a.DebridClientRepository != nil {
+		a.DebridClientRepository.SetDirectStreamObserver(func(clientId string, info debrid_client.DirectStreamInfo, ev debrid_client.DirectStreamEvent) {
+			switch ev {
+			case debrid_client.DirectStreamResolving:
+				viewers.SetTitle(clientId, info.MediaId, info.EpisodeNumber, info.MediaTitle)
+			case debrid_client.DirectStreamReady:
+				viewers.SetState(clientId, info.MediaId, info.EpisodeNumber, sessions.StateReady)
+			case debrid_client.DirectStreamFailed:
+				viewers.Release(clientId, info.MediaId, info.EpisodeNumber, sessions.ReasonFailed)
+			}
+		})
+	}
+	rt.viewersRunOnce.Do(func() { go viewers.Run(context.Background(), 10*time.Second) })
+}
+
+// ViewerSessions returns the viewer sessions registry (nil without profiles).
+func (a *App) ViewerSessions() *sessions.Registry {
+	if a.ProfilesRuntime == nil {
+		return nil
+	}
+	return a.ProfilesRuntime.Viewers
+}
+
+// OnDirectSessionPlaying runs when a direct session's player starts the episode
+// (manual tracking start): the native auto-watching for the session's profile.
+func (a *App) OnDirectSessionPlaying(ctx context.Context, mediaID int, episode int) {
+	go a.markProfileWatchingOnStart(context.WithoutCancel(ctx), mediaID, episode)
 }
 
 // ErrAnilistLoginDisabled: profiles never log in to AniList (plan §3.4.3).

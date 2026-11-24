@@ -11,6 +11,7 @@ import (
 	"seanime/internal/debrid/debrid"
 	"seanime/internal/events"
 	hibiketorrent "seanime/internal/extension/hibike/torrent"
+	"seanime/internal/profiles/sessions"
 
 	"github.com/labstack/echo/v4"
 )
@@ -439,11 +440,28 @@ func (h *Handler) HandleDebridStartStream(c echo.Context) error {
 
 	b.ClientId = getRequestClientId(c, b.ClientId)
 
+	// Garceslab Anime phase 2: a direct stream (the client plays the debrid link
+	// itself) takes a viewer session; a relayed one takes the playback lane.
+	direct := b.PlaybackType.IsDirect()
+	if direct {
+		if err := h.acquireDirectSession(c, b.ClientId, b.MediaId, b.EpisodeNumber); err != nil {
+			return h.respondPlaybackSlotError(c, err)
+		}
+	} else if err := h.acquireRelayedLane(c, b.ClientId); err != nil {
+		return h.respondPlaybackSlotError(c, err)
+	}
+	releaseOnError := func() {
+		if viewers := h.App.ViewerSessions(); direct && viewers != nil {
+			viewers.Release(b.ClientId, b.MediaId, b.EpisodeNumber, sessions.ReasonFailed)
+		}
+	}
+
 	userAgent := c.Request().Header.Get("User-Agent")
 
 	if b.Torrent != nil {
 		magnet, err := h.App.TorrentRepository.ResolveMagnetLink(b.Torrent)
 		if err != nil {
+			releaseOnError()
 			return h.RespondWithError(c, err)
 		}
 
@@ -464,6 +482,7 @@ func (h *Handler) HandleDebridStartStream(c echo.Context) error {
 		BatchEpisodeFiles: b.BatchEpisodeFiles,
 	})
 	if err != nil {
+		releaseOnError()
 		return h.RespondWithError(c, err)
 	}
 
@@ -486,7 +505,13 @@ func (h *Handler) HandleDebridCancelStream(c echo.Context) error {
 		return h.RespondWithError(c, err)
 	}
 
-	h.App.DebridClientRepository.CancelStream(b.Options)
+	// Garceslab Anime phase 2: cancel the requesting client's direct stream (and
+	// free its viewing slot); without one, the relayed stream as upstream.
+	clientID := getRequestClientId(c, "")
+	h.App.DebridClientRepository.CancelStreamFor(clientID, b.Options)
+	if viewers := h.App.ViewerSessions(); viewers != nil && clientID != "" {
+		viewers.Release(clientID, 0, 0, sessions.ReasonStopped)
+	}
 
 	return h.RespondWithData(c, true)
 }

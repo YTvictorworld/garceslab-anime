@@ -78,6 +78,13 @@ func (h *Handler) HandlePlaybackPlayRandomVideo(c echo.Context) error {
 //	@route /api/v1/playback-manager/sync-current-progress [POST]
 //	@returns int
 func (h *Handler) HandlePlaybackSyncCurrentProgress(c echo.Context) error {
+	// Garceslab Anime phase 2: the requesting client's own tracking first.
+	if mediaID, handled, err := h.syncSessionManualTracking(c); handled {
+		if err != nil {
+			return h.RespondWithError(c, err)
+		}
+		return h.RespondWithData(c, mediaID)
+	}
 
 	err := h.App.PlaybackManager.SyncCurrentProgress()
 	if err != nil {
@@ -222,6 +229,18 @@ func (h *Handler) HandlePlaybackStartManualTracking(c echo.Context) error {
 
 	b.ClientId = getRequestClientId(c, b.ClientId)
 
+	// Garceslab Anime phase 2: a client with a viewer session (it plays a debrid
+	// link directly) gets its own tracking; the global one is left alone.
+	if handled, err := h.startSessionManualTracking(c, b.ClientId, b.MediaId, b.EpisodeNumber); handled {
+		if err != nil {
+			return h.RespondWithError(c, err)
+		}
+		return h.RespondWithData(c, true)
+	}
+	if err := h.acquireRelayedLane(c, b.ClientId); err != nil {
+		return h.respondPlaybackSlotError(c, err)
+	}
+
 	err := h.App.PlaybackManager.StartManualProgressTracking(&playbackmanager.StartManualProgressTrackingOptions{
 		ClientId:      b.ClientId,
 		MediaId:       b.MediaId,
@@ -241,6 +260,18 @@ func (h *Handler) HandlePlaybackStartManualTracking(c echo.Context) error {
 //	@route /api/v1/playback-manager/manual-tracking/cancel [POST]
 //	@returns bool
 func (h *Handler) HandlePlaybackCancelManualTracking(c echo.Context) error {
+	// Optional (Garceslab Anime): the episode whose tracking ends, so a late
+	// cancel of the previous episode doesn't end the session of the next one.
+	type body struct {
+		MediaId       int `json:"mediaId"`
+		EpisodeNumber int `json:"episodeNumber"`
+	}
+	var b body
+	_ = c.Bind(&b)
+
+	if h.cancelSessionManualTracking(c, b.MediaId, b.EpisodeNumber) {
+		return h.RespondWithData(c, true)
+	}
 
 	h.App.PlaybackManager.CancelManualProgressTracking()
 

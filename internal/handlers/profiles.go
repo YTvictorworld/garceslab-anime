@@ -34,6 +34,7 @@ func (h *Handler) registerProfileRoutes(e *echo.Echo, v1 *echo.Group) {
 
 	h.registerProfileDataRoutes(v1)
 	h.registerProfilePlayerRoutes(v1) // phase 4: profiles_player.go
+	h.registerProfileViewerRoutes(v1) // phase 2: profiles_viewers.go
 }
 
 // profilesMiddleware resolves the request's profile. Registered right after the
@@ -58,6 +59,9 @@ func (h *Handler) profilesMiddleware() echo.MiddlewareFunc {
 			// Tag the client's websocket with its profile (plan §3.7.1).
 			if h.App.ProfilesRuntime != nil {
 				h.App.ProfilesRuntime.Tags.Tag(clientID, profileID)
+				if v := h.App.ProfilesRuntime.Viewers; v != nil {
+					v.Touch(clientID) // phase 2: the idle timeout counts from the last request
+				}
 			}
 		},
 	})
@@ -220,6 +224,9 @@ func (h *Handler) HandleDeleteProfile(c echo.Context) error {
 		rt.Router.ForgetProfile(id)
 		rt.Tags.UntagProfile(id)
 		rt.Settings.Forget(id)
+		if rt.Viewers != nil {
+			rt.Viewers.ForgetProfile(id) // phase 2
+		}
 	}
 	if cur := profiles.FromEcho(c); cur != nil && cur.ID == id {
 		clearProfileCookie(c)

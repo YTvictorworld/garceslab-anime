@@ -68,8 +68,32 @@ No schema change: favourites, custom lists and activity use the v1 tables.
 | `seanime-web/.../anilist-media-entry-modal.tsx` | With a profile, anime entries save through `PATCH /profiles/me/entries/:mediaId` with `ProfileEntryExtras` (notes, private, custom lists) |
 | `seanime-web/.../lists/_containers/anilist-collection-lists.tsx` | Favourites section, "Manage lists", recently watched on the Stats tab |
 
+## Phase 2: viewer sessions (up to three people watching)
+
+New files: `internal/profiles/sessions/**`, `internal/handlers/profiles_viewers.go`,
+`internal/handlers/profiles_viewers_test.go`, `internal/debrid/client/stream_sessions_test.go`,
+`internal/e2e/phase2/**`, `scripts/e2e-phase2.sh`. Design: `docs/phase2-direct-play.md`.
+
+| File | Hook |
+|---|---|
+| `internal/debrid/client/stream.go` | `StreamManager` holds a relayed `streamSlot` and one direct slot per client (`takeSlot`, `cancelClientStream`, `eventsFor` = `SendEventTo(client)` for direct streams); `notifyDirect` → `DirectStreamObserver` (resolving/ready/failed); `StreamPlaybackType.IsDirect`; the external player link is sent with `noLog` |
+| `internal/debrid/client/repository.go` | `GetStreamURLFor`, `CancelStreamFor`, `CancelDirectStream`, `DirectStreamClientIds`, `SetDirectStreamObserver`, `SetProviderForTesting`; `GetPreviousStreamOptions` locks; auto-select status via `OnStatusCtx` (to the stream's client) |
+| `internal/debrid/client/finder.go` | `db_bridge.FindAutoSelectProfileCtx(ctx, …)` (requesting profile) |
+| `internal/torrents/autoselect/autoselect.go` | `OnStatusCtx`, `WithStatusClient`/`StatusClient`; `updateStatus` takes ctx |
+| `internal/database/db_bridge/autoselect_profile.go` | `ProfileAutoSelectCtxHook`, `FindAutoSelectProfileCtx` |
+| `internal/profiles/lane.go` | `AcquireFor(p, clientID)` checks the viewing-slot capacity (`SetCapacityFunc`); `ActiveOwner`; debrid start and manual tracking start left `playbackStartRoutes` |
+| `internal/profiles/middleware.go` | `acquireLaneIfPlayback` passes the client id |
+| `internal/core/profiles.go` | `ProfilesRuntime.Viewers`; `installViewerSessions` (relayed lane counts as a viewer, capacity check, ended session cancels its debrid resolve, debrid observer, sweep loop); `markProfileWatchingOnStart` (shared by the media core and direct sessions); `ProfileAutoSelectCtxHook`; `ViewerSessions()`, `OnDirectSessionPlaying` |
+| `internal/handlers/debrid.go` | Start: direct type → viewer session, relayed → lane (`respondPlaybackSlotError`, slot freed on error); cancel: `CancelStreamFor(client)` + session release |
+| `internal/handlers/playback_manager.go` | Manual tracking start/cancel and sync-current-progress go through the client's session (`startSessionManualTracking`, …); cancel accepts `{mediaId, episodeNumber}` |
+| `internal/handlers/websocket.go` | `viewerWebsocketConnected` / `viewerWebsocketDisconnected` (disconnect grace) |
+| `internal/handlers/profiles.go` | `registerProfileViewerRoutes(v1)`; `OnProfile` touches the session (idle timeout); delete → `Viewers.ForgetProfile` |
+| `seanime-web/.../requests.ts`, `profiles.hooks.ts`, `profiles-settings.tsx` | LANES_FULL with names; `useGetViewerSessions`, `useStopViewerSession`; "Now watching" card |
+
 ## Runtime switches
 
+- `SEANIME_MAX_VIEWERS` (default 3), `SEANIME_VIEWER_IDLE_TIMEOUT` (default `15m`),
+  `SEANIME_VIEWER_DISCONNECT_GRACE` (default `45s`): viewer sessions (phase 2).
 - `SEANIME_PROFILES_ENFORCE=true`: routes outside `internal/profiles/public_routes.go`
   answer `401 {"error":"PROFILE_REQUIRED"}` without a valid profile token. Still off by
   default until the web (M3) and TV (M4) clients send profiles. With it off, requests
@@ -78,7 +102,9 @@ No schema change: favourites, custom lists and activity use the v1 tables.
 
 ## Phase 1 playback lane
 
-One playback at a time on the whole server. The routes in `profiles.playbackStartRoutes`
+Since phase 2 this lane is only for **relayed** playback (web player, torrent streams,
+library files, transcoding); direct debrid streams use viewer sessions (above), and the
+lane counts as one of their slots. Originally: one playback at a time on the whole server. The routes in `profiles.playbackStartRoutes`
 take the lane in the middleware; another profile gets `409 PLAYBACK_BUSY` while the
 owner's playback is being prepared (90 s grace) or the media core has an active session.
 The owner stays after the playback ends, so late progress updates still reach it.

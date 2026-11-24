@@ -29,6 +29,9 @@ type PlaybackLane struct {
 	active     func() bool
 	onAcquire  func(p *Profile)
 	now        func() time.Time
+	// capacity (phase 2) fails when the direct viewer sessions of other profiles
+	// fill every viewing slot (sessions.Registry.Capacity).
+	capacity func(p *Profile, clientID string) error
 }
 
 func NewPlaybackLane() *PlaybackLane {
@@ -67,9 +70,29 @@ func (l *PlaybackLane) SetOnAcquire(f func(p *Profile)) {
 	l.mu.Unlock()
 }
 
+// SetCapacityFunc sets the phase 2 viewing-slot check (core: the viewer sessions).
+func (l *PlaybackLane) SetCapacityFunc(f func(p *Profile, clientID string) error) {
+	l.mu.Lock()
+	l.capacity = f
+	l.mu.Unlock()
+}
+
 // Acquire gives the lane to p (nil = a client without profile, whose progress is
 // not saved). It fails with ErrPlaybackBusy if another profile is playing.
-func (l *PlaybackLane) Acquire(p *Profile) error {
+func (l *PlaybackLane) Acquire(p *Profile) error { return l.AcquireFor(p, "") }
+
+// AcquireFor is Acquire for a client: since phase 2 the relayed lane is one of
+// the viewing slots, so it also fails (LANES_FULL) when the direct sessions of
+// other profiles and clients take every slot.
+func (l *PlaybackLane) AcquireFor(p *Profile, clientID string) error {
+	l.mu.RLock()
+	capacity := l.capacity
+	l.mu.RUnlock()
+	if capacity != nil { // outside the lock: the registry asks the lane back
+		if err := capacity(p, clientID); err != nil {
+			return err
+		}
+	}
 	l.mu.Lock()
 	if l.isBusyFor(p) {
 		l.mu.Unlock()
@@ -83,6 +106,27 @@ func (l *PlaybackLane) Acquire(p *Profile) error {
 		cb(p)
 	}
 	return nil
+}
+
+// ActiveOwner reports whether a relayed playback holds the lane right now (being
+// prepared, or the media core has a session) and the profile that owns it.
+func (l *PlaybackLane) ActiveOwner() (*Profile, bool) {
+	if l == nil {
+		return nil, false
+	}
+	l.mu.RLock()
+	owner, acquiredAt, active := l.owner, l.acquiredAt, l.active
+	l.mu.RUnlock()
+	if acquiredAt.IsZero() {
+		return nil, false
+	}
+	if l.now().Sub(acquiredAt) < laneGrace {
+		return owner, true
+	}
+	if active != nil && active() {
+		return owner, true
+	}
+	return nil, false
 }
 
 // Owner returns the profile that owns the lane (nil if none).
@@ -130,6 +174,9 @@ func (l *PlaybackLane) ForgetProfile(id int64) {
 
 // playbackStartRoutes start a server-side playback (they take the lane). Online
 // streaming is played by the client and saves progress with its own requests.
+// Phase 2: debrid stream starts and manual tracking take the lane in their
+// handlers instead, only when the playback is relayed (a direct debrid stream
+// takes a viewer session, internal/profiles/sessions).
 var playbackStartRoutes = map[string]bool{
 	"POST /api/v1/playback-manager/play":                  true,
 	"POST /api/v1/playback-manager/play-random":           true,
@@ -137,9 +184,7 @@ var playbackStartRoutes = map[string]bool{
 	"POST /api/v1/playback-manager/playlist-next":         true,
 	"POST /api/v1/playback-manager/next-episode":          true,
 	"POST /api/v1/playback-manager/autoplay-next-episode": true,
-	"POST /api/v1/playback-manager/manual-tracking/start": true,
 	"POST /api/v1/directstream/play/localfile":            true,
-	"POST /api/v1/debrid/stream/start":                    true,
 	"POST /api/v1/torrentstream/start":                    true,
 	"POST /api/v1/mediastream/request":                    true,
 }

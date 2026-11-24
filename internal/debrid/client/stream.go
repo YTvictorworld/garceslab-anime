@@ -11,6 +11,7 @@ import (
 	hibiketorrent "seanime/internal/extension/hibike/torrent"
 	"seanime/internal/hook"
 	"seanime/internal/library/playbackmanager"
+	"seanime/internal/torrents/autoselect"
 	"seanime/internal/util"
 	"strconv"
 	"sync"
@@ -20,14 +21,50 @@ import (
 )
 
 type (
+	// StreamManager runs the debrid streams. Garceslab Anime (phase 2): a stream
+	// is a streamSlot. Relayed streams (played through the server: "default"
+	// media player, "nativeplayer" direct stream) keep upstream's single slot,
+	// and starting one replaces the previous relayed stream. Direct streams
+	// ("externalPlayerLink", "none", "noneAndAwait": the client gets the debrid
+	// link and plays it itself) get one slot per client id, so several clients
+	// resolve and watch at once; their status events only go to their client.
+	// A relayed start never cancels another client's direct stream and vice versa.
 	StreamManager struct {
-		repository            *Repository
+		repository *Repository
+
+		mu      sync.Mutex
+		relayed *streamSlot
+		direct  map[string]*streamSlot
+	}
+
+	// streamSlot is the state of one stream (upstream's former StreamManager fields).
+	streamSlot struct {
+		mu                    sync.Mutex // guards the fields below the ids
+		clientId              string
+		isDirect              bool
+		mediaId               int
+		episodeNumber         int
+		mediaTitle            string
 		currentTorrentItemId  string
 		downloadCtxCancelFunc context.CancelFunc
-
-		currentStreamUrl string
+		currentStreamUrl      string
 
 		playbackSubscriberCtxCancelFunc context.CancelFunc
+		stopped                         bool
+	}
+
+	// DirectStreamEvent is what the observer of direct streams hears.
+	DirectStreamEvent string
+
+	// DirectStreamObserver hears how the direct stream of a client went
+	// (Garceslab Anime: the viewer sessions registry frees a slot on failure).
+	DirectStreamObserver func(clientId string, info DirectStreamInfo, ev DirectStreamEvent)
+
+	// DirectStreamInfo describes a direct stream for its observer (never the link).
+	DirectStreamInfo struct {
+		MediaId       int
+		EpisodeNumber int
+		MediaTitle    string
 	}
 
 	StreamPlaybackType string
@@ -69,12 +106,28 @@ const (
 
 func NewStreamManager(repository *Repository) *StreamManager {
 	return &StreamManager{
-		repository:           repository,
-		currentTorrentItemId: "",
+		repository: repository,
+		direct:     map[string]*streamSlot{},
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const (
+	DirectStreamResolving DirectStreamEvent = "resolving" // the media is known (MediaTitle set)
+	DirectStreamReady     DirectStreamEvent = "ready"
+	DirectStreamFailed    DirectStreamEvent = "failed"
+)
+
+// IsDirect reports whether the client plays the debrid link itself (Garceslab
+// Anime): the server only resolves the link and never relays the video.
+func (t StreamPlaybackType) IsDirect() bool {
+	switch t {
+	case PlaybackTypeExternalPlayer, PlaybackTypeNone, PlaybackTypeNoneAndAwait:
+		return true
+	}
+	return false
+}
 
 const (
 	PlaybackTypeNone           StreamPlaybackType = "none"
@@ -88,32 +141,35 @@ const (
 func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOptions) (err error) {
 	defer util.HandlePanicInModuleWithError("debrid/client/StartStream", &err)
 
+	s.mu.Lock()
 	s.repository.previousStreamOptions = mo.Some(opts)
+	s.mu.Unlock()
 
 	s.repository.logger.Info().
 		Str("clientId", opts.ClientId).
 		Any("playbackType", opts.PlaybackType).
 		Int("mediaId", opts.MediaId).Msgf("debridstream: Starting stream for episode %s", opts.AniDBEpisode)
 
-	// Cancel the download context if it's running
-	if s.downloadCtxCancelFunc != nil {
-		s.downloadCtxCancelFunc()
-		s.downloadCtxCancelFunc = nil
-	}
-
-	if s.playbackSubscriberCtxCancelFunc != nil {
-		s.playbackSubscriberCtxCancelFunc()
-		s.playbackSubscriberCtxCancelFunc = nil
-	}
-
 	provider, err := s.repository.GetProvider()
 	if err != nil {
 		return fmt.Errorf("debridstream: Failed to start stream: %w", err)
 	}
 
-	s.repository.wsEventManager.SendEvent(events.ShowIndefiniteLoader, "debridstream")
+	// Garceslab Anime: take the slot of this stream (cancels only the streams it replaces).
+	slot := s.takeSlot(opts)
+	ws := s.eventsFor(slot)
+	if slot.isDirect {
+		ctx = autoselect.WithStatusClient(ctx, slot.clientId)
+	}
+	defer func() {
+		if err != nil {
+			s.notifyDirect(slot, DirectStreamFailed)
+		}
+	}()
+
+	ws.SendEvent(events.ShowIndefiniteLoader, "debridstream")
 	//defer func() {
-	//	s.repository.wsEventManager.SendEvent(events.HideIndefiniteLoader, "debridstream")
+	//	ws.SendEvent(events.HideIndefiniteLoader, "debridstream")
 	//}()
 
 	if opts.PlaybackType == PlaybackTypeNativePlayer {
@@ -127,12 +183,18 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 	//
 	media, _, err := s.getMediaInfo(ctx, opts.MediaId)
 	if err != nil {
-		s.repository.wsEventManager.SendEvent(events.HideIndefiniteLoader, "debridstream")
+		ws.SendEvent(events.HideIndefiniteLoader, "debridstream")
 		return err
 	}
 	if opts.PlaybackType == PlaybackTypeNativePlayer && !s.repository.directStreamManager.IsOpenActive(opts.ClientId) {
-		s.repository.wsEventManager.SendEvent(events.HideIndefiniteLoader, "debridstream")
+		ws.SendEvent(events.HideIndefiniteLoader, "debridstream")
 		return nil
+	}
+	if slot.isDirect {
+		slot.mu.Lock()
+		slot.mediaTitle = media.GetPreferredTitle()
+		slot.mu.Unlock()
+		s.notifyDirect(slot, DirectStreamResolving)
 	}
 
 	episodeNumber := opts.EpisodeNumber
@@ -144,7 +206,7 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 
 	if opts.AutoSelect {
 
-		s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+		ws.SendEvent(events.DebridStreamState, StreamState{
 			Status:      StreamStatusDownloading,
 			TorrentName: "-",
 			Message:     "Selecting best torrent...",
@@ -155,12 +217,12 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 			if opts.PlaybackType == PlaybackTypeNativePlayer {
 				s.repository.directStreamManager.AbortOpen(opts.ClientId, err)
 			}
-			s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+			ws.SendEvent(events.DebridStreamState, StreamState{
 				Status:      StreamStatusFailed,
 				TorrentName: "-",
 				Message:     fmt.Sprintf("Failed to select best torrent, %v", err),
 			})
-			s.repository.wsEventManager.SendEvent(events.HideIndefiniteLoader, "debridstream")
+			ws.SendEvent(events.HideIndefiniteLoader, "debridstream")
 			return fmt.Errorf("debridstream: Failed to start stream: %w", err)
 		}
 		selectedTorrent = pt.torrent
@@ -169,11 +231,11 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 	} else {
 		// Manual selection
 		if selectedTorrent == nil {
-			s.repository.wsEventManager.SendEvent(events.HideIndefiniteLoader, "debridstream")
+			ws.SendEvent(events.HideIndefiniteLoader, "debridstream")
 			return fmt.Errorf("debridstream: Failed to start stream, no torrent provided")
 		}
 
-		s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+		ws.SendEvent(events.DebridStreamState, StreamState{
 			Status:      StreamStatusDownloading,
 			TorrentName: selectedTorrent.Name,
 			Message:     "Analyzing selected torrent...",
@@ -190,12 +252,12 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 				if opts.PlaybackType == PlaybackTypeNativePlayer {
 					s.repository.directStreamManager.AbortOpen(opts.ClientId, err)
 				}
-				s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+				ws.SendEvent(events.DebridStreamState, StreamState{
 					Status:      StreamStatusFailed,
 					TorrentName: selectedTorrent.Name,
 					Message:     fmt.Sprintf("Failed to analyze torrent, %v", err),
 				})
-				s.repository.wsEventManager.SendEvent(events.HideIndefiniteLoader, "debridstream")
+				ws.SendEvent(events.HideIndefiniteLoader, "debridstream")
 				return fmt.Errorf("debridstream: Failed to analyze torrent: %w", err)
 			}
 			selectedTorrent = pt.torrent
@@ -208,15 +270,15 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 		if opts.PlaybackType == PlaybackTypeNativePlayer {
 			s.repository.directStreamManager.AbortOpen(opts.ClientId, fmt.Errorf("debridstream: Failed to start stream, no torrent provided"))
 		}
-		s.repository.wsEventManager.SendEvent(events.HideIndefiniteLoader, "debridstream")
+		ws.SendEvent(events.HideIndefiniteLoader, "debridstream")
 		return fmt.Errorf("debridstream: Failed to start stream, no torrent provided")
 	}
 	if opts.PlaybackType == PlaybackTypeNativePlayer && !s.repository.directStreamManager.IsOpenActive(opts.ClientId) {
-		s.repository.wsEventManager.SendEvent(events.HideIndefiniteLoader, "debridstream")
+		ws.SendEvent(events.HideIndefiniteLoader, "debridstream")
 		return nil
 	}
 
-	s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+	ws.SendEvent(events.DebridStreamState, StreamState{
 		Status:      StreamStatusDownloading,
 		TorrentName: selectedTorrent.Name,
 		Message:     "Adding torrent...",
@@ -229,21 +291,25 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 		SelectFileId: fileId, // RD-only, download only the selected file
 	})
 	if err != nil {
-		s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+		ws.SendEvent(events.DebridStreamState, StreamState{
 			Status:      StreamStatusFailed,
 			TorrentName: selectedTorrent.Name,
 			Message:     fmt.Sprintf("Failed to add torrent, %v", err),
 		})
-		s.repository.wsEventManager.SendEvent(events.HideIndefiniteLoader, "debridstream")
+		ws.SendEvent(events.HideIndefiniteLoader, "debridstream")
 		return fmt.Errorf("debridstream: Failed to add torrent: %w", err)
 	}
 
 	time.Sleep(150 * time.Millisecond)
 
 	// Save the current torrent item id
-	s.currentTorrentItemId = torrentItemId
 	ctx, cancelCtx := context.WithCancel(context.Background())
-	s.downloadCtxCancelFunc = cancelCtx
+	if !slot.begin(torrentItemId, cancelCtx) {
+		// Replaced or cancelled while the torrent was being added
+		cancelCtx()
+		ws.SendEvent(events.HideIndefiniteLoader, "debridstream")
+		return nil
+	}
 
 	readyCh := make(chan struct{})
 	readyOnce := sync.Once{}
@@ -257,20 +323,17 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 	go func(ctx context.Context) {
 		defer util.HandlePanicInModuleThen("debrid/client/StartStream", func() {})
 		defer func() {
-			s.repository.wsEventManager.SendEvent(events.HideIndefiniteLoader, "debridstream")
+			ws.SendEvent(events.HideIndefiniteLoader, "debridstream")
 		}()
 
 		defer func() {
 			// Cancel the context
-			if s.downloadCtxCancelFunc != nil {
-				s.downloadCtxCancelFunc()
-				s.downloadCtxCancelFunc = nil
-			}
+			slot.cancelDownload()
 		}()
 
 		s.repository.logger.Debug().Msg("debridstream: Listening to torrent status")
 
-		s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+		ws.SendEvent(events.DebridStreamState, StreamState{
 			Status:      StreamStatusDownloading,
 			TorrentName: selectedTorrent.Name,
 			Message:     fmt.Sprintf("Downloading torrent..."),
@@ -286,7 +349,7 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 					}
 				}
 
-				s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+				ws.SendEvent(events.DebridStreamState, StreamState{
 					Status:      StreamStatusDownloading,
 					TorrentName: item.Name,
 					Message:     fmt.Sprintf("Downloading torrent: %d%%", item.CompletionPercentage),
@@ -318,7 +381,8 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 		if err != nil {
 			s.repository.logger.Err(err).Msg("debridstream: Failed to get stream URL")
 			if !errors.Is(err, context.Canceled) {
-				s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+				s.notifyDirect(slot, DirectStreamFailed)
+				ws.SendEvent(events.DebridStreamState, StreamState{
 					Status:      StreamStatusFailed,
 					TorrentName: selectedTorrent.Name,
 					Message:     fmt.Sprintf("Failed to get stream URL, %v", err),
@@ -339,7 +403,7 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 		// Default prevented, we check if we can stream the file
 		if skipCheckEvent.DefaultPrevented {
 			s.repository.logger.Debug().Msg("debridstream: Stream URL received, checking stream file")
-			s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+			ws.SendEvent(events.DebridStreamState, StreamState{
 				Status:      StreamStatusDownloading,
 				TorrentName: selectedTorrent.Name,
 				Message:     "Checking stream file...",
@@ -358,8 +422,9 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 					if canStream, reason := CanStream(streamUrl); !canStream {
 						if retries >= skipCheckEvent.Retries {
 							s.repository.logger.Error().Msg("debridstream: Cannot stream the file")
+							s.notifyDirect(slot, DirectStreamFailed)
 
-							s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+							ws.SendEvent(events.DebridStreamState, StreamState{
 								Status:      StreamStatusFailed,
 								TorrentName: selectedTorrent.Name,
 								Message:     fmt.Sprintf("Cannot stream this file: %s", reason),
@@ -367,7 +432,7 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 							return
 						}
 						s.repository.logger.Warn().Msg("debridstream: Rechecking stream file in 8 seconds")
-						s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+						ws.SendEvent(events.DebridStreamState, StreamState{
 							Status:      StreamStatusDownloading,
 							TorrentName: selectedTorrent.Name,
 							Message:     "Checking stream file...",
@@ -384,7 +449,7 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 		s.repository.logger.Debug().Msg("debridstream: Stream is ready")
 
 		// Signal to the client that the torrent is ready to stream
-		s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+		ws.SendEvent(events.DebridStreamState, StreamState{
 			Status:      StreamStatusReady,
 			TorrentName: selectedTorrent.Name,
 			Message:     "Ready to stream the file",
@@ -424,19 +489,20 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 			return
 		}
 
-		s.currentStreamUrl = streamUrl
+		slot.setStreamURL(streamUrl)
+		s.notifyDirect(slot, DirectStreamReady)
 
 		switch playbackType {
 		case PlaybackTypeNone:
 			// No playback type selected, just signal to the client that the stream is ready
-			s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+			ws.SendEvent(events.DebridStreamState, StreamState{
 				Status:      StreamStatusReady,
 				TorrentName: selectedTorrent.Name,
 				Message:     "External player link sent",
 			})
 		case PlaybackTypeNoneAndAwait:
 			// No playback type selected, just signal to the client that the stream is ready
-			s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+			ws.SendEvent(events.DebridStreamState, StreamState{
 				Status:      StreamStatusReady,
 				TorrentName: selectedTorrent.Name,
 				Message:     "External player link sent",
@@ -449,11 +515,11 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 			//
 			s.repository.logger.Debug().Msg("debridstream: Starting the media player")
 
-			s.repository.wsEventManager.SendEvent(events.InfoToast, "Sending stream to media player...")
-			s.repository.wsEventManager.SendEvent(events.ShowIndefiniteLoader, "debridstream")
+			ws.SendEvent(events.InfoToast, "Sending stream to media player...")
+			ws.SendEvent(events.ShowIndefiniteLoader, "debridstream")
 
-			var playbackSubscriberCtx context.Context
-			playbackSubscriberCtx, s.playbackSubscriberCtxCancelFunc = context.WithCancel(context.Background())
+			playbackSubscriberCtx, playbackSubscriberCancel := context.WithCancel(context.Background())
+			slot.setPlaybackSubscriberCancel(playbackSubscriberCancel)
 			playbackSubscriber := s.repository.playbackManager.SubscribeToPlaybackStatus("debridstream")
 
 			// Sends the stream to the media player
@@ -465,12 +531,9 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 			}, media, aniDbEpisode)
 			if err != nil {
 				go s.repository.playbackManager.UnsubscribeFromPlaybackStatus("debridstream")
-				if s.playbackSubscriberCtxCancelFunc != nil {
-					s.playbackSubscriberCtxCancelFunc()
-					s.playbackSubscriberCtxCancelFunc = nil
-				}
+				slot.cancelPlaybackSubscriber()
 				// Failed to start the stream, we'll drop the torrents and stop the server
-				s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+				ws.SendEvent(events.DebridStreamState, StreamState{
 					Status:      StreamStatusFailed,
 					TorrentName: selectedTorrent.Name,
 					Message:     fmt.Sprintf("Failed to send the stream to the media player, %v", err),
@@ -482,31 +545,26 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 			// Reset the current stream url when playback is stopped
 			go func() {
 				defer util.HandlePanicInModuleThen("debridstream/PlaybackSubscriber", func() {})
-				defer func() {
-					if s.playbackSubscriberCtxCancelFunc != nil {
-						s.playbackSubscriberCtxCancelFunc()
-						s.playbackSubscriberCtxCancelFunc = nil
-					}
-				}()
+				defer slot.cancelPlaybackSubscriber()
 				select {
 				case <-playbackSubscriberCtx.Done():
-					s.repository.wsEventManager.SendEvent(events.HideIndefiniteLoader, "debridstream")
+					ws.SendEvent(events.HideIndefiniteLoader, "debridstream")
 					s.repository.playbackManager.UnsubscribeFromPlaybackStatus("debridstream")
-					s.currentStreamUrl = ""
+					slot.setStreamURL("")
 				case event := <-playbackSubscriber.EventCh:
 					switch event.(type) {
 					case playbackmanager.StreamStartedEvent:
-						s.repository.wsEventManager.SendEvent(events.HideIndefiniteLoader, "debridstream")
+						ws.SendEvent(events.HideIndefiniteLoader, "debridstream")
 					case playbackmanager.StreamStoppedEvent:
 						go s.repository.playbackManager.UnsubscribeFromPlaybackStatus("debridstream")
-						s.currentStreamUrl = ""
+						slot.setStreamURL("")
 					}
 				}
 			}()
 
 		case PlaybackTypeExternalPlayer:
 			// Send the external player link
-			s.repository.wsEventManager.SendEventTo(opts.ClientId, events.ExternalPlayerOpenURL, struct {
+			ws.SendEventTo(opts.ClientId, events.ExternalPlayerOpenURL, struct {
 				Url           string `json:"url"`
 				MediaId       int    `json:"mediaId"`
 				EpisodeNumber int    `json:"episodeNumber"`
@@ -516,17 +574,17 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 				MediaId:       opts.MediaId,
 				EpisodeNumber: opts.EpisodeNumber,
 				MediaTitle:    media.GetPreferredTitle(),
-			})
+			}, true) // Garceslab Anime: never log the debrid link
 
 			// Signal to the client that the torrent has started playing (remove loading status)
 			// We can't know for sure
-			s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+			ws.SendEvent(events.DebridStreamState, StreamState{
 				Status:      StreamStatusReady,
 				TorrentName: selectedTorrent.Name,
 				Message:     "External player link sent",
 			})
 		case PlaybackTypeNativePlayer:
-			s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+			ws.SendEvent(events.DebridStreamState, StreamState{
 				Status:      StreamStatusReady,
 				TorrentName: selectedTorrent.Name,
 				Message:     "",
@@ -558,12 +616,12 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 			if selectedTorrent.IsBatch {
 				_ = db_bridge.InsertTorrentstreamHistory(s.repository.db, media.GetID(), selectedTorrent, opts.BatchEpisodeFiles)
 
-				s.repository.wsEventManager.SendEvent(events.InvalidateQueries, []string{events.GetTorrentstreamBatchHistoryEndpoint})
+				ws.SendEvent(events.InvalidateQueries, []string{events.GetTorrentstreamBatchHistoryEndpoint})
 			}
 		}()
 	}(ctx)
 
-	s.repository.wsEventManager.SendEvent(events.DebridStreamState, StreamState{
+	ws.SendEvent(events.DebridStreamState, StreamState{
 		Status:      StreamStatusStarted,
 		TorrentName: selectedTorrent.Name,
 		Message:     "Stream started",
@@ -573,7 +631,7 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 	if opts.PlaybackType == PlaybackTypeNoneAndAwait {
 		s.repository.logger.Debug().Msg("debridstream: Waiting for stream to be ready")
 		<-readyCh
-		s.repository.wsEventManager.SendEvent(events.HideIndefiniteLoader, "debridstream")
+		ws.SendEvent(events.HideIndefiniteLoader, "debridstream")
 	}
 
 	return nil
@@ -584,29 +642,224 @@ func (s *StreamManager) cancelStream(opts *CancelStreamOptions) {
 		s.repository.directStreamManager.CloseOpen("")
 	}
 
-	if s.downloadCtxCancelFunc != nil {
-		s.downloadCtxCancelFunc()
-		s.downloadCtxCancelFunc = nil
-	}
+	s.mu.Lock()
+	slot := s.relayed
+	s.relayed = nil
+	s.mu.Unlock()
 
 	s.repository.wsEventManager.SendEvent(events.HideIndefiniteLoader, "debridstream")
 
-	s.currentStreamUrl = ""
+	s.stopSlot(slot, opts)
+}
 
-	if opts.RemoveTorrent && s.currentTorrentItemId != "" {
-		// Remove the torrent from the debrid service
-		provider, err := s.repository.GetProvider()
-		if err != nil {
-			s.repository.logger.Err(err).Msg("debridstream: Failed to remove torrent")
-			return
-		}
-
-		// Remove the torrent from the debrid service
-		err = provider.DeleteTorrent(s.currentTorrentItemId)
-		if err != nil {
-			s.repository.logger.Err(err).Msg("debridstream: Failed to remove torrent")
-		}
+// cancelClientStream cancels the direct stream of clientId (Garceslab Anime). It
+// reports false when the client has no direct stream, so callers can fall back
+// to cancelStream (the relayed stream, upstream behaviour).
+func (s *StreamManager) cancelClientStream(clientId string, opts *CancelStreamOptions) bool {
+	if clientId == "" {
+		return false
 	}
+	s.mu.Lock()
+	slot, ok := s.direct[clientId]
+	if ok {
+		delete(s.direct, clientId)
+	}
+	s.mu.Unlock()
+	if !ok {
+		return false
+	}
+	s.eventsFor(slot).SendEvent(events.HideIndefiniteLoader, "debridstream")
+	s.stopSlot(slot, opts)
+	return true
+}
+
+// stopSlot cancels a slot's download and playback subscriber and, if asked,
+// removes its torrent from the debrid service.
+func (s *StreamManager) stopSlot(slot *streamSlot, opts *CancelStreamOptions) {
+	if slot == nil {
+		return
+	}
+	torrentItemId := slot.stop()
+	if opts == nil || !opts.RemoveTorrent || torrentItemId == "" {
+		return
+	}
+	provider, err := s.repository.GetProvider()
+	if err != nil {
+		s.repository.logger.Err(err).Msg("debridstream: Failed to remove torrent")
+		return
+	}
+	if err := provider.DeleteTorrent(torrentItemId); err != nil {
+		s.repository.logger.Err(err).Msg("debridstream: Failed to remove torrent")
+	}
+}
+
+// takeSlot gives the new stream its slot and stops the streams it replaces: a
+// direct stream replaces its client's previous stream (direct or relayed); a
+// relayed stream replaces the relayed stream (any client) and its client's
+// direct stream. Other clients' direct streams are left alone.
+func (s *StreamManager) takeSlot(opts *StartStreamOptions) *streamSlot {
+	slot := &streamSlot{
+		clientId:      opts.ClientId,
+		isDirect:      opts.PlaybackType.IsDirect() && opts.ClientId != "",
+		mediaId:       opts.MediaId,
+		episodeNumber: opts.EpisodeNumber,
+	}
+	var replaced []*streamSlot
+	s.mu.Lock()
+	if prev, ok := s.direct[opts.ClientId]; ok && opts.ClientId != "" {
+		replaced = append(replaced, prev)
+		delete(s.direct, opts.ClientId)
+	}
+	if slot.isDirect {
+		if s.relayed != nil && s.relayed.clientId == opts.ClientId {
+			replaced = append(replaced, s.relayed)
+			s.relayed = nil
+		}
+		s.direct[opts.ClientId] = slot
+	} else {
+		if s.relayed != nil {
+			replaced = append(replaced, s.relayed)
+		}
+		s.relayed = slot
+	}
+	s.mu.Unlock()
+	for _, prev := range replaced {
+		prev.stop()
+	}
+	return slot
+}
+
+// eventsFor returns where a slot's status events go: only its client for a
+// direct stream, the repository's event manager (broadcast) for a relayed one.
+func (s *StreamManager) eventsFor(slot *streamSlot) events.WSEventManagerInterface {
+	if slot != nil && slot.isDirect {
+		return &clientEvents{WSEventManagerInterface: s.repository.wsEventManager, clientId: slot.clientId}
+	}
+	return s.repository.wsEventManager
+}
+
+// clientEvents turns SendEvent into SendEventTo(clientId).
+type clientEvents struct {
+	events.WSEventManagerInterface
+	clientId string
+}
+
+func (c *clientEvents) SendEvent(t string, payload interface{}) {
+	c.WSEventManagerInterface.SendEventTo(c.clientId, t, payload)
+}
+
+// notifyDirect tells the observer (the viewer sessions registry) how a direct stream went.
+func (s *StreamManager) notifyDirect(slot *streamSlot, ev DirectStreamEvent) {
+	if slot == nil || !slot.isDirect || slot.isStopped() {
+		return
+	}
+	if f := s.repository.directStreamObserver; f != nil {
+		slot.mu.Lock()
+		info := DirectStreamInfo{MediaId: slot.mediaId, EpisodeNumber: slot.episodeNumber, MediaTitle: slot.mediaTitle}
+		slot.mu.Unlock()
+		f(slot.clientId, info, ev)
+	}
+}
+
+// streamURL returns the stream URL of the client's direct stream, else of the relayed stream.
+func (s *StreamManager) streamURL(clientId string) string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if slot, ok := s.direct[clientId]; ok && clientId != "" {
+		return slot.streamURL()
+	}
+	if s.relayed != nil {
+		return s.relayed.streamURL()
+	}
+	return ""
+}
+
+// directClientIds returns the clients with a direct stream.
+func (s *StreamManager) directClientIds() []string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	ret := make([]string, 0, len(s.direct))
+	for id := range s.direct {
+		ret = append(ret, id)
+	}
+	return ret
+}
+
+// begin records the torrent being streamed and the cancel func of its download
+// loop. It reports false when the slot was stopped meanwhile.
+func (sl *streamSlot) begin(torrentItemId string, cancel context.CancelFunc) bool {
+	sl.mu.Lock()
+	defer sl.mu.Unlock()
+	if sl.stopped {
+		return false
+	}
+	sl.currentTorrentItemId = torrentItemId
+	sl.downloadCtxCancelFunc = cancel
+	return true
+}
+
+func (sl *streamSlot) cancelDownload() {
+	sl.mu.Lock()
+	cancel := sl.downloadCtxCancelFunc
+	sl.downloadCtxCancelFunc = nil
+	sl.mu.Unlock()
+	if cancel != nil {
+		cancel()
+	}
+}
+
+func (sl *streamSlot) setPlaybackSubscriberCancel(cancel context.CancelFunc) {
+	sl.mu.Lock()
+	sl.playbackSubscriberCtxCancelFunc = cancel
+	sl.mu.Unlock()
+}
+
+func (sl *streamSlot) cancelPlaybackSubscriber() {
+	sl.mu.Lock()
+	cancel := sl.playbackSubscriberCtxCancelFunc
+	sl.playbackSubscriberCtxCancelFunc = nil
+	sl.mu.Unlock()
+	if cancel != nil {
+		cancel()
+	}
+}
+
+func (sl *streamSlot) setStreamURL(u string) {
+	sl.mu.Lock()
+	sl.currentStreamUrl = u
+	sl.mu.Unlock()
+}
+
+func (sl *streamSlot) streamURL() string {
+	sl.mu.Lock()
+	defer sl.mu.Unlock()
+	return sl.currentStreamUrl
+}
+
+func (sl *streamSlot) isStopped() bool {
+	sl.mu.Lock()
+	defer sl.mu.Unlock()
+	return sl.stopped
+}
+
+// stop cancels the slot's goroutines and returns its torrent item id.
+func (sl *streamSlot) stop() string {
+	sl.mu.Lock()
+	sl.stopped = true
+	cancel := sl.downloadCtxCancelFunc
+	sub := sl.playbackSubscriberCtxCancelFunc
+	sl.downloadCtxCancelFunc = nil
+	sl.playbackSubscriberCtxCancelFunc = nil
+	sl.currentStreamUrl = ""
+	id := sl.currentTorrentItemId
+	sl.mu.Unlock()
+	if cancel != nil {
+		cancel()
+	}
+	if sub != nil {
+		sub()
+	}
+	return id
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
