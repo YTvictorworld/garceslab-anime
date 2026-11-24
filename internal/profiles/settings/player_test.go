@@ -144,3 +144,27 @@ func TestPlayerPrefsCascadeOnPurge(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, *b.TV.AutoPlay)
 }
+
+// "Skip filler and recaps" follows the profile like the other TV preferences
+// and only accepts a boolean.
+func TestPlayerPrefsSkipFillerEpisodes(t *testing.T) {
+	s, ana, bruno := newPlayerTestStore(t)
+	ctx := context.Background()
+
+	got, err := s.PatchPlayerPrefs(ctx, ana, patchOf(t, `{"tv": {"skipFillerEpisodes": true}}`))
+	require.NoError(t, err)
+	require.NotNil(t, got.TV.SkipFillerEpisodes)
+	assert.True(t, *got.TV.SkipFillerEpisodes)
+
+	// Another field later keeps it.
+	got, err = s.PatchPlayerPrefs(ctx, ana, patchOf(t, `{"tv": {"autoNextEpisode": false}}`))
+	require.NoError(t, err)
+	assert.True(t, *got.TV.SkipFillerEpisodes)
+
+	b, err := s.PlayerPrefs(ctx, bruno)
+	require.NoError(t, err)
+	assert.Nil(t, b.TV)
+
+	_, err = s.PatchPlayerPrefs(ctx, ana, patchOf(t, `{"tv": {"skipFillerEpisodes": "yes"}}`))
+	require.ErrorIs(t, err, ErrInvalidSetting)
+}
