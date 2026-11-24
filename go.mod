@@ -37,6 +37,7 @@ require (
 	github.com/hekmon/transmissionrpc/v3 v3.0.0
 	github.com/huin/goupnp v1.3.0
 	github.com/imroc/req/v3 v3.61.0
+	github.com/klauspost/compress v1.19.2
 	github.com/kr/pretty v0.3.1
 	github.com/labstack/echo/v4 v4.15.4
 	github.com/mileusna/useragent v1.3.5
@@ -123,7 +124,6 @@ require (
 	github.com/icholy/digest v1.2.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/klauspost/compress v1.19.2 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.3 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/labstack/gommon v0.5.0 // indirect
