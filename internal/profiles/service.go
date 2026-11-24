@@ -404,6 +404,7 @@ func (s *Service) Update(ctx context.Context, id int64, in UpdateInput) (*Profil
 				return ErrNameTaken
 			}
 		}
+		renamed, changed := describeUpdate(p, updates)
 		updates["updated_at"] = s.now().Unix()
 		if err := tx.Model(&Profile{}).Where("id = ?", id).Updates(updates).Error; err != nil {
 			if isUniqueViolation(err) {
@@ -411,7 +412,15 @@ func (s *Service) Update(ctx context.Context, id int64, in UpdateInput) (*Profil
 			}
 			return err
 		}
-		return s.audit(ctx, tx, p, AuditUpdate)
+		if renamed != "" {
+			if err := s.auditDetail(ctx, tx, p, AuditRename, renamed); err != nil {
+				return err
+			}
+		}
+		if changed != "" {
+			return s.auditDetail(ctx, tx, p, AuditUpdate, changed)
+		}
+		return nil
 	})
 	if err != nil {
 		return nil, err
@@ -528,16 +537,80 @@ func (s *Service) AuditLog(ctx context.Context, limit int) ([]*ProfileAuditEntry
 }
 
 func (s *Service) audit(ctx context.Context, tx *gorm.DB, target *Profile, action string) error {
+	return s.auditDetail(ctx, tx, target, action, "")
+}
+
+// auditDetail writes one profile_audit row. The actor is the request's profile
+// (none for the purge loop or requests without a profile).
+func (s *Service) auditDetail(ctx context.Context, tx *gorm.DB, target *Profile, action, detail string) error {
 	e := &ProfileAuditEntry{
 		TargetProfileID: target.ID,
 		TargetName:      target.Name,
 		Action:          action,
 		CreatedAt:       s.now().Unix(),
 	}
+	if detail = strings.TrimSpace(detail); detail != "" {
+		if utf8.RuneCountInString(detail) > MaxAuditDetail {
+			detail = string([]rune(detail)[:MaxAuditDetail-1]) + "…"
+		}
+		e.Detail = &detail
+	}
 	if actor := IDFromContext(ctx); actor != 0 {
 		e.ActorProfileID = &actor
 	}
 	return tx.Create(e).Error
+}
+
+// RecordAudit adds an entry for something done to a profile outside this
+// service (imports, exports). A failure is logged, never returned: the audit
+// log must not break the action itself.
+func (s *Service) RecordAudit(ctx context.Context, target *Profile, action, detail string) {
+	if target == nil {
+		return
+	}
+	if err := s.auditDetail(ctx, s.db.WithContext(ctx), target, action, detail); err != nil {
+		s.logger.Warn().Err(err).Str("action", action).Int64("profileId", target.ID).Msg("profiles: Could not write the audit log")
+	}
+}
+
+// describeUpdate returns the audit details of an update: "Old → New" when the
+// name changes and the list of the other fields that really change.
+func describeUpdate(p *Profile, updates map[string]any) (renamed, changed string) {
+	if name, ok := updates["name"].(string); ok && name != p.Name {
+		renamed = fmt.Sprintf("%s → %s", p.Name, name)
+	}
+	var fields []string
+	if v, ok := updates["avatar_id"].(string); ok && v != p.AvatarID {
+		fields = append(fields, "avatar")
+	}
+	if v, ok := updates["color"]; ok {
+		var next string
+		switch c := v.(type) {
+		case *string:
+			if c != nil {
+				next = *c
+			}
+		case string:
+			next = c
+		}
+		prev := ""
+		if p.Color != nil {
+			prev = *p.Color
+		}
+		if next != prev {
+			fields = append(fields, "colour")
+		}
+	}
+	if v, ok := updates["sort_order"].(int); ok && v != p.SortOrder {
+		fields = append(fields, "order")
+	}
+	if v, ok := updates["score_format"].(string); ok && v != p.ScoreFormat {
+		fields = append(fields, "score format")
+	}
+	if v, ok := updates["title_language"].(string); ok && v != p.TitleLanguage {
+		fields = append(fields, "title language")
+	}
+	return renamed, strings.Join(fields, ", ")
 }
 
 func getTx(tx *gorm.DB, id int64) (*Profile, error) {

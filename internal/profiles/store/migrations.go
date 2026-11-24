@@ -18,12 +18,19 @@ type migration struct {
 
 var migrations = []migration{
 	{version: 1, name: "initial schema", statements: schemaV1},
+	{version: 2, name: "phase 4: profile_audit details and more actions", statements: schemaV2Phase4Audit},
 }
 
 // LatestVersion is the schema version this build expects.
 func LatestVersion() int { return migrations[len(migrations)-1].version }
 
 func migrate(ctx context.Context, db *gorm.DB) error {
+	return applyMigrations(ctx, db, migrations)
+}
+
+// applyMigrations applies the steps of list newer than the database's version.
+func applyMigrations(ctx context.Context, db *gorm.DB, list []migration) error {
+	latest := list[len(list)-1].version
 	if err := db.WithContext(ctx).Exec(`CREATE TABLE IF NOT EXISTS profiles_schema_version (
   version    INTEGER PRIMARY KEY,
   name       TEXT    NOT NULL,
@@ -36,11 +43,11 @@ func migrate(ctx context.Context, db *gorm.DB) error {
 	if err != nil {
 		return err
 	}
-	if current > LatestVersion() {
-		return fmt.Errorf("profiles store: database schema version %d is newer than this build (%d)", current, LatestVersion())
+	if current > latest {
+		return fmt.Errorf("profiles store: database schema version %d is newer than this build (%d)", current, latest)
 	}
 
-	for _, m := range migrations {
+	for _, m := range list {
 		if m.version <= current {
 			continue
 		}
@@ -230,4 +237,31 @@ var schemaV1 = []string{
   created_at        INTEGER NOT NULL
 )`,
 	`CREATE INDEX ix_profile_audit_time ON profile_audit(created_at DESC)`,
+}
+
+// schemaV2Phase4Audit (phase 4) rebuilds profile_audit, because SQLite can't
+// change a CHECK constraint in place:
+//   - `detail`: a short human-readable note (old -> new name, changed fields,
+//     import source), NULL when there is nothing to add;
+//   - the action list moves from a CHECK to Go (profiles.Audit*), so new actions
+//     (rename, import, export...) don't need another table rebuild;
+//   - an index to list one profile's history.
+//
+// Existing rows are kept with their ids.
+var schemaV2Phase4Audit = []string{
+	`CREATE TABLE profile_audit_p4 (
+  id                INTEGER PRIMARY KEY AUTOINCREMENT,
+  actor_profile_id  INTEGER REFERENCES profiles(id) ON DELETE SET NULL,
+  target_profile_id INTEGER NOT NULL,
+  target_name       TEXT    NOT NULL,
+  action            TEXT    NOT NULL CHECK (length(action) BETWEEN 1 AND 32),
+  detail            TEXT    CHECK (detail IS NULL OR length(detail) <= 300),
+  created_at        INTEGER NOT NULL
+)`,
+	`INSERT INTO profile_audit_p4 (id, actor_profile_id, target_profile_id, target_name, action, detail, created_at)
+SELECT id, actor_profile_id, target_profile_id, target_name, action, NULL, created_at FROM profile_audit`,
+	`DROP TABLE profile_audit`,
+	`ALTER TABLE profile_audit_p4 RENAME TO profile_audit`,
+	`CREATE INDEX ix_profile_audit_time ON profile_audit(created_at DESC)`,
+	`CREATE INDEX ix_profile_audit_target ON profile_audit(target_profile_id, created_at DESC)`,
 }
