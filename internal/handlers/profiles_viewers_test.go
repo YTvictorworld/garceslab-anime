@@ -312,3 +312,39 @@ func TestRelayedStartKeepsDirectSessionsAndCountsAsAViewer(t *testing.T) {
 	require.Contains(t, res["error"], "LANES_FULL")
 	require.Equal(t, 2, env.app.ViewerSessions().Count(), "the relayed playback cancelled no direct session")
 }
+
+// Direct play retries (the TV asks for a fresh link to the same file up to
+// three times) restart the stream as the same client: they replace its own
+// viewer session and never need a free slot.
+func TestDirectPlayRetryReusesTheDevicesSession(t *testing.T) {
+	env, ws, provider := newViewersEnv(t)
+	viewers := env.app.ViewerSessions()
+	var tokens []string
+	for _, name := range []string{"Ana", "Bob", "Carl"} {
+		_, token := env.session(name, "tv-"+strings.ToLower(name))
+		tokens = append(tokens, token)
+	}
+	for i, name := range []string{"ana", "bob", "carl"} {
+		code, _ := startDirect(env, "tv-"+name, tokens[i], i+1)
+		require.Equal(t, 200, code)
+	}
+	require.Equal(t, 3, viewers.Count())
+	first, ok := viewers.Get("tv-ana")
+	require.True(t, ok)
+
+	// All three slots are in use; Ana's TV retries its link three times.
+	for retry := 0; retry < 3; retry++ {
+		code, res := startDirect(env, "tv-ana", tokens[0], 1)
+		require.Equal(t, 200, code, "retry %d: %v", retry, res)
+		require.Equal(t, 3, viewers.Count())
+	}
+	s, ok := viewers.Get("tv-ana")
+	require.True(t, ok)
+	require.Equal(t, first.MediaID, s.MediaID)
+	require.False(t, ws.has("tv-ana", sessions.EventSessionEnded, ""), "a retry doesn't end the device's session")
+	require.ElementsMatch(t, []string{"tv-ana", "tv-bob", "tv-carl"}, env.app.DebridClientRepository.DirectStreamClientIds())
+
+	close(provider.gate("item-hash1"))
+	waitUntil(t, "Ana's link", func() bool { return ws.has("tv-ana", events.ExternalPlayerOpenURL, "item-hash1") })
+	require.True(t, ws.has("tv-ana", events.ExternalPlayerOpenURL, "FileId:1"), "the link names the file for the next retry")
+}
