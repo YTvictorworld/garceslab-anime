@@ -9649,7 +9649,26 @@
         "POST"
       ],
       "params": [],
-      "bodyFields": [],
+      "bodyFields": [
+        {
+          "name": "MediaId",
+          "jsonName": "mediaId",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": []
+        },
+        {
+          "name": "EpisodeNumber",
+          "jsonName": "episodeNumber",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": []
+        }
+      ],
       "returns": "bool",
       "returnGoType": "bool",
       "returnTypescriptType": "boolean"
@@ -11440,6 +11459,251 @@
     ],
     "filepath": "internal/handlers/profiles_test.go",
     "filename": "profiles_test.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "registerProfileViewerRoutes",
+    "trimmedName": "registerProfileViewerRoutes",
+    "comments": [
+      "registerProfileViewerRoutes adds the \"Now watching\" routes (Settings → Profiles).",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_viewers.go",
+    "filename": "profiles_viewers.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "HandleGetViewerSessions",
+    "trimmedName": "GetViewerSessions",
+    "comments": [
+      "HandleGetViewerSessions",
+      "",
+      "\t@summary returns who is watching right now (viewer sessions and the relayed playback).",
+      "\t@route /api/v1/profiles/viewers [GET]",
+      "\t@returns handlers.ViewerSessionsResponse",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_viewers.go",
+    "filename": "profiles_viewers.go",
+    "api": {
+      "summary": "returns who is watching right now (viewer sessions and the relayed playback).",
+      "descriptions": [],
+      "endpoint": "/api/v1/profiles/viewers",
+      "methods": [
+        "GET"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "handlers.ViewerSessionsResponse",
+      "returnGoType": "handlers.ViewerSessionsResponse",
+      "returnTypescriptType": "ViewerSessionsResponse"
+    }
+  },
+  {
+    "name": "HandleStopViewerSession",
+    "trimmedName": "StopViewerSession",
+    "comments": [
+      "HandleStopViewerSession",
+      "",
+      "\t@summary ends a viewer session and frees its slot.",
+      "\t@desc The device is told its session ended; a debrid link still being resolved for it is cancelled.",
+      "\t@route /api/v1/profiles/viewers/{sessionId}/stop [POST]",
+      "\t@param sessionId - string - true - \"The session ID\"",
+      "\t@returns bool",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_viewers.go",
+    "filename": "profiles_viewers.go",
+    "api": {
+      "summary": "ends a viewer session and frees its slot.",
+      "descriptions": [
+        "The device is told its session ended; a debrid link still being resolved for it is cancelled."
+      ],
+      "endpoint": "/api/v1/profiles/viewers/{sessionId}/stop",
+      "methods": [
+        "POST"
+      ],
+      "params": [
+        {
+          "name": "sessionId",
+          "jsonName": "sessionId",
+          "goType": "string",
+          "usedStructType": "",
+          "typescriptType": "string",
+          "required": true,
+          "descriptions": [
+            "The session ID"
+          ]
+        }
+      ],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "acquireDirectSession",
+    "trimmedName": "acquireDirectSession",
+    "comments": [
+      "acquireDirectSession takes a viewing slot for a direct debrid stream of the",
+      "requesting client. Without profiles (or viewer sessions) it does nothing.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_viewers.go",
+    "filename": "profiles_viewers.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "acquireRelayedLane",
+    "trimmedName": "acquireRelayedLane",
+    "comments": [
+      "acquireRelayedLane takes the single relayed playback lane (phase 1) for the",
+      "requesting client, and ends its direct session: the device now plays through",
+      "the server instead.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_viewers.go",
+    "filename": "profiles_viewers.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "respondPlaybackSlotError",
+    "trimmedName": "respondPlaybackSlotError",
+    "comments": [
+      "respondPlaybackSlotError answers 409 for LANES_FULL and PLAYBACK_BUSY.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_viewers.go",
+    "filename": "profiles_viewers.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "viewerWebsocketConnected",
+    "trimmedName": "viewerWebsocketConnected",
+    "comments": [
+      "viewerWebsocketConnected / viewerWebsocketDisconnected: the disconnect grace of",
+      "a session starts when its client's last websocket closes.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_viewers.go",
+    "filename": "profiles_viewers.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "startSessionManualTracking",
+    "trimmedName": "startSessionManualTracking",
+    "comments": [
+      "startSessionManualTracking reports handled=false without viewer sessions.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_viewers.go",
+    "filename": "profiles_viewers.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "cancelSessionManualTracking",
+    "trimmedName": "cancelSessionManualTracking",
+    "comments": [
+      "cancelSessionManualTracking ends the requesting client's session. A cancel",
+      "without an episode only ends a session that is already playing: a session",
+      "still being prepared belongs to the next episode.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_viewers.go",
+    "filename": "profiles_viewers.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "syncSessionManualTracking",
+    "trimmedName": "syncSessionManualTracking",
+    "comments": [
+      "syncSessionManualTracking saves the tracked episode as watched for the",
+      "requesting client's profile, then ends the tracking (like upstream).",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_viewers.go",
+    "filename": "profiles_viewers.go",
     "api": {
       "summary": "",
       "descriptions": [],

@@ -2383,7 +2383,7 @@
 // }
 
 // export function usePlaybackCancelManualTracking() {
-//     return useServerMutation<boolean>({
+//     return useServerMutation<boolean, PlaybackCancelManualTracking_Variables>({
 //         endpoint: API_ENDPOINTS.PLAYBACK_MANAGER.PlaybackCancelManualTracking.endpoint,
 //         method: API_ENDPOINTS.PLAYBACK_MANAGER.PlaybackCancelManualTracking.methods[0],
 //         mutationKey: [API_ENDPOINTS.PLAYBACK_MANAGER.PlaybackCancelManualTracking.key],
@@ -2777,6 +2777,30 @@
 //         endpoint: API_ENDPOINTS.PROFILES_PLAYER.PatchMyPlayerPrefs.endpoint,
 //         method: API_ENDPOINTS.PROFILES_PLAYER.PatchMyPlayerPrefs.methods[0],
 //         mutationKey: [API_ENDPOINTS.PROFILES_PLAYER.PatchMyPlayerPrefs.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// profiles_viewers
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// export function useGetViewerSessions() {
+//     return useServerQuery<ViewerSessionsResponse>({
+//         endpoint: API_ENDPOINTS.PROFILES_VIEWERS.GetViewerSessions.endpoint,
+//         method: API_ENDPOINTS.PROFILES_VIEWERS.GetViewerSessions.methods[0],
+//         queryKey: [API_ENDPOINTS.PROFILES_VIEWERS.GetViewerSessions.key],
+//         enabled: true,
+//     })
+// }
+
+// export function useStopViewerSession(sessionId: string) {
+//     return useServerMutation<boolean>({
+//         endpoint: API_ENDPOINTS.PROFILES_VIEWERS.StopViewerSession.endpoint.replace("{sessionId}", String(sessionId)),
+//         method: API_ENDPOINTS.PROFILES_VIEWERS.StopViewerSession.methods[0],
+//         mutationKey: [API_ENDPOINTS.PROFILES_VIEWERS.StopViewerSession.key],
 //         onSuccess: async () => {
 //
 //         },
