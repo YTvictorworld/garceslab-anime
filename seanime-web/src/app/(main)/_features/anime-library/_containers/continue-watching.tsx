@@ -1,8 +1,10 @@
 import { Anime_Episode, Continuity_WatchHistory } from "@/api/generated/types"
 import { getEpisodeMinutesRemaining, getEpisodePercentageComplete, useGetContinuityWatchHistory } from "@/api/hooks/continuity.hooks"
+import { useEpisodeTag } from "@/api/hooks/episode_tags.hooks"
 import { usePlayNext } from "@/app/(main)/_atoms/playback.atoms"
 import { __libraryHeaderImageAtom } from "@/app/(main)/_features/anime-library/_components/library-header"
 import { EpisodeCard } from "@/app/(main)/_features/anime/_components/episode-card"
+import { EpisodeTagPill } from "@/app/(main)/_features/anime/_components/episode-tag-pill"
 import { EpisodeTorrentAvailabilityBadge } from "@/app/(main)/_features/anime/_components/episode-torrent-availability-badge"
 import { useSeaCommandInject } from "@/app/(main)/_features/sea-command/use-inject"
 import { useServerStatus } from "@/app/(main)/_hooks/use-server-status"
@@ -185,6 +187,7 @@ export function ContinueWatching({ episodes, isLoading, linkTemplate, withTitle 
                                 overrideLink={linkTemplate}
                                 spoilerActive={spoilerActive}
                                 watchHistory={watchHistory}
+                                withEpisodeTag={idx < MAX_TAGGED_CARDS}
                             />
                         </CarouselItem>
                     ))}
@@ -195,13 +198,19 @@ export function ContinueWatching({ episodes, isLoading, linkTemplate, withTitle 
     return null
 }
 
-const _EpisodeCard = React.memo(({ episode, mRef, overrideLink, spoilerActive, watchHistory }: {
+/** Garceslab Anime: about what the row shows without scrolling far. */
+const MAX_TAGGED_CARDS = 10
+
+const _EpisodeCard = React.memo(({ episode, mRef, overrideLink, spoilerActive, watchHistory, withEpisodeTag }: {
     episode: Anime_Episode,
     mRef: React.RefObject<any>,
     overrideLink?: string
     spoilerActive: boolean
     watchHistory: Continuity_WatchHistory | undefined
+    /** Garceslab Anime: only the first cards ask for tags, so a long row doesn't send a burst of requests. */
+    withEpisodeTag?: boolean
 }) => {
+    const episodeTag = useEpisodeTag(withEpisodeTag && episode.type === "main" ? episode.baseAnime?.id : null, episode.episodeNumber)
     const serverStatus = useServerStatus()
     const router = useRouter()
     const setHeaderImage = useSetAtom(__libraryHeaderImageAtom)
@@ -242,7 +251,10 @@ const _EpisodeCard = React.memo(({ episode, mRef, overrideLink, spoilerActive, w
             progressTotal={episode.baseAnime?.episodes}
             progressNumber={episode.progressNumber}
             episodeNumber={episode.episodeNumber}
-            badge={<EpisodeTorrentAvailabilityBadge status={episode.torrentAvailability} />}
+            badge={episodeTag ? <div className="flex items-center gap-1.5">
+                <EpisodeTagPill kind={episodeTag} />
+                <EpisodeTorrentAvailabilityBadge status={episode.torrentAvailability} />
+            </div> : <EpisodeTorrentAvailabilityBadge status={episode.torrentAvailability} />}
             length={episode.episodeMetadata?.length}
             hasDiscrepancy={episode.episodeNumber !== episode.progressNumber}
             percentageComplete={getEpisodePercentageComplete(watchHistory, episode.baseAnime?.id || 0, episode.episodeNumber)}

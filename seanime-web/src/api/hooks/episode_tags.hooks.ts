@@ -1,7 +1,7 @@
 import { useServerQuery } from "@/api/client/requests"
 import { API_ENDPOINTS } from "@/api/generated/endpoints"
-import { EpisodeTags_Response, Nullish } from "@/api/generated/types"
-import { EpisodeTagMap, visibleEpisodeTags } from "@/lib/episode-tags/episode-tags"
+import { EpisodeTags_Kind, EpisodeTags_Response, Nullish } from "@/api/generated/types"
+import { episodeTagFor, EpisodeTagMap, visibleEpisodeTags } from "@/lib/episode-tags/episode-tags"
 import React from "react"
 
 const POLL_MS = 4000
@@ -26,4 +26,13 @@ export function useEpisodeTags(mediaId: Nullish<number>): EpisodeTagMap | null {
         refetchInterval: query => (query.state.data?.status === "pending" && query.state.dataUpdateCount < MAX_POLLS ? POLL_MS : false),
     })
     return React.useMemo(() => visibleEpisodeTags(data), [data])
+}
+
+/**
+ * One episode's tag (continue watching, the autoplay prompt), from the same
+ * cache as the anime page. Pass a null mediaId to skip the request.
+ */
+export function useEpisodeTag(mediaId: Nullish<number>, episodeNumber: Nullish<number>): EpisodeTags_Kind | undefined {
+    const tags = useEpisodeTags(episodeNumber ? mediaId : null)
+    return episodeTagFor(tags, episodeNumber)
 }
