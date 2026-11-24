@@ -1,6 +1,11 @@
 import { AL_AnimeCollection_MediaListCollection_Lists } from "@/api/generated/types"
 import { useGetAniListStats } from "@/api/hooks/anilist.hooks"
 import { AnilistAnimeEntryList } from "@/app/(main)/_features/anime/_components/anilist-media-entry-list"
+import {
+    ProfileCustomListsButton,
+    ProfileFavouritesSection,
+    ProfileRecentlyWatchedSection,
+} from "@/app/(main)/_features/profiles/profile-library-sections"
 import { useServerStatus } from "@/app/(main)/_hooks/use-server-status"
 import { AnilistStats } from "@/app/(main)/lists/_containers/anilist-stats"
 import {
@@ -145,6 +150,8 @@ export function AnilistCollectionLists() {
                             <h2>Dropped <span className="text-[--muted] font-medium ml-3">{droppedList?.entries?.length}</span></h2>
                             <AnilistAnimeEntryList type={pageType} list={droppedList} />
                         </>}
+                        {/* Garceslab Anime: the profile's favourites (phase 3) */}
+                        {(pageType === "anime" && selectedIndex === "-") && <ProfileFavouritesSection />}
                         {customLists?.map(list => {
                             return (!!list.entries?.length && ["-", list.name || "N/A"].includes(selectedIndex)) ? <div
                                 key={list.name}
@@ -174,6 +181,7 @@ export function AnilistCollectionLists() {
                         stats={stats}
                         isLoading={statsLoading}
                     />
+                    <ProfileRecentlyWatchedSection />
                 </PageWrapper>}
             </AnimatePresence>
 
@@ -247,6 +255,7 @@ export function SearchOptions({
                 />
                 <div className="flex gap-4 items-center w-full" data-anilist-collection-lists-search-options-actions>
                     <SearchInput />
+                    {pageType === "anime" && <ProfileCustomListsButton />}
                     <IconButton
                         icon={<BiTrash />} intent={highlightTrash ? "alert" : "gray-subtle"} className="flex-none" onClick={() => {
                         setParams(prev => ({
