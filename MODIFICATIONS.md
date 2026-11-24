@@ -66,6 +66,16 @@ AniList account, several playbacks at the same time) will be listed here as they
   `EpisodeTags_` prefix. The web anime page shows a CANON / FILLER / RECAP / MIX pill on episode
   cards when the anime has at least one filler or recap episode.
 
+## 2026-11 (profiles, phase 3: AniList-like features)
+
+- **Favourites, full entry editor, custom list management, recently watched**
+  (`internal/profiles/localplatform/{favourites,editor,customlists}.go`,
+  `internal/handlers/profiles_library.go`), stored per profile on the existing tables. The web
+  adds a favourite button, notes/private/custom lists in the entry editor and "Manage lists";
+  stats are computed locally. See `docs/profiles-phase3.md`.
+- **Private AniList import with a one-time token** and favourites import
+  (`internal/profiles/importer/anilist_account.go`); the token is never stored.
+
 ## 2026-11 (profiles, phase 4: polish)
 
 - **Player preferences per profile** (`internal/profiles/settings/player.go`,
