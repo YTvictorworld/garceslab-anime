@@ -133,13 +133,13 @@ export function TorrentstreamSettings(props: TorrentstreamSettingsProps) {
                                 side="right"
                                 name="autoSelect"
                                 label="Enable"
-                                help="Let Seanime find the best torrent automatically."
+                                help="Let Garceslab Anime find the best torrent automatically."
                             />
 
                             <Field.Select
                                 name="preferredResolution"
                                 label="Preferred resolution"
-                                help="If auto-select is enabled, Seanime will try to find torrents with this resolution."
+                                help="If auto-select is enabled, Garceslab Anime will try to find torrents with this resolution."
                                 options={[
                                     { label: "Highest", value: "-" },
                                     { label: "480p", value: "480" },

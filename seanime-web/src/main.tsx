@@ -112,7 +112,7 @@ function RootErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
                 <LuffyError
                     title="Client error"
                 >
-                    Seanime encountered an unexpected error. Please try again.
+                    Garceslab Anime encountered an unexpected error. Please try again.
                 </LuffyError>
 
                 {!!(error as Error)?.message && (
