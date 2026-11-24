@@ -13,7 +13,9 @@ import {
     useGetAvatarCatalog,
     useGetProfileAudit,
     useGetProfiles,
+    useGetViewerSessions,
     useRestoreProfile,
+    useStopViewerSession,
     useSetProfilePin,
     useTrashProfile,
     useUpdateProfile,
@@ -44,6 +46,50 @@ function formatDate(unixSeconds?: number) {
     return new Date(unixSeconds * 1000).toLocaleString()
 }
 
+const SESSION_STATE: Record<string, string> = {
+    preparing: "Starting",
+    ready: "Starting",
+    playing: "Watching",
+}
+
+/**
+ * Phase 2: who is watching right now. Debrid streams played directly by a
+ * device take one of the viewing slots each; a playback through the server
+ * (web player, torrent stream, library file) takes one too.
+ */
+function NowWatching() {
+    const { data } = useGetViewerSessions()
+    const { mutate: stop, isPending } = useStopViewerSession()
+    if (!data) return null
+    const sessions = data.sessions ?? []
+    const used = sessions.length + (data.relayed ? 1 : 0)
+    return (
+        <SettingsCard title="Now watching">
+            <div data-now-watching className="space-y-2">
+                <p className="text-sm text-[--muted]">{used} of {data.max} viewing slots in use.</p>
+                {sessions.map(s => (
+                    <div key={s.id} data-viewer-session={s.profileName} className="flex flex-wrap items-center gap-3 p-2 rounded-[--radius-md] border border-[--border]">
+                        <div className="flex-1 min-w-[8rem]">
+                            <p className="font-semibold">{s.profileName || "Guest"} <span className="text-[--muted] font-normal">· {s.device}</span></p>
+                            <p className="text-sm text-[--muted] truncate">
+                                {s.mediaTitle || `Anime ${s.mediaId}`}{s.episodeNumber > 0 ? ` · Episode ${s.episodeNumber}` : ""}
+                                {" · "}{SESSION_STATE[s.state] ?? s.state}{s.disconnected ? " · reconnecting" : ""}
+                            </p>
+                        </div>
+                        <Button size="sm" intent="alert-subtle" disabled={isPending} onClick={() => stop({ sessionId: s.id })}>Stop</Button>
+                    </div>
+                ))}
+                {data.relayed && (
+                    <div className="p-2 rounded-[--radius-md] border border-[--border]">
+                        <p className="font-semibold">{data.relayed.profileName || "Guest"} <span className="text-[--muted] font-normal">· through the server</span></p>
+                    </div>
+                )}
+                {used === 0 && <p className="text-sm text-[--muted]">Nobody is watching.</p>}
+            </div>
+        </SettingsCard>
+    )
+}
+
 /** Settings → Profiles (plan §3.3, §3.9.3). No roles: any profile can manage any profile. */
 export function ProfilesSettings() {
     const { data: profiles, isLoading } = useGetProfiles(true)
@@ -67,6 +113,8 @@ export function ProfilesSettings() {
                     <p>{PIN_NOTICE}</p>
                 </div>
             </SettingsCard>
+
+            <NowWatching />
 
             <SettingsCard title="Profiles">
                 <div className="space-y-2">

@@ -357,8 +357,11 @@ export function getProfileErrorMessage(err: string): string {
     switch (code) {
         case "PLAYBACK_BUSY":
             return "Someone else is playing something on this server right now. Try again when their playback ends."
-        case "LANES_FULL":
-            return "All playback slots on this server are in use. Try again when someone stops watching."
+        case "LANES_FULL": {
+            // "LANES_FULL: All 3 viewing slots are in use (Ana, Bob and Carl)"
+            const detail = err.slice(code.length + 1).trim().replace(/\.$/, "")
+            return `${detail || "All viewing slots on this server are in use"}. Try again when someone stops watching.`
+        }
         case "PROFILE_REQUIRED":
         case "PROFILE_INVALID_TOKEN":
             return "Choose a profile first."

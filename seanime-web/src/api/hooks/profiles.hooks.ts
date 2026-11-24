@@ -3,7 +3,7 @@
 import { buildSeaQuery, useServerMutation, useServerQuery } from "@/api/client/requests"
 import { API_ENDPOINTS } from "@/api/generated/endpoints"
 import { PatchMyPlayerPrefs_Variables } from "@/api/generated/endpoint.types"
-import { Avatar, PlayerPrefs, Profile, ProfileAuditEntry, ProfileImportResult, ProfileSession } from "@/api/generated/types"
+import { Avatar, PlayerPrefs, Profile, ProfileAuditEntry, ProfileImportResult, ProfileSession, ViewerSessionsResponse } from "@/api/generated/types"
 import { serverAuthTokenAtom } from "@/app/(main)/_atoms/server-status.atoms"
 import { useQueryClient } from "@tanstack/react-query"
 import { useAtomValue } from "jotai"
@@ -55,6 +55,38 @@ export function useGetProfileAudit(enabled = true) {
         params: { limit: 50 },
         queryKey: [P.GetProfileAudit.key],
         enabled,
+    })
+}
+
+/** Phase 2: who is watching right now (viewer sessions and the relayed playback). */
+export function useGetViewerSessions(enabled = true) {
+    return useServerQuery<ViewerSessionsResponse>({
+        endpoint: API_ENDPOINTS.PROFILES_VIEWERS.GetViewerSessions.endpoint,
+        method: API_ENDPOINTS.PROFILES_VIEWERS.GetViewerSessions.methods[0],
+        queryKey: [API_ENDPOINTS.PROFILES_VIEWERS.GetViewerSessions.key],
+        enabled,
+        refetchInterval: 10_000,
+    })
+}
+
+/** Ends a viewer session (its device is told, and its slot is freed). */
+export function useStopViewerSession() {
+    const qc = useQueryClient()
+    const password = useAtomValue(serverAuthTokenAtom)
+    const E = API_ENDPOINTS.PROFILES_VIEWERS.StopViewerSession
+    return useServerMutation<boolean, { sessionId: string }>({
+        endpoint: E.endpoint,
+        method: E.methods[0],
+        mutationKey: [E.key],
+        mutationFn: async v => buildSeaQuery<boolean>({
+            endpoint: E.endpoint.replace("{sessionId}", encodeURIComponent(v.sessionId)),
+            method: E.methods[0],
+            password,
+        }),
+        onSuccess: async () => {
+            await qc.invalidateQueries({ queryKey: [API_ENDPOINTS.PROFILES_VIEWERS.GetViewerSessions.key] })
+            toast.success("Stopped")
+        },
     })
 }
 
