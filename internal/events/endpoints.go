@@ -71,6 +71,7 @@ const (
 	GetAnimeEntryEndpoint                              = "ANIME-ENTRIES-get-anime-entry"
 	GetAnimeEntrySilenceStatusEndpoint                 = "ANIME-ENTRIES-get-anime-entry-silence-status"
 	GetAnimeEpisodeCollectionEndpoint                  = "ANIME-get-anime-episode-collection"
+	GetAnimeEpisodeTagsEndpoint                        = "ANIME-EPISODE-TAGS-get-anime-episode-tags"
 	GetAnnouncementsEndpoint                           = "STATUS-get-announcements"
 	GetAutoDownloaderItemsEndpoint                     = "AUTO-DOWNLOADER-get-auto-downloader-items"
 	GetAutoDownloaderProfileEndpoint                   = "AUTO-DOWNLOADER-get-auto-downloader-profile"

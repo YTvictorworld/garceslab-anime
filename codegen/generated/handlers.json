@@ -1348,6 +1348,59 @@
     }
   },
   {
+    "name": "HandleGetAnimeEpisodeTags",
+    "trimmedName": "GetAnimeEpisodeTags",
+    "comments": [
+      "HandleGetAnimeEpisodeTags",
+      "",
+      "\t@summary returns canon/filler/recap tags for the episodes of an anime.",
+      "\t@desc Tags come from MyAnimeList data via Jikan-compatible APIs (Tenrai, jikan-edge, Jikan), looked up by the media's MAL id.",
+      "\t@desc It never waits for the network: \"status\" is \"ready\" (tags in \"episodes\"), \"pending\" (nothing cached yet, a background",
+      "\t@desc fetch is running; ask again in a few seconds) or \"unavailable\" (no MAL id, not on MAL, providers down, disabled or offline).",
+      "\t@desc \"episodes\" maps the episode number (MAL numbering = the episode list's episodeNumber) to \"canon\", \"filler\", \"recap\" or \"mixed\".",
+      "\t@desc \"hasNonCanon\" is true when at least one episode is not canon; clients show tags only then.",
+      "\t@desc Tags are cached in the data directory: refreshed daily while the anime airs, every 30 days once finished.",
+      "\t@param id - int - true - \"AniList anime media ID\"",
+      "\t@route /api/v1/anime/episode-tags/{id} [GET]",
+      "\t@returns episodetags.Response",
+      ""
+    ],
+    "filepath": "internal/handlers/anime_episode_tags.go",
+    "filename": "anime_episode_tags.go",
+    "api": {
+      "summary": "returns canon/filler/recap tags for the episodes of an anime.",
+      "descriptions": [
+        "Tags come from MyAnimeList data via Jikan-compatible APIs (Tenrai, jikan-edge, Jikan), looked up by the media's MAL id.",
+        "It never waits for the network: \"status\" is \"ready\" (tags in \"episodes\"), \"pending\" (nothing cached yet, a background",
+        "fetch is running; ask again in a few seconds) or \"unavailable\" (no MAL id, not on MAL, providers down, disabled or offline).",
+        "\"episodes\" maps the episode number (MAL numbering = the episode list's episodeNumber) to \"canon\", \"filler\", \"recap\" or \"mixed\".",
+        "\"hasNonCanon\" is true when at least one episode is not canon; clients show tags only then.",
+        "Tags are cached in the data directory: refreshed daily while the anime airs, every 30 days once finished."
+      ],
+      "endpoint": "/api/v1/anime/episode-tags/{id}",
+      "methods": [
+        "GET"
+      ],
+      "params": [
+        {
+          "name": "id",
+          "jsonName": "id",
+          "goType": "int",
+          "usedStructType": "",
+          "typescriptType": "number",
+          "required": true,
+          "descriptions": [
+            "AniList anime media ID"
+          ]
+        }
+      ],
+      "bodyFields": [],
+      "returns": "episodetags.Response",
+      "returnGoType": "episodetags.Response",
+      "returnTypescriptType": "EpisodeTags_Response"
+    }
+  },
+  {
     "name": "HandleLogin",
     "trimmedName": "Login",
     "comments": [

@@ -1,5 +1,6 @@
 import { getServerBaseUrl } from "@/api/client/server-url"
 import { AL_BaseAnime, Anime_Episode, Anime_LocalFileType } from "@/api/generated/types"
+import { useEpisodeTags } from "@/api/hooks/episode_tags.hooks"
 import { useUpdateLocalFileData } from "@/api/hooks/localfiles.hooks"
 import { useExternalPlayerLink } from "@/app/(main)/_atoms/playback.atoms"
 import { EpisodeGridItem } from "@/app/(main)/_features/anime/_components/episode-grid-item"
@@ -12,6 +13,7 @@ import { defineSchema, Field, Form } from "@/components/ui/form"
 import { Modal, ModalProps } from "@/components/ui/modal"
 import { Popover, PopoverProps } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
+import { episodeTagFor } from "@/lib/episode-tags/episode-tags"
 import { getImageUrl } from "@/lib/server/assets"
 import { useWindowSize } from "@uidotdev/usehooks"
 import { atom } from "jotai"
@@ -44,6 +46,7 @@ export const EpisodeItem = memo(({ episode, media, isWatched, watchedProgress, o
 }) => {
 
     const { updateLocalFile, isPending } = useUpdateLocalFileData()
+    const episodeTags = useEpisodeTags(media.id)
     const [_, copyToClipboard] = useCopyToClipboard()
 
     const { getHMACTokenQueryParam } = useServerHMACAuth()
@@ -73,6 +76,7 @@ export const EpisodeItem = memo(({ episode, media, isWatched, watchedProgress, o
                 fileName={episode.localFile?.name}
                 isWatched={episode.progressNumber > 0 && isWatched}
                 isFiller={episode.episodeMetadata?.isFiller}
+                episodeTag={episode.type === "main" ? episodeTagFor(episodeTags, episode.episodeNumber) : undefined}
                 length={episode.episodeMetadata?.length}
                 percentageComplete={percentageComplete}
                 minutesRemaining={minutesRemaining}
