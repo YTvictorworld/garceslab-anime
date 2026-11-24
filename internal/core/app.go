@@ -47,6 +47,7 @@ import (
 	"seanime/internal/plugin"
 	"seanime/internal/profiles"
 	"seanime/internal/report"
+	"seanime/internal/titleindex"
 	"seanime/internal/torrent_clients/torrent_client"
 	"seanime/internal/torrents/torrent"
 	"seanime/internal/torrentstream"
@@ -190,6 +191,9 @@ type (
 		Profiles *profiles.Service
 		// profiles-hook: router platform, playback lane, per-profile settings/history (nil in offline mode)
 		ProfilesRuntime *ProfilesRuntime
+
+		// Garceslab Anime: local title index for search suggestions (nil when disabled)
+		TitleIndex *titleindex.Manager
 	}
 )
 
@@ -589,6 +593,9 @@ func NewApp(configOpts *ConfigOptions, selfupdater *updater.SelfUpdater) *App {
 
 	// Run one-time initialization actions
 	app.performActionsOnce()
+
+	// Garceslab Anime: title index for search suggestions (loads and downloads in the background)
+	app.initTitleIndex()
 
 	return app
 }

@@ -19,6 +19,15 @@ The companion TV app (https://github.com/YTvictorworld/garceslab-anime-tv) is
 derived from Seanime Tenji by AlkindiX (https://github.com/AlkindiX/seanime-tv),
 Copyright (C) AlkindiX and contributors.
 
+Search suggestions use the anime-offline-database by manami-project
+(https://github.com/manami-project/anime-offline-database), made available
+under the Open Database License (ODbL) v1.0
+(https://opendatacommons.org/licenses/odbl/1-0/); its contents are under the
+Database Contents License (DbCL) v1.0. The database is not part of this
+program: the server downloads it at runtime into its data directory and builds
+a title index from it in memory. Set SEANIME_TITLE_INDEX_DISABLED=true to turn
+this off.
+
 "Seanime" and "Seanime Tenji", and their logos, belong to their respective
 owners and are used only to describe where this program comes from.
 Garceslab Anime is an independent, unofficial project. It is not affiliated

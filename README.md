@@ -84,6 +84,14 @@ Garceslab Anime is **not originally our code**. It is derived from:
   (based on [Seanime Tenji](https://github.com/5rahim/seanime-tenji) by 5rahim): the TV app in
   [garceslab-anime-tv](https://github.com/YTvictorworld/garceslab-anime-tv) is derived from it.
 
+Search suggestions (prefix "search as you type") come from the
+[anime-offline-database](https://github.com/manami-project/anime-offline-database) by
+manami-project, available under the [Open Database License (ODbL) v1.0](https://opendatacommons.org/licenses/odbl/1-0/)
+(contents under the Database Contents License v1.0). It is not included in this repository: the
+server downloads it at runtime into its data directory (`title-index/`, about 6 MB, refreshed
+weekly) and serves `GET /api/v1/search/suggest` from it. Set `SEANIME_TITLE_INDEX_DISABLED=true`
+to turn it off; clients then use the AniList search only.
+
 The original authors keep the copyright on their work, and this project does not claim
 ownership of it. All original copyright and license notices are preserved unchanged, and the
 full git history is kept, so every upstream commit keeps its author.
