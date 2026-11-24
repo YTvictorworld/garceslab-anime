@@ -1,6 +1,7 @@
 import { AL_BaseAnime, AL_BaseManga, AL_MediaStatus, Anime_EntryListData, Manga_EntryListData, Nullish } from "@/api/generated/types"
 import { TRANSPARENT_SIDEBAR_BANNER_IMG_STYLE } from "@/app/(main)/_features/custom-ui/styles"
 import { AnilistMediaEntryModal } from "@/app/(main)/_features/media/_containers/anilist-media-entry-modal"
+import { ProfileFavouriteButton } from "@/app/(main)/_features/profiles/profile-favourite-button"
 import { imageShimmer } from "@/components/shared/image-helpers"
 import { SeaImage } from "@/components/shared/sea-image"
 import { TextGenerateEffect } from "@/components/shared/text-generate-effect"
@@ -421,6 +422,9 @@ export function MediaPageHeaderEntryDetails(props: MediaPageHeaderEntryDetailsPr
                             />
 
                             <AnilistMediaEntryModal listData={listData} media={media} type={type} />
+
+                            {/* Garceslab Anime: favourites per profile (phase 3) */}
+                            {type === "anime" && <ProfileFavouriteButton mediaId={media?.id} />}
 
                             {(listData?.status || listData?.repeat) &&
                                 <div
