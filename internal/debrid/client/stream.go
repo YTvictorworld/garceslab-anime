@@ -226,7 +226,18 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 			Message:     "Selecting best torrent...",
 		})
 
-		pt, err := s.repository.findBestTorrent(ctx, provider, media, opts.EpisodeNumber)
+		// Garceslab Anime: the subtitle-aware step's progress on this client's loading screen.
+		onProgress := func(detail string) {
+			if opts.PlaybackType == PlaybackTypeNativePlayer {
+				s.repository.directStreamManager.UpdateOpenStep(opts.ClientId, detail)
+			}
+			ws.SendEvent(events.DebridStreamState, StreamState{
+				Status:      StreamStatusDownloading,
+				TorrentName: "-",
+				Message:     detail,
+			})
+		}
+		pt, err := s.repository.findBestTorrent(ctx, provider, media, opts.EpisodeNumber, onProgress)
 		if err != nil {
 			if opts.PlaybackType == PlaybackTypeNativePlayer {
 				s.repository.directStreamManager.AbortOpen(opts.ClientId, err)

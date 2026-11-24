@@ -126,3 +126,37 @@ func FilterVideoFiles(files []*TorrentItemFile) []*TorrentItemFile {
 	}
 	return filtered
 }
+
+// Garceslab Anime: subtitle-aware auto-select.
+
+var (
+	// ErrNotCached is returned by CachedFileLinker when the torrent isn't
+	// cached by the provider (nothing was added).
+	ErrNotCached = fmt.Errorf("debrid: torrent is not cached")
+	// ErrRateLimited is returned when the provider answers 429.
+	ErrRateLimited = fmt.Errorf("debrid: rate limited")
+)
+
+type (
+	// CachedFileLinker is implemented by providers that can give a direct link
+	// to one file of a torrent they already have cached, without starting a
+	// download. The subtitle-aware auto-select uses it to read MKV headers.
+	CachedFileLinker interface {
+		CachedFileLink(ctx context.Context, opts CachedFileLinkOptions) (*CachedFileLink, error)
+	}
+
+	CachedFileLinkOptions struct {
+		MagnetLink string
+		InfoHash   string
+		FileId     string // TorrentItemFile.ID from GetTorrentInfo
+	}
+
+	// CachedFileLink is a direct link to one file. URL carries credentials:
+	// never log it. Release must be called once: keep=false removes the
+	// torrent from the account if CachedFileLink added it; keep=true leaves it
+	// for the stream that follows.
+	CachedFileLink struct {
+		URL     string
+		Release func(keep bool)
+	}
+)

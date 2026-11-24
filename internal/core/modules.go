@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"errors"
+	"path/filepath"
 	"seanime/internal/api/anilist"
 	"seanime/internal/continuity"
 	"seanime/internal/database/db"
@@ -337,6 +338,7 @@ func (a *App) initModulesOnce() {
 		TorrentRepository:   a.TorrentRepository,
 		DirectStreamManager: a.DirectStreamManager,
 		DummyDebridEnabled:  a.FeatureFlags.DummyDebrid,
+		TrackProbeCacheDir:  filepath.Join(a.Config.Data.AppDataDir, "track-probe"), // Garceslab Anime
 	})
 
 	plugin.GlobalAppContext.SetModulesPartial(plugin.AppContextModules{

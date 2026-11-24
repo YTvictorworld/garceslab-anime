@@ -156,6 +156,28 @@ func NewProfilesRuntime(svc *profiles.Service, wsEventManager events.WSEventMana
 		}
 		return p, true
 	}
+	// Subtitle-aware debrid auto-select: the TV player languages of the profile that asked.
+	debrid_client.TrackPreferenceCtxHook = func(ctx context.Context) (string, string, string, bool) {
+		pid := profiles.IDFromContext(ctx)
+		if pid <= 0 {
+			return "", "", "", false
+		}
+		prefs, err := rt.Settings.PlayerPrefs(ctx, pid)
+		if err != nil || prefs == nil || prefs.TV == nil {
+			return "", "", "", false
+		}
+		deref := func(v *string) string {
+			if v == nil {
+				return ""
+			}
+			return *v
+		}
+		tv := prefs.TV
+		if tv.PreferredSubtitleLanguages == nil && tv.PreferredAudioLanguages == nil {
+			return "", "", "", false
+		}
+		return deref(tv.PreferredSubtitleLanguages), deref(tv.PreferredAudioLanguages), deref(tv.IgnoredSubtitleLabels), true
+	}
 	// Torrent auto-selection during a stream start uses the lane owner's profile.
 	db_bridge.ProfileAutoSelectHook = func() (*anime.AutoSelectProfile, bool) {
 		ctx := rt.Lane.Context(context.Background())

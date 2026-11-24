@@ -144,6 +144,9 @@ func (t *TorBox) doQueryCtx(ctx context.Context, method, uri string, body io.Rea
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusTooManyRequests { // Garceslab Anime
+		return nil, fmt.Errorf("request failed: code %d: %w", resp.StatusCode, debrid.ErrRateLimited)
+	}
 	if resp.StatusCode >= 400 {
 		bodyB, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("request failed: code %d, body: %s", resp.StatusCode, string(bodyB))
@@ -422,7 +425,7 @@ func (t *TorBox) GetTorrentDownloadUrl(opts debrid.DownloadTorrentOptions) (down
 		return "", fmt.Errorf("torbox: Failed to get download URL: %w", err)
 	}
 
-	t.logger.Debug().Str("downloadUrl", d).Msg("torbox: Download link retrieved")
+	t.logger.Debug().Msg("torbox: Download link retrieved") // Garceslab Anime: never log the link (it carries the token)
 
 	return d, nil
 }
