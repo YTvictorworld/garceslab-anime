@@ -54,6 +54,10 @@ func (f ClientFetcher) AnimeCollection(ctx context.Context, userName *string) (*
 	if f.Client.IsAuthenticated() {
 		return nil, errors.New("importer: public list imports must use an anonymous AniList client")
 	}
+	// The wrapper refuses collection queries without a token; public lists don't need one.
+	if impl, ok := f.Client.(*anilist.AnilistClientImpl); ok && impl.Client != nil {
+		return impl.Client.AnimeCollection(ctx, userName)
+	}
 	return f.Client.AnimeCollection(ctx, userName)
 }
 
