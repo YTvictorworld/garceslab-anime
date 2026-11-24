@@ -41,6 +41,7 @@ func (h *Handler) registerProfileDataRoutes(v1 *echo.Group) {
 	v1.POST("/profiles/:id/import/server-account", h.HandleImportProfileServerAccount)
 	v1.POST("/profiles/:id/import/json", h.HandleImportProfileJSON)
 	v1.GET("/profiles/:id/export", h.HandleExportProfile)
+	h.registerProfileLibraryRoutes(v1) // phase 3 (profiles_library.go)
 }
 
 // tagWebsocketProfile tags a new /events connection with the profile of its
@@ -506,7 +507,7 @@ func importMode(s string) localplatform.ImportMode {
 
 func (h *Handler) respondImportError(c echo.Context, err error) error {
 	switch {
-	case errors.Is(err, importer.ErrInvalidUsername), errors.Is(err, importer.ErrInvalidFile):
+	case errors.Is(err, importer.ErrInvalidUsername), errors.Is(err, importer.ErrInvalidFile), errors.Is(err, importer.ErrInvalidToken):
 		return h.RespondWithStatusError(c, http.StatusBadRequest, err)
 	case errors.Is(err, importer.ErrListUnavailable), errors.Is(err, importer.ErrNothingToImport):
 		return h.RespondWithStatusError(c, http.StatusUnprocessableEntity, err)
@@ -521,7 +522,8 @@ func (h *Handler) afterImport(c echo.Context, p *profiles.Profile) {
 
 // HandleImportProfileAnilist
 //
-//	@summary imports the public AniList anime list of a user into a profile (anonymous, no token).
+//	@summary imports an AniList anime list (and optionally the favourites) into a profile.
+//	@desc Body: {"username": string} for a public list (anonymous), or {"token": string} for a private list: the token is used for this import only and is never stored or logged. Also "mode" (merge|replace) and "favourites" (default true).
 //	@route /api/v1/profiles/{id}/import/anilist [POST]
 //	@param id - int - true - "The profile ID"
 //	@returns localplatform.ProfileImportResult
@@ -531,15 +533,32 @@ func (h *Handler) HandleImportProfileAnilist(c echo.Context) error {
 		return err
 	}
 	var b struct {
-		Username string `json:"username"`
-		Mode     string `json:"mode"`
+		Username   string `json:"username"`
+		Token      string `json:"token"`
+		Mode       string `json:"mode"`
+		Favourites *bool  `json:"favourites"`
 	}
 	if err := c.Bind(&b); err != nil {
 		return h.RespondWithStatusError(c, http.StatusBadRequest, err)
 	}
 	rt := h.App.ProfilesRuntime
-	res, err := importer.ImportPublicAnilist(c.Request().Context(), rt.Router.For(target.ID),
-		importer.ClientFetcher{Client: rt.DirectAnilist}, b.Username, importMode(b.Mode))
+	src := importer.AnilistSources{
+		Public:           importer.ClientFetcher{Client: rt.DirectAnilist},
+		PublicFavourites: importer.PublicFavourites{Query: importer.ClientQuery(rt.DirectAnilist), Logger: h.App.Logger},
+		NewAccount: func(token string) (importer.AccountFetcher, error) {
+			return importer.NewTokenClient(token, h.App.Logger)
+		},
+	}
+	if profileImportSourcesForTest != nil {
+		src = profileImportSourcesForTest()
+	}
+	res, err := importer.ImportAnilist(c.Request().Context(), rt.Router.For(target.ID), src, importer.AnilistImportOptions{
+		Username:   b.Username,
+		Token:      b.Token,
+		Mode:       importMode(b.Mode),
+		Favourites: b.Favourites == nil || *b.Favourites,
+	})
+	b.Token = ""
 	if err != nil {
 		return h.respondImportError(c, err)
 	}
