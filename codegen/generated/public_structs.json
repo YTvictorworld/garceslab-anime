@@ -29218,6 +29218,17 @@
         "required": false,
         "public": true,
         "comments": []
+      },
+      {
+        "name": "TitleIndex",
+        "jsonName": "TitleIndex",
+        "goType": "titleindex.Manager",
+        "typescriptType": "TitleIndex_Manager",
+        "usedTypescriptType": "TitleIndex_Manager",
+        "usedStructName": "titleindex.Manager",
+        "required": false,
+        "public": true,
+        "comments": []
       }
     ],
     "comments": []
@@ -94421,6 +94432,269 @@
       }
     ],
     "comments": []
+  },
+  {
+    "filepath": "../internal/titleindex/index.go",
+    "filename": "index.go",
+    "name": "Suggestion",
+    "formattedName": "TitleIndex_Suggestion",
+    "package": "titleindex",
+    "fields": [
+      {
+        "name": "MediaID",
+        "jsonName": "mediaId",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Title",
+        "jsonName": "title",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Matched",
+        "jsonName": "matched",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Year",
+        "jsonName": "year",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Format",
+        "jsonName": "format",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Episodes",
+        "jsonName": "episodes",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Picture",
+        "jsonName": "picture",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Thumbnail",
+        "jsonName": "thumbnail",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Suggestion is one anime suggested for a partial title."
+    ]
+  },
+  {
+    "filepath": "../internal/titleindex/index.go",
+    "filename": "index.go",
+    "name": "Index",
+    "formattedName": "TitleIndex_Index",
+    "package": "titleindex",
+    "fields": [
+      {
+        "name": "entries",
+        "jsonName": "entries",
+        "goType": "[]entry",
+        "typescriptType": "Array\u003cTitleIndex_entry\u003e",
+        "usedTypescriptType": "TitleIndex_entry",
+        "usedStructName": "titleindex.entry",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "lastUpdate",
+        "jsonName": "lastUpdate",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Index is an immutable, in-memory title index. Safe for concurrent use."
+    ]
+  },
+  {
+    "filepath": "../internal/titleindex/manager.go",
+    "filename": "manager.go",
+    "name": "Options",
+    "formattedName": "TitleIndex_Options",
+    "package": "titleindex",
+    "fields": [
+      {
+        "name": "Dir",
+        "jsonName": "Dir",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Logger",
+        "jsonName": "Logger",
+        "goType": "zerolog.Logger",
+        "typescriptType": "Logger",
+        "usedTypescriptType": "Logger",
+        "usedStructName": "zerolog.Logger",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "URL",
+        "jsonName": "URL",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MaxAge",
+        "jsonName": "MaxAge",
+        "goType": "time.Duration",
+        "typescriptType": "Duration",
+        "usedTypescriptType": "Duration",
+        "usedStructName": "time.Duration",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "IsOffline",
+        "jsonName": "IsOffline",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "HTTPClient",
+        "jsonName": "HTTPClient",
+        "goType": "http.Client",
+        "typescriptType": "Client",
+        "usedTypescriptType": "Client",
+        "usedStructName": "http.Client",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MinEntries",
+        "jsonName": "MinEntries",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Options configures a Manager."
+    ]
+  },
+  {
+    "filepath": "../internal/titleindex/manager.go",
+    "filename": "manager.go",
+    "name": "Manager",
+    "formattedName": "TitleIndex_Manager",
+    "package": "titleindex",
+    "fields": [
+      {
+        "name": "opts",
+        "jsonName": "opts",
+        "goType": "Options",
+        "typescriptType": "TitleIndex_Options",
+        "usedTypescriptType": "TitleIndex_Options",
+        "usedStructName": "titleindex.Options",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "index",
+        "jsonName": "index",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "refresh",
+        "jsonName": "refresh",
+        "goType": "sync.Mutex",
+        "typescriptType": "Mutex",
+        "usedTypescriptType": "Mutex",
+        "usedStructName": "sync.Mutex",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "cancel",
+        "jsonName": "cancel",
+        "goType": "context.CancelFunc",
+        "typescriptType": "CancelFunc",
+        "usedTypescriptType": "CancelFunc",
+        "usedStructName": "context.CancelFunc",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "done",
+        "jsonName": "done",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Manager keeps the title index in memory: it loads the cached database file,",
+      " downloads a new release in the background when the file is missing or older",
+      " than MaxAge, and serves searches from the last good index. Until an index is",
+      " loaded (or if every download fails), searches return an empty list."
+    ]
   },
   {
     "filepath": "../internal/torrent_clients/builtin_client/builtin.go",

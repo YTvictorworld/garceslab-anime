@@ -249,6 +249,7 @@ const (
 	SaveSettingsEndpoint                               = "SETTINGS-save-settings"
 	SaveTorrentstreamSettingsEndpoint                  = "TORRENTSTREAM-save-torrentstream-settings"
 	ScanLocalFilesEndpoint                             = "SCAN-scan-local-files"
+	SearchSuggestEndpoint                              = "SEARCH-SUGGEST-search-suggest"
 	SearchTorrentEndpoint                              = "TORRENT-SEARCH-search-torrent"
 	SelectProfileEndpoint                              = "PROFILES-select-profile"
 	SendNakamaMessageEndpoint                          = "NAKAMA-send-nakama-message"

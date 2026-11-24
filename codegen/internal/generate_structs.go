@@ -90,6 +90,7 @@ var typePrefixesByPackage = map[string]string{
 	"anime":                  "Anime_",
 	"anime_types":            "Anime_",
 	"summary":                "Summary_",
+	"titleindex":             "TitleIndex_",
 	"filesystem":             "Filesystem_",
 	"filecache":              "Filecache_",
 	"core":                   "INTERNAL_",

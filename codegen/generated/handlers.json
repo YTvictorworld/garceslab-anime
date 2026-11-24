@@ -11392,6 +11392,42 @@
     }
   },
   {
+    "name": "HandleSearchSuggest",
+    "trimmedName": "SearchSuggest",
+    "comments": [
+      "HandleSearchSuggest",
+      "",
+      "\t@summary returns anime that match the start of a title, for search as you type.",
+      "\t@desc Query parameters: \"q\" (the typed text) and \"limit\" (1-25, default 8).",
+      "\t@desc Matches every title and synonym of the local title index (manami-project's anime-offline-database, ODbL),",
+      "\t@desc ranked exact \u003e prefix \u003e word prefix \u003e substring, then TV first and by popularity. \"mediaId\" is the AniList id.",
+      "\t@desc Returns an empty list while the index isn't downloaded or when it is disabled; clients then fall back to the AniList search.",
+      "\t@route /api/v1/search/suggest [GET]",
+      "\t@returns []titleindex.Suggestion",
+      ""
+    ],
+    "filepath": "internal/handlers/search_suggest.go",
+    "filename": "search_suggest.go",
+    "api": {
+      "summary": "returns anime that match the start of a title, for search as you type.",
+      "descriptions": [
+        "Query parameters: \"q\" (the typed text) and \"limit\" (1-25, default 8).",
+        "Matches every title and synonym of the local title index (manami-project's anime-offline-database, ODbL),",
+        "ranked exact \u003e prefix \u003e word prefix \u003e substring, then TV first and by popularity. \"mediaId\" is the AniList id.",
+        "Returns an empty list while the index isn't downloaded or when it is disabled; clients then fall back to the AniList search."
+      ],
+      "endpoint": "/api/v1/search/suggest",
+      "methods": [
+        "GET"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "[]titleindex.Suggestion",
+      "returnGoType": "titleindex.Suggestion",
+      "returnTypescriptType": "Array\u003cTitleIndex_Suggestion\u003e"
+    }
+  },
+  {
     "name": "HandleGetSettings",
     "trimmedName": "GetSettings",
     "comments": [
