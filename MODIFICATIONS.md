@@ -66,6 +66,32 @@ AniList account, several playbacks at the same time) will be listed here as they
   `EpisodeTags_` prefix. The web anime page shows a CANON / FILLER / RECAP / MIX pill on episode
   cards when the anime has at least one filler or recap episode.
 
+## 2026-11 (profiles, phase 4: polish)
+
+- **Player preferences per profile** (`internal/profiles/settings/player.go`,
+  `internal/handlers/profiles_player.go`): `GET/PATCH /api/v1/profiles/me/player-prefs` keep
+  each profile's player preferences in `profile_settings.value.player`, with a typed, range
+  checked `tv` section and a `web` section (video core and media core objects). Device-only
+  settings are refused. The web player (`profile-player-prefs-sync.tsx`) loads and saves them
+  per profile.
+- **More avatars** (`internal/profiles/avatars`): 30 more, in the CC0 styles Open Peeps,
+  Pixel Art, Voxel Bot, Clay, Sprouts and Planets and the CC BY 4.0 style Adventurer (with its
+  attribution in `catalog.json`, `LICENSES.md`, the README and the avatar pickers). The
+  runtime check and `.github/scripts/check-avatars.go` only accept CC0 1.0 and CC BY 4.0, and
+  CC BY entries need a credit.
+- **`profile_audit`** (`internal/profiles/store/migrations.go` step 2, `service.go`,
+  `internal/handlers/profiles_audit.go`): a `detail` column, renames ("Old → New"), changed
+  fields, imports (with the source) and exports are recorded; the web's
+  Settings → Profiles → Recent changes shows them.
+- **Announcements off** (`internal/constants`, `internal/updater/announcement.go`, web
+  `main-layout.tsx`): the upstream announcement feed is no longer fetched or shown.
+- **Fan art removed:** `seanime-web/public/luffy-01.png` is replaced by the Garceslab Anime
+  logo in the error and "no results" illustrations.
+- **Branding:** user-facing web texts say "Garceslab Anime" instead of "Seanime" (credits,
+  identifiers, storage keys and references to upstream services unchanged).
+- **Docs:** `docs/self-hosting-webos.md` (Docker Compose, TV app, first run, profiles, PINs,
+  optional AniList).
+
 ## GPL-3.0 compliance checklist
 
 - [x] **Prominent modification notices with dates (§5a):** this file, `NOTICE`, the README's
