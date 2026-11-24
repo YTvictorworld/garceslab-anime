@@ -88,7 +88,7 @@ func (s *Service) Middleware(cfg MiddlewareConfig) echo.MiddlewareFunc {
 					if cfg.OnProfile != nil {
 						cfg.OnProfile(clientID, p.ID)
 					}
-					if err := s.acquireLaneIfPlayback(c, p); err != nil {
+					if err := s.acquireLaneIfPlayback(c, p, clientID); err != nil {
 						return rejectBusy(c, err)
 					}
 					return next(c)
@@ -98,7 +98,11 @@ func (s *Service) Middleware(cfg MiddlewareConfig) echo.MiddlewareFunc {
 			if s.Enforced() && !IsPublicRoute(req.Method, routePath(c)) && !IsPublicRoute(req.Method, req.URL.Path) {
 				return reject(c, ErrProfileRequired)
 			}
-			if err := s.acquireLaneIfPlayback(c, nil); err != nil {
+			clientID := ""
+			if cfg.ClientID != nil {
+				clientID = cfg.ClientID(c)
+			}
+			if err := s.acquireLaneIfPlayback(c, nil, clientID); err != nil {
 				return rejectBusy(c, err)
 			}
 			return next(c)
@@ -128,9 +132,9 @@ func FromEcho(c echo.Context) *Profile {
 
 // acquireLaneIfPlayback takes the playback lane for p on the routes that start a
 // server-side playback (phase 1: one playback at a time, 409 PLAYBACK_BUSY).
-func (s *Service) acquireLaneIfPlayback(c echo.Context, p *Profile) error {
+func (s *Service) acquireLaneIfPlayback(c echo.Context, p *Profile, clientID string) error {
 	if s.lane == nil || !IsPlaybackStartRoute(c.Request().Method, routePath(c)) {
 		return nil
 	}
-	return s.lane.Acquire(p)
+	return s.lane.AcquireFor(p, clientID)
 }
