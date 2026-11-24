@@ -46,6 +46,26 @@ AniList account, several playbacks at the same time) will be listed here as they
   it first and falls back to AniList. `SEANIME_TITLE_INDEX_DISABLED=true` turns it off.
   Codegen gives the `titleindex` package the `TitleIndex_` prefix.
 
+## 2026-11 (episode tags)
+
+- **Canon / filler / recap episode tags** (`internal/episodetags`, `internal/core/episode_tags.go`,
+  `internal/handlers/anime_episode_tags.go`, route in `internal/handlers/routes.go`, public route
+  in `internal/profiles/public_routes.go`): `GET /api/v1/anime/episode-tags/{id}` returns
+  `{status: "ready"|"pending"|"unavailable", malId, episodes: {"<n>": "canon"|"filler"|"recap"|"mixed"},
+  hasNonCanon, fetchedAt, source}` for an AniList anime, from MyAnimeList data (looked up by the
+  media's `idMal`) served by the Jikan-compatible APIs Tenrai, jikan-edge and Jikan. It never
+  waits for the network: a cache miss queues a background fetch (all pages) and answers
+  "pending". Requests go out one at a time, at least 1 s apart per API (1.5 s for jikan-edge and
+  Jikan), and rotate to the next API on 429 (honouring Retry-After), 5xx or a connection failure;
+  a failing API rests on an exponential cooldown (30 s doubling, capped at 30 min). The cache is
+  global (one JSON file per MAL anime in `<data dir>/episode-tags`, not in the profiles
+  database): daily refresh while airing, 30 days once finished. MAL episode numbers map 1:1 to
+  the episode list's `episodeNumber`; anime that MAL and AniList split differently (split cours,
+  absolute numbering) get shifted or missing tags. `SEANIME_EPISODE_TAGS_PROVIDERS` and
+  `SEANIME_EPISODE_TAGS_DISABLED` configure it. Codegen gives the `episodetags` package the
+  `EpisodeTags_` prefix. The web anime page shows a CANON / FILLER / RECAP / MIX pill on episode
+  cards when the anime has at least one filler or recap episode.
+
 ## GPL-3.0 compliance checklist
 
 - [x] **Prominent modification notices with dates (§5a):** this file, `NOTICE`, the README's

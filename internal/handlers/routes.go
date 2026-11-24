@@ -293,6 +293,8 @@ func InitRoutes(app *core.App, e *echo.Echo) {
 	// Anime
 	//
 	v1.GET("/anime/episode-collection/:id", h.HandleGetAnimeEpisodeCollection)
+	// Garceslab Anime: canon/filler/recap tags from MyAnimeList data (public, no user data)
+	v1.GET("/anime/episode-tags/:id", h.HandleGetAnimeEpisodeTags)
 
 	//
 	// Torrent / Torrent Client

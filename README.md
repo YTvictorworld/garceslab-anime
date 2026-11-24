@@ -92,6 +92,18 @@ server downloads it at runtime into its data directory (`title-index/`, about 6 
 weekly) and serves `GET /api/v1/search/suggest` from it. Set `SEANIME_TITLE_INDEX_DISABLED=true`
 to turn it off; clients then use the AniList search only.
 
+Episode tags (CANON / FILLER / RECAP on episode cards) use [MyAnimeList](https://myanimelist.net)
+episode data, read through the Jikan-compatible APIs [Tenrai](https://tenrai.org),
+[jikan-edge](https://jikan.lucashdo.com) and [Jikan](https://jikan.moe). The data belongs to
+MyAnimeList; this project is not affiliated with MyAnimeList or with these APIs. The server
+fetches the episode list of the anime being viewed in the background (at most one request per
+second per API, rotating to the next API when one is rate limited or down) and caches it in its
+data directory (`episode-tags/`, one small JSON file per anime, refreshed daily while airing and
+every 30 days once finished). `GET /api/v1/anime/episode-tags/{id}` serves it.
+`SEANIME_EPISODE_TAGS_PROVIDERS` sets the APIs and their order (default
+`tenrai,jikan-edge,jikan`; `jikan4=<url>` or `edge=<url>` adds another instance), and
+`SEANIME_EPISODE_TAGS_DISABLED=true` turns the feature off.
+
 The original authors keep the copyright on their work, and this project does not claim
 ownership of it. All original copyright and license notices are preserved unchanged, and the
 full git history is kept, so every upstream commit keeps its author.

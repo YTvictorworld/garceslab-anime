@@ -22,6 +22,7 @@ var publicRoutes = map[string]bool{
 	"GET /api/v1/anilist/cache-layer/status":   true,
 	"GET /api/v1/search/suggest":               true, // title suggestions from the local index (no user data)
 	"GET /api/v1/anime/episode-collection/:id": true, // public episode metadata
+	"GET /api/v1/anime/episode-tags/:id":       true, // canon/filler/recap tags from MAL data (no user data)
 	"GET /events":                              true, // the websocket handler authenticates itself
 }
 

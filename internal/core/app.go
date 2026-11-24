@@ -14,6 +14,7 @@ import (
 	"seanime/internal/directstream"
 	discordrpc_presence "seanime/internal/discordrpc/presence"
 	"seanime/internal/doh"
+	"seanime/internal/episodetags"
 	"seanime/internal/events"
 	"seanime/internal/extension"
 	"seanime/internal/extension_playground"
@@ -194,6 +195,9 @@ type (
 
 		// Garceslab Anime: local title index for search suggestions (nil when disabled)
 		TitleIndex *titleindex.Manager
+
+		// Garceslab Anime: canon/filler/recap episode tags (nil when disabled)
+		EpisodeTags *episodetags.Manager
 	}
 )
 
@@ -596,6 +600,9 @@ func NewApp(configOpts *ConfigOptions, selfupdater *updater.SelfUpdater) *App {
 
 	// Garceslab Anime: title index for search suggestions (loads and downloads in the background)
 	app.initTitleIndex()
+
+	// Garceslab Anime: episode tags (fetched in the background on first request)
+	app.initEpisodeTags()
 
 	return app
 }

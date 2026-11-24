@@ -28,6 +28,15 @@ program: the server downloads it at runtime into its data directory and builds
 a title index from it in memory. Set SEANIME_TITLE_INDEX_DISABLED=true to turn
 this off.
 
+Episode tags (canon, filler, recap) use MyAnimeList (https://myanimelist.net)
+episode data, read through the Jikan-compatible APIs Tenrai
+(https://tenrai.org), jikan-edge (https://jikan.lucashdo.com) and Jikan
+(https://jikan.moe). The data belongs to MyAnimeList and is not part of this
+program: the server fetches it at runtime for the anime being viewed and
+caches it in its data directory. Garceslab Anime is not affiliated with
+MyAnimeList, Jikan, Tenrai or jikan-edge. Set SEANIME_EPISODE_TAGS_DISABLED=true
+to turn this off.
+
 "Seanime" and "Seanime Tenji", and their logos, belong to their respective
 owners and are used only to describe where this program comes from.
 Garceslab Anime is an independent, unofficial project. It is not affiliated
