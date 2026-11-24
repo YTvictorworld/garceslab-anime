@@ -574,7 +574,7 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 				MediaId:       opts.MediaId,
 				EpisodeNumber: opts.EpisodeNumber,
 				MediaTitle:    media.GetPreferredTitle(),
-			})
+			}, true) // Garceslab Anime: never log the debrid link
 
 			// Signal to the client that the torrent has started playing (remove loading status)
 			// We can't know for sure
