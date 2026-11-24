@@ -27,7 +27,7 @@ export const LuffyError: React.FC<LuffyErrorProps> = (props) => {
                 >
                     <SeaImage
                         data-luffy-error-image
-                        src="/luffy-01.png"
+                        src="/garceslab-logo.png"
                         alt={""}
                         fill
                         priority
