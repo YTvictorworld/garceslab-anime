@@ -1,4 +1,5 @@
 import { AL_BaseAnime, Anime_EntryDownloadInfo } from "@/api/generated/types"
+import { useEpisodeTags } from "@/api/hooks/episode_tags.hooks"
 import { EpisodeGridItem } from "@/app/(main)/_features/anime/_components/episode-grid-item"
 import { PluginEpisodeGridItemMenuItems } from "@/app/(main)/_features/plugin/actions/plugin-actions"
 import { useHasTorrentProvider } from "@/app/(main)/_hooks/use-server-status"
@@ -7,6 +8,7 @@ import {
     __torrentSearch_selectionAtom,
     __torrentSearch_selectionEpisodeAtom,
 } from "@/app/(main)/entry/_containers/torrent-search/torrent-search-drawer"
+import { episodeTagFor } from "@/lib/episode-tags/episode-tags"
 import { useSetAtom } from "jotai"
 import React, { startTransition } from "react"
 import { BiCalendarAlt, BiDownload } from "react-icons/bi"
@@ -25,6 +27,7 @@ export function UndownloadedEpisodeList({ downloadInfo, media, watchedProgress, 
     const setTorrentSearchEpisode = useSetAtom(__torrentSearch_selectionEpisodeAtom)
 
     const { hasTorrentProvider } = useHasTorrentProvider()
+    const episodeTags = useEpisodeTags(media?.id)
 
     const text = hasTorrentProvider ? (downloadInfo?.rewatch
             ? "You have not downloaded the following:"
@@ -51,6 +54,7 @@ export function UndownloadedEpisodeList({ downloadInfo, media, watchedProgress, 
                             title={episode.displayTitle}
                             episodeTitle={episode.episodeTitle}
                             episodeNumber={episode.episodeNumber}
+                            episodeTag={episode.type === "main" ? episodeTagFor(episodeTags, episode.episodeNumber) : undefined}
                             watchedProgress={watchedProgress}
                             progressNumber={episode.progressNumber}
                             description={episode.episodeMetadata?.summary || episode.episodeMetadata?.overview}

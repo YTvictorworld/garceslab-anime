@@ -1,10 +1,11 @@
-import { AL_BaseAnime } from "@/api/generated/types"
+import { AL_BaseAnime, EpisodeTags_Kind } from "@/api/generated/types"
 import { EpisodeCardImage } from "@/app/(main)/_features/anime/_components/episode-card-image"
 import { useServerStatus } from "@/app/(main)/_hooks/use-server-status"
 import { imageShimmer } from "@/components/shared/image-helpers"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/components/ui/core/styling"
 import { ProgressBar } from "@/components/ui/progress-bar"
+import { EPISODE_TAG_LABELS } from "@/lib/episode-tags/episode-tags"
 import { getImageUrl } from "@/lib/server/assets"
 import { useEpisodeSpoilerState } from "@/lib/theme/anime-spoilers"
 import { useThemeSettings } from "@/lib/theme/theme-hooks"
@@ -40,6 +41,8 @@ type EpisodeGridItemProps = {
     progressNumber?: number
     watchedProgress?: number
     spoilerActive?: boolean
+    /** Garceslab Anime: CANON / FILLER / RECAP / MIX pill on the image (see useEpisodeTags). */
+    episodeTag?: EpisodeTags_Kind
 }
 
 export const EpisodeGridItem = React.memo((props: EpisodeGridItemProps & React.ComponentPropsWithoutRef<"div">) => {
@@ -72,6 +75,7 @@ export const EpisodeGridItem = React.memo((props: EpisodeGridItemProps & React.C
         progressNumber,
         watchedProgress,
         spoilerActive,
+        episodeTag,
         ...rest
     } = props
 
@@ -113,7 +117,7 @@ export const EpisodeGridItem = React.memo((props: EpisodeGridItemProps & React.C
             {...rest}
         >
 
-            {isFiller && (
+            {isFiller && !episodeTag && (
                 <Badge
                     data-episode-grid-item-filler-badge
                     className={cn(
@@ -144,7 +148,7 @@ export const EpisodeGridItem = React.memo((props: EpisodeGridItemProps & React.C
                         onClick && "cursor-pointer",
                         {
                             "border-2 border-red-700": isInvalid,
-                            "border-2 border-yellow-900": isFiller,
+                            "border-2 border-yellow-900": isFiller && !episodeTag,
                             "border-2 border-[--brand]": isSelected,
                         },
 
@@ -198,6 +202,8 @@ export const EpisodeGridItem = React.memo((props: EpisodeGridItemProps & React.C
                             "", imageClassName)}
                         data-src={image}
                     />}
+
+                    {episodeTag && <EpisodeTagPill kind={episodeTag} />}
 
                     {(serverStatus?.settings?.library?.enableWatchContinuity && !!percentageComplete && !isWatched) &&
                         <div data-episode-grid-item-progress-bar-container className="absolute bottom-0 left-0 w-full z-[3]">
@@ -265,3 +271,26 @@ export const EpisodeGridItem = React.memo((props: EpisodeGridItemProps & React.C
     </>
 
 })
+
+const episodeTagClassNames: Record<EpisodeTags_Kind, string> = {
+    // Muted lilac (the brand's 300 shade), outlined.
+    canon: "bg-[rgba(20,12,28,0.72)] text-[#e6b0fd] border border-[rgba(230,176,253,0.45)]",
+    // Warm orange: the one to notice.
+    filler: "bg-[#f59e4b] text-[#1c0d02]",
+    recap: "bg-[rgba(120,120,134,0.92)] text-[#f4f4f6]",
+    mixed: "bg-gradient-to-r from-[#a443cf] to-[#f59e4b] text-white",
+}
+
+/** Garceslab Anime: canon/filler/recap pill in the image's top-right corner. */
+function EpisodeTagPill({ kind }: { kind: EpisodeTags_Kind }) {
+    return (
+        <span
+            data-episode-grid-item-episode-tag={kind}
+            className={cn(
+                "absolute top-1.5 right-1.5 z-[3] pointer-events-none select-none",
+                "rounded-[5px] px-1.5 py-[1px] text-[0.65rem] leading-4 font-extrabold tracking-wider",
+                episodeTagClassNames[kind],
+            )}
+        >{EPISODE_TAG_LABELS[kind]}</span>
+    )
+}
