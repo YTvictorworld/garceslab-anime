@@ -35,7 +35,7 @@ func PrintHeader() {
 	logoLines := strings.Split(asciiLogo(), "\n")
 
 	// Create a gradient effect for the logo
-	gradientColors := []string{"#9370DB", "#8A2BE2", "#7B68EE", "#6A5ACD", "#5243CB"}
+	gradientColors := []string{"#e6b0fd", "#d384f5", "#22B5AA", "#14A39A", "#a443cf"}
 	for i, line := range logoLines {
 		colorIdx := i % len(gradientColors)
 		coloredLine := logoStyle.Foreground(lipgloss.Color(gradientColors[colorIdx])).Render(line)

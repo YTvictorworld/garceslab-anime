@@ -658,7 +658,7 @@ export function UISettings() {
                                             <Field.ColorPicker
                                                 name="accentColor"
                                                 label="Accent color"
-                                                help="Default: #6152df"
+                                                help="Default: #a443cf"
                                             />
                                         </div>
                                     </>

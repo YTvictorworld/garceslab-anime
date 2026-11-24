@@ -98,7 +98,7 @@ export function UpdateModal(props: UpdateModalProps) {
                     <h3 className="text-center">A new update is available!</h3>
                     <h4 className="font-bold flex gap-2 text-center items-center justify-center">
                         <span className="text-[--muted]">{updateData?.current_version}</span> <FiArrowRight />
-                        <span className="text-indigo-200">{updateData?.release?.version}</span></h4>
+                        <span className="text-brand-200">{updateData?.release?.version}</span></h4>
 
                     {serverStatus?.isDesktopSidecar && <Alert
                         intent="info"

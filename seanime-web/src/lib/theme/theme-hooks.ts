@@ -89,7 +89,7 @@ export const THEME_DEFAULT_VALUES: ThemeSettings = {
     smallerEpisodeCarouselSize: false,
     expandSidebarOnHover: false,
     backgroundColor: "#070707",
-    accentColor: "#6152df",
+    accentColor: "#a443cf",
     sidebarBackgroundColor: "#070707",
     hideTopNavbar: false,
     enableMediaCardBlurredBackground: false,

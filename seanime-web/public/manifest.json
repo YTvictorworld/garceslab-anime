@@ -4,8 +4,8 @@
   "description": "Garceslab Anime: self-hosted anime media server, based on Seanime.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0c0c0c",
-  "theme_color": "#0c0c0c",
+  "background_color": "#0a080c",
+  "theme_color": "#0a080c",
   "icons": [
     {
       "src": "/icons/android-chrome-192x192.png",

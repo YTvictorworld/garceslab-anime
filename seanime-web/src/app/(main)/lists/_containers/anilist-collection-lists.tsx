@@ -275,7 +275,7 @@ export function SearchOptions({
             >
                 <Combobox
                     multiple
-                    leftAddon={<TbSwords className={cn((params.genre !== null && !!params.genre?.length) && "text-indigo-300 font-bold text-xl")} />}
+                    leftAddon={<TbSwords className={cn((params.genre !== null && !!params.genre?.length) && "text-brand-300 font-bold text-xl")} />}
                     emptyMessage="No options found"
                     label="Genre" placeholder="All genres"
                     className="w-full"
@@ -291,7 +291,7 @@ export function SearchOptions({
                 <Combobox
                     multiple
                     leftAddon={!params.tags?.length &&
-                        <LuTags className={cn((params.tags !== null && !!params.tags.length) && "text-indigo-300 font-bold text-xl")} />}
+                        <LuTags className={cn((params.tags !== null && !!params.tags.length) && "text-brand-300 font-bold text-xl")} />}
                     emptyMessage="No options found"
                     label="Tags" placeholder="All tags" className="w-full"
                     options={ADVANCED_SEARCH_MEDIA_TAGS
@@ -311,7 +311,7 @@ export function SearchOptions({
                 />
                 <Select
                     label="Sorting"
-                    leftAddon={<FaSortAmountDown className={cn((params.sorting !== "SCORE_DESC") && "text-indigo-300 font-bold text-xl")} />}
+                    leftAddon={<FaSortAmountDown className={cn((params.sorting !== "SCORE_DESC") && "text-brand-300 font-bold text-xl")} />}
                     className="w-full"
                     fieldClass="flex items-center"
                     inputContainerClass="w-full"
@@ -326,7 +326,7 @@ export function SearchOptions({
                 />
                 {pageType === "anime" && <Select
                     leftAddon={
-                        <MdPersonalVideo className={cn((params.format !== null && !!params.format?.length) && "text-indigo-300 font-bold text-xl")} />}
+                        <MdPersonalVideo className={cn((params.format !== null && !!params.format?.length) && "text-brand-300 font-bold text-xl")} />}
                     label="Format" placeholder="All formats"
                     className="w-full"
                     fieldClass="w-full"
@@ -340,7 +340,7 @@ export function SearchOptions({
                 />}
                 <Select
                     leftAddon={
-                        <RiSignalTowerLine className={cn((params.status !== null && !!params.status?.length) && "text-indigo-300 font-bold text-xl")} />}
+                        <RiSignalTowerLine className={cn((params.status !== null && !!params.status?.length) && "text-brand-300 font-bold text-xl")} />}
                     label="Status" placeholder="All statuses"
                     className="w-full"
                     fieldClass="w-full"
@@ -355,7 +355,7 @@ export function SearchOptions({
                     fieldLabelClass="hidden"
                 />
                 {pageType === "anime" && <Select
-                    leftAddon={<LuLeaf className={cn((params.season !== null && !!params.season?.length) && "text-indigo-300 font-bold text-xl")} />}
+                    leftAddon={<LuLeaf className={cn((params.season !== null && !!params.season?.length) && "text-brand-300 font-bold text-xl")} />}
                     label="Season"
                     placeholder="All seasons"
                     className="w-full"
@@ -370,7 +370,7 @@ export function SearchOptions({
                     fieldLabelClass="hidden"
                 />}
                 <Select
-                    leftAddon={<LuCalendar className={cn((params.year !== null && !!params.year?.length) && "text-indigo-300 font-bold text-xl")} />}
+                    leftAddon={<LuCalendar className={cn((params.year !== null && !!params.year?.length) && "text-brand-300 font-bold text-xl")} />}
                     label="Year" placeholder="Timeless"
                     className="w-full"
                     fieldClass="w-full"

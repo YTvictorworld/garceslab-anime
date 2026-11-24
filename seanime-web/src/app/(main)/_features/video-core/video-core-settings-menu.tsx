@@ -692,7 +692,7 @@ export function VideoCoreSettingsMenu() {
                             <p className="text-sm mb-2">Custom Font</p>
                             <p className="text-sm text-[--muted] mb-2">
                                 Place the font file in the <span
-                                className="text-indigo-300 cursor-pointer underline underline-offset-2"
+                                className="text-brand-300 cursor-pointer underline underline-offset-2"
                                 onClick={() => {
                                     openInExplorer({ path: upath.normalize(`${serverStatus?.dataDir}/assets`) })
                                 }}

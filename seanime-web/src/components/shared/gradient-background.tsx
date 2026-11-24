@@ -62,7 +62,7 @@ export const GradientBackground: React.FC<GradientBackgroundProps> = ({
     Breathing = true,
     gradientColors = [
         "transparent",
-        "#312887",
+        "#61237b",
         "#3D5AFE",
         "#FF80AB",
         "#FF6D00",

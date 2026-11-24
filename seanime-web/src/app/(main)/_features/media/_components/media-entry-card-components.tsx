@@ -98,7 +98,7 @@ export function MediaEntryCardAdultVeil(props: React.HTMLAttributes<HTMLDivEleme
             <div
                 className="absolute inset-0 opacity-90"
                 style={{
-                    backgroundImage: "radial-gradient(circle at 22% 18%, rgba(90, 63, 244, 0.32), transparent 28%), radial-gradient(circle at 74% 72%, rgba(59, 130, 246, 0.24), transparent 34%), linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 42%)",
+                    backgroundImage: "radial-gradient(circle at 22% 18%, rgba(211, 132, 245, 0.26), transparent 28%), radial-gradient(circle at 74% 72%, rgba(59, 130, 246, 0.24), transparent 34%), linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 42%)",
                 }}
             />
             <div

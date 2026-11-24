@@ -1,5 +1,5 @@
 export const THEME_COLOR_BANK = [
-    { name: "Seanime", backgroundColor: "#070707", accentColor: "#6152df" },
+    { name: "Garceslab", backgroundColor: "#070707", accentColor: "#a443cf" },
     { name: "Midnight", backgroundColor: "#000", accentColor: "#5649bb" },
     { name: "Deep purple", backgroundColor: "#0a050d", accentColor: "#8659c9" },
     { name: "Desert flower", backgroundColor: "#090e11", accentColor: "#c08b57" },

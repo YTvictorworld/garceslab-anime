@@ -167,7 +167,7 @@ function SpotlightOverlay({ rect, onClick }: { rect: Rect; onClick?: (e: React.M
                     rx={borderRadius}
                     ry={borderRadius}
                     fill="none"
-                    stroke="rgba(166, 135, 244, 0.4)"
+                    stroke="rgba(230, 176, 253, 0.4)"
                     strokeWidth={2}
                     filter="url(#tour-spotlight-glow)"
                     initial={{ opacity: 0 }}

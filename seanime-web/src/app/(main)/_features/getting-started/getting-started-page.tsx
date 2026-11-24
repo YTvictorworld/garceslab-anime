@@ -837,7 +837,7 @@ export function GettingStartedPage({ status }: { status: Status }) {
                                 {currentStep === STEPS.length - 1 ? (
                                     <Button
                                         type="submit"
-                                        className="flex items-center bg-gradient-to-r from-brand-600 to-indigo-600 hover:ring-2 ring-brand-600"
+                                        className="flex items-center bg-gradient-to-r from-brand-600 to-brand-800 hover:ring-2 ring-brand-600"
                                         loading={isPending}
                                         rightIcon={<BiRocket className="size-6" />}
                                     >
