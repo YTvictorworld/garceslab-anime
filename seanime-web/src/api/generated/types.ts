@@ -1943,7 +1943,7 @@ export type StreamAutoSelectStatusPayload = {
     resolutions?: Array<string>
     minSeeders: number
     /**
-     * "searching", "ranking", "analyzing", "completed"
+     * "searching", "ranking", "analyzing", "probing" (Garceslab Anime: reading track languages), "completed"
      */
     step: string
     /**

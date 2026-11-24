@@ -35156,6 +35156,19 @@
         "comments": [
           " Garceslab Anime: viewer sessions"
         ]
+      },
+      {
+        "name": "trackProbeCache",
+        "jsonName": "trackProbeCache",
+        "goType": "trackprobe.Cache",
+        "typescriptType": "Cache",
+        "usedTypescriptType": "Cache",
+        "usedStructName": "trackprobe.Cache",
+        "required": false,
+        "public": false,
+        "comments": [
+          " Garceslab Anime: subtitle-aware auto-select"
+        ]
       }
     ],
     "comments": []
@@ -35256,6 +35269,15 @@
         "jsonName": "DummyDebridEnabled",
         "goType": "bool",
         "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "TrackProbeCacheDir",
+        "jsonName": "TrackProbeCacheDir",
+        "goType": "string",
+        "typescriptType": "string",
         "required": true,
         "public": true,
         "comments": []
@@ -35568,6 +35590,72 @@
         "typescriptType": "HibikeTorrent_BatchEpisodeFiles",
         "usedTypescriptType": "HibikeTorrent_BatchEpisodeFiles",
         "usedStructName": "hibiketorrent.BatchEpisodeFiles",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/debrid/client/stream.go",
+    "filename": "stream.go",
+    "name": "ExternalPlayerLinkPayload",
+    "formattedName": "DebridClient_ExternalPlayerLinkPayload",
+    "package": "debrid_client",
+    "fields": [
+      {
+        "name": "Url",
+        "jsonName": "url",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaId",
+        "jsonName": "mediaId",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "EpisodeNumber",
+        "jsonName": "episodeNumber",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MediaTitle",
+        "jsonName": "mediaTitle",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Torrent",
+        "jsonName": "torrent",
+        "goType": "hibiketorrent.AnimeTorrent",
+        "typescriptType": "HibikeTorrent_AnimeTorrent",
+        "usedTypescriptType": "HibikeTorrent_AnimeTorrent",
+        "usedStructName": "hibiketorrent.AnimeTorrent",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "FileId",
+        "jsonName": "fileId",
+        "goType": "string",
+        "typescriptType": "string",
         "required": false,
         "public": true,
         "comments": []
@@ -36108,6 +36196,73 @@
         "jsonName": "name",
         "goType": "string",
         "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/debrid/debrid/debrid.go",
+    "filename": "debrid.go",
+    "name": "CachedFileLinkOptions",
+    "formattedName": "Debrid_CachedFileLinkOptions",
+    "package": "debrid",
+    "fields": [
+      {
+        "name": "MagnetLink",
+        "jsonName": "MagnetLink",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "InfoHash",
+        "jsonName": "InfoHash",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "FileId",
+        "jsonName": "FileId",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": [
+          " TorrentItemFile.ID from GetTorrentInfo"
+        ]
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/debrid/debrid/debrid.go",
+    "filename": "debrid.go",
+    "name": "CachedFileLink",
+    "formattedName": "Debrid_CachedFileLink",
+    "package": "debrid",
+    "fields": [
+      {
+        "name": "URL",
+        "jsonName": "URL",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Release",
+        "jsonName": "Release",
+        "goType": "",
+        "typescriptType": "any",
         "required": true,
         "public": true,
         "comments": []
@@ -102477,7 +102632,7 @@
         "required": true,
         "public": true,
         "comments": [
-          " \"searching\", \"ranking\", \"analyzing\", \"completed\""
+          " \"searching\", \"ranking\", \"analyzing\", \"probing\" (Garceslab Anime: reading track languages), \"completed\""
         ]
       },
       {
@@ -102670,6 +102825,170 @@
     "comments": [
       " TestSearchProvider is a programmable torrent provider for search tests."
     ]
+  },
+  {
+    "filepath": "../internal/torrents/autoselect/track_select.go",
+    "filename": "track_select.go",
+    "name": "TrackPreference",
+    "formattedName": "TrackPreference",
+    "package": "autoselect",
+    "fields": [
+      {
+        "name": "Subtitles",
+        "jsonName": "Subtitles",
+        "goType": "[]string",
+        "typescriptType": "Array\u003cstring\u003e",
+        "required": false,
+        "public": true,
+        "comments": [
+          " canonical language keys, in order"
+        ]
+      },
+      {
+        "name": "Dub",
+        "jsonName": "Dub",
+        "goType": "[]string",
+        "typescriptType": "Array\u003cstring\u003e",
+        "required": false,
+        "public": true,
+        "comments": [
+          " audio languages preferred over Japanese"
+        ]
+      },
+      {
+        "name": "IgnoredLabels",
+        "jsonName": "IgnoredLabels",
+        "goType": "[]string",
+        "typescriptType": "Array\u003cstring\u003e",
+        "required": false,
+        "public": true,
+        "comments": [
+          " lowercased subtitle name parts that don't count (\"signs\")"
+        ]
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/torrents/autoselect/track_select.go",
+    "filename": "track_select.go",
+    "name": "TrackProbeOptions",
+    "formattedName": "TrackProbeOptions",
+    "package": "autoselect",
+    "fields": [
+      {
+        "name": "Preference",
+        "jsonName": "Preference",
+        "goType": "TrackPreference",
+        "typescriptType": "TrackPreference",
+        "usedTypescriptType": "TrackPreference",
+        "usedStructName": "autoselect.TrackPreference",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Linker",
+        "jsonName": "Linker",
+        "goType": "debrid.CachedFileLinker",
+        "typescriptType": "Debrid_CachedFileLinker",
+        "usedTypescriptType": "Debrid_CachedFileLinker",
+        "usedStructName": "debrid.CachedFileLinker",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ProviderID",
+        "jsonName": "ProviderID",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Cache",
+        "jsonName": "Cache",
+        "goType": "trackprobe.Cache",
+        "typescriptType": "Cache",
+        "usedTypescriptType": "Cache",
+        "usedStructName": "trackprobe.Cache",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "TopN",
+        "jsonName": "TopN",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Budget",
+        "jsonName": "Budget",
+        "goType": "time.Duration",
+        "typescriptType": "Duration",
+        "usedTypescriptType": "Duration",
+        "usedStructName": "time.Duration",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "PerCandidate",
+        "jsonName": "PerCandidate",
+        "goType": "time.Duration",
+        "typescriptType": "Duration",
+        "usedTypescriptType": "Duration",
+        "usedStructName": "time.Duration",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Pace",
+        "jsonName": "Pace",
+        "goType": "time.Duration",
+        "typescriptType": "Duration",
+        "usedTypescriptType": "Duration",
+        "usedStructName": "time.Duration",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Probe",
+        "jsonName": "Probe",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "OnProgress",
+        "jsonName": "OnProgress",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "resolve",
+        "jsonName": "resolve",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": []
   },
   {
     "filepath": "../internal/torrents/torrent/hook_events.go",
@@ -103149,6 +103468,206 @@
         "goType": "[]string",
         "typescriptType": "Array\u003cstring\u003e",
         "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/torrents/trackprobe/cache.go",
+    "filename": "cache.go",
+    "name": "Cache",
+    "formattedName": "Cache",
+    "package": "trackprobe",
+    "fields": [
+      {
+        "name": "dir",
+        "jsonName": "dir",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "ttl",
+        "jsonName": "ttl",
+        "goType": "time.Duration",
+        "typescriptType": "Duration",
+        "usedTypescriptType": "Duration",
+        "usedStructName": "time.Duration",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "now",
+        "jsonName": "now",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "mu",
+        "jsonName": "mu",
+        "goType": "sync.Mutex",
+        "typescriptType": "Mutex",
+        "usedTypescriptType": "Mutex",
+        "usedStructName": "sync.Mutex",
+        "required": false,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Cache keeps probe results on disk, one small JSON file per probed file",
+      " (named by a hash of the key, so no release or file name is in the path)."
+    ]
+  },
+  {
+    "filepath": "../internal/torrents/trackprobe/probe.go",
+    "filename": "probe.go",
+    "name": "Track",
+    "formattedName": "Track",
+    "package": "trackprobe",
+    "fields": [
+      {
+        "name": "Languages",
+        "jsonName": "languages",
+        "goType": "[]string",
+        "typescriptType": "Array\u003cstring\u003e",
+        "required": false,
+        "public": true,
+        "comments": [
+          " canonical keys, see Normalize"
+        ]
+      },
+      {
+        "name": "Name",
+        "jsonName": "name",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Forced",
+        "jsonName": "forced",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/torrents/trackprobe/probe.go",
+    "filename": "probe.go",
+    "name": "Tracks",
+    "formattedName": "Tracks",
+    "package": "trackprobe",
+    "fields": [
+      {
+        "name": "Audio",
+        "jsonName": "audio",
+        "goType": "[]Track",
+        "typescriptType": "Array\u003cTrack\u003e",
+        "usedTypescriptType": "Track",
+        "usedStructName": "trackprobe.Track",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Subtitles",
+        "jsonName": "subtitles",
+        "goType": "[]Track",
+        "typescriptType": "Array\u003cTrack\u003e",
+        "usedTypescriptType": "Track",
+        "usedStructName": "trackprobe.Track",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "NotMatroska",
+        "jsonName": "notMatroska",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/torrents/trackprobe/probe.go",
+    "filename": "probe.go",
+    "name": "Options",
+    "formattedName": "Options",
+    "package": "trackprobe",
+    "fields": [
+      {
+        "name": "Client",
+        "jsonName": "Client",
+        "goType": "http.Client",
+        "typescriptType": "Client",
+        "usedTypescriptType": "Client",
+        "usedStructName": "http.Client",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "MaxBytes",
+        "jsonName": "MaxBytes",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ChunkBytes",
+        "jsonName": "ChunkBytes",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": []
+  },
+  {
+    "filepath": "../internal/torrents/trackprobe/probe.go",
+    "filename": "probe.go",
+    "name": "Stats",
+    "formattedName": "Stats",
+    "package": "trackprobe",
+    "fields": [
+      {
+        "name": "Requests",
+        "jsonName": "Requests",
+        "goType": "int",
+        "typescriptType": "number",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Bytes",
+        "jsonName": "Bytes",
+        "goType": "int64",
+        "typescriptType": "number",
+        "required": true,
         "public": true,
         "comments": []
       }

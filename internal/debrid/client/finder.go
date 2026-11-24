@@ -24,7 +24,8 @@ type (
 	}
 )
 
-func (r *Repository) findBestTorrent(ctx context.Context, provider debrid.Provider, media *anilist.CompleteAnime, episodeNumber int) (ret *playbackTorrent, err error) {
+// onProgress receives the subtitle-aware step's progress text (Garceslab Anime; may be nil).
+func (r *Repository) findBestTorrent(ctx context.Context, provider debrid.Provider, media *anilist.CompleteAnime, episodeNumber int, onProgress func(string)) (ret *playbackTorrent, err error) {
 
 	defer util.HandlePanicInModuleWithError("debridstream/findBestTorrent", &err)
 
@@ -79,6 +80,7 @@ func (r *Repository) findBestTorrent(ctx context.Context, provider debrid.Provid
 		postSearchSort,
 		nil,
 		provider,
+		autoselect.WithTrackProbe(r.trackProbeOptions(ctx, provider, profile, onProgress)), // Garceslab Anime
 	)
 	if err != nil {
 		r.logger.Error().Err(err).Msg("debridstream: Auto-select failed")

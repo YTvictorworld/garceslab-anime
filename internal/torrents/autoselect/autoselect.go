@@ -69,7 +69,7 @@ type (
 		Episode      int                   `json:"episode"`
 		Resolutions  []string              `json:"resolutions"`
 		MinSeeders   int                   `json:"minSeeders"`
-		Step         string                `json:"step"`       // "searching", "ranking", "analyzing", "completed"
+		Step         string                `json:"step"`       // "searching", "ranking", "analyzing", "probing" (Garceslab Anime: reading track languages), "completed"
 		StepDetail   string                `json:"stepDetail"` // Description of the current action
 		Candidates   []AutoSelectCandidate `json:"candidates"`
 		SelectedFile string                `json:"selectedFile"`
@@ -191,7 +191,15 @@ func (s *AutoSelect) FindBestTorrent(
 	postSearchSort func([]*hibiketorrent.AnimeTorrent) []*TorrentWithCacheStatus,
 	torrentClient TorrentClient,
 	debridClient debrid.Provider,
+	options ...FindOption,
 ) (res *Result, err error) {
+
+	var cfg findConfig
+	for _, o := range options {
+		if o != nil {
+			o(&cfg)
+		}
+	}
 
 	resolutions := []string{"1080p"}
 	minSeeders := 0
@@ -231,6 +239,19 @@ func (s *AutoSelect) FindBestTorrent(
 	// 2. Filter & sort
 	s.log("Filtering and sorting candidates")
 	s.updateStep(ctx, "ranking", "Filtering and sorting candidates...")
+	cached := map[string]bool{} // Garceslab Anime: cache status, for the subtitle-aware step
+	if postSearchSort != nil {
+		inner := postSearchSort
+		postSearchSort = func(ts []*hibiketorrent.AnimeTorrent) []*TorrentWithCacheStatus {
+			out := inner(ts)
+			for _, t := range out {
+				if t != nil && t.Torrent != nil && t.IsCached {
+					cached[t.Torrent.InfoHash] = true
+				}
+			}
+			return out
+		}
+	}
 	torrents = s.filterAndSort(ctx, torrents, profile, postSearchSort)
 
 	// 3. Select file (iterate top 3)
@@ -239,6 +260,11 @@ func (s *AutoSelect) FindBestTorrent(
 	res, err = s.selectFile(ctx, media, episodeNumber, torrents, mode, torrentClient, debridClient)
 	if err != nil {
 		return nil, err
+	}
+
+	// 4. Garceslab Anime: prefer a cached release that has the profile's subtitle/dub language
+	if mode == SelectionModeDebrid && cfg.trackProbe != nil {
+		res = s.preferTracks(ctx, media, episodeNumber, torrents, res, cached, cfg.trackProbe, debridClient)
 	}
 
 	if res != nil {

@@ -208,7 +208,7 @@ func (s *AutoSelect) selectFileFromDebrid(
 	s.logger.Trace().Msgf("autoselect: Getting torrent magnet")
 	magnet, err := providerExt.GetProvider().GetTorrentMagnetLink(t)
 	if err != nil {
-		s.logger.Warn().Err(err).Msgf("autoselect: Error scraping magnet link for %s", t.Link)
+		s.logger.Warn().Err(err).Msgf("autoselect: Error scraping magnet link for %s", t.Name)
 		return nil, err
 	}
 
@@ -219,14 +219,14 @@ func (s *AutoSelect) selectFileFromDebrid(
 	// Override magnet link
 	t.MagnetLink = magnet
 
-	s.logger.Debug().Msgf("autoselect: Checking debrid info for %s", t.Link)
+	s.logger.Debug().Msgf("autoselect: Checking debrid info for %s", t.Name) // Garceslab Anime: name, not the provider link
 
 	info, err := client.GetTorrentInfo(debrid.GetTorrentInfoOptions{
 		MagnetLink: magnet,
 		InfoHash:   t.InfoHash,
 	})
 	if err != nil {
-		s.logger.Warn().Err(err).Msgf("autoselect: Error getting debrid info %s", t.Link)
+		s.logger.Warn().Err(err).Msgf("autoselect: Error getting debrid info %s", t.Name)
 		return nil, err
 	}
 

@@ -21,6 +21,7 @@ import (
 	"seanime/internal/platforms/platform"
 	"seanime/internal/torrents/autoselect"
 	"seanime/internal/torrents/torrent"
+	"seanime/internal/torrents/trackprobe"
 	"seanime/internal/util"
 	"seanime/internal/util/result"
 
@@ -56,6 +57,8 @@ type (
 		previousStreamOptions mo.Option[*StartStreamOptions]
 
 		directStreamObserver DirectStreamObserver // Garceslab Anime: viewer sessions
+
+		trackProbeCache *trackprobe.Cache // Garceslab Anime: subtitle-aware auto-select
 	}
 
 	NewRepositoryOptions struct {
@@ -69,6 +72,9 @@ type (
 		MetadataProviderRef *util.Ref[metadata_provider.Provider]
 		PlatformRef         *util.Ref[platform.Platform]
 		DummyDebridEnabled  bool
+		// TrackProbeCacheDir keeps the MKV track lists read by the
+		// subtitle-aware auto-select (Garceslab Anime; "" = no cache).
+		TrackProbeCacheDir string
 	}
 )
 
@@ -90,6 +96,7 @@ func NewRepository(opts *NewRepositoryOptions) (ret *Repository) {
 		ctxMap:                result.NewMap[string, context.CancelFunc](),
 		previousStreamOptions: mo.None[*StartStreamOptions](),
 		directStreamManager:   opts.DirectStreamManager,
+		trackProbeCache:       trackprobe.NewCache(opts.TrackProbeCacheDir, 0),
 	}
 
 	ret.streamManager = NewStreamManager(ret)

@@ -90,10 +90,20 @@ New files: `internal/profiles/sessions/**`, `internal/handlers/profiles_viewers.
 | `internal/handlers/profiles.go` | `registerProfileViewerRoutes(v1)`; `OnProfile` touches the session (idle timeout); delete → `Viewers.ForgetProfile` |
 | `seanime-web/.../requests.ts`, `profiles.hooks.ts`, `profiles-settings.tsx` | LANES_FULL with names; `useGetViewerSessions`, `useStopViewerSession`; "Now watching" card |
 
+## Subtitle-aware debrid auto-select
+
+| File | Hook |
+|---|---|
+| `internal/debrid/client/track_probe.go` (own file) | `TrackPreferenceCtxHook`: the requesting profile's TV player languages (subtitles, audio, ignored labels) |
+| `internal/core/profiles.go` | Sets `debrid_client.TrackPreferenceCtxHook` from `Settings.PlayerPrefs(ctx, profile).TV` |
+| `internal/debrid/client/finder.go`, `stream.go` | `findBestTorrent` passes `autoselect.WithTrackProbe(...)` (preference of the profile in ctx) and an `onProgress` that only reaches the requesting client |
+
 ## Runtime switches
 
 - `SEANIME_MAX_VIEWERS` (default 3), `SEANIME_VIEWER_IDLE_TIMEOUT` (default `15m`),
   `SEANIME_VIEWER_DISCONNECT_GRACE` (default `45s`): viewer sessions (phase 2).
+- `SEANIME_AUTOSELECT_PROBE_TOP` (default 4, max 10, `0` = off): how many cached debrid
+  candidates the subtitle-aware auto-select may read the MKV header of.
 - `SEANIME_PROFILES_ENFORCE=true`: routes outside `internal/profiles/public_routes.go`
   answer `401 {"error":"PROFILE_REQUIRED"}` without a valid profile token. Still off by
   default until the web (M3) and TV (M4) clients send profiles. With it off, requests
