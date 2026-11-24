@@ -38,6 +38,7 @@ type (
 		platform          *util.Ref[platform.Platform]
 		onEvent           func(string)
 		onStatus          func(StreamAutoSelectStatusPayload)
+		onStatusCtx       func(context.Context, StreamAutoSelectStatusPayload)
 		statusMu          sync.Mutex
 	}
 
@@ -48,6 +49,9 @@ type (
 		Platform          *util.Ref[platform.Platform]
 		OnEvent           func(string)
 		OnStatus          func(StreamAutoSelectStatusPayload)
+		// OnStatusCtx, when set, is used instead of OnStatus (Garceslab Anime:
+		// the status of a direct debrid stream only goes to its client).
+		OnStatusCtx func(context.Context, StreamAutoSelectStatusPayload)
 	}
 
 	Result struct {
@@ -88,6 +92,7 @@ func New(opts *NewAutoSelectOptions) *AutoSelect {
 		platform:          opts.Platform,
 		onEvent:           opts.OnEvent,
 		onStatus:          opts.OnStatus,
+		onStatusCtx:       opts.OnStatusCtx,
 	}
 }
 
@@ -106,10 +111,31 @@ const statusKey contextKey = "autoselect-status"
 
 const freshSearchKey contextKey = "autoselect-fresh-search"
 
-func (s *AutoSelect) updateStatus(status StreamAutoSelectStatusPayload) {
+func (s *AutoSelect) updateStatus(ctx context.Context, status StreamAutoSelectStatusPayload) {
+	if s.onStatusCtx != nil {
+		s.onStatusCtx(ctx, status)
+		return
+	}
 	if s.onStatus != nil {
 		s.onStatus(status)
 	}
+}
+
+const statusClientKey contextKey = "autoselect-status-client"
+
+// WithStatusClient marks ctx as a search for one client (Garceslab Anime: a
+// direct debrid stream), so OnStatusCtx can send the status to it only.
+func WithStatusClient(ctx context.Context, clientId string) context.Context {
+	return context.WithValue(ctx, statusClientKey, clientId)
+}
+
+// StatusClient returns the client set by WithStatusClient ("" if none).
+func StatusClient(ctx context.Context) string {
+	if ctx == nil {
+		return ""
+	}
+	id, _ := ctx.Value(statusClientKey).(string)
+	return id
 }
 
 func (s *AutoSelect) updateStep(ctx context.Context, step string, detail string) {
@@ -118,7 +144,7 @@ func (s *AutoSelect) updateStep(ctx context.Context, step string, detail string)
 	if status, ok := ctx.Value(statusKey).(*StreamAutoSelectStatusPayload); ok {
 		status.Step = step
 		status.StepDetail = detail
-		s.updateStatus(*status)
+		s.updateStatus(ctx, *status)
 	}
 }
 
@@ -127,7 +153,7 @@ func (s *AutoSelect) updateCandidates(ctx context.Context, list []AutoSelectCand
 	defer s.statusMu.Unlock()
 	if status, ok := ctx.Value(statusKey).(*StreamAutoSelectStatusPayload); ok {
 		status.Candidates = list
-		s.updateStatus(*status)
+		s.updateStatus(ctx, *status)
 	}
 }
 
@@ -138,7 +164,7 @@ func (s *AutoSelect) updateCandidateStatus(ctx context.Context, name string, sta
 		for i, c := range status.Candidates {
 			if c.Name == name {
 				status.Candidates[i].Status = statusStr
-				s.updateStatus(*status)
+				s.updateStatus(ctx, *status)
 				break
 			}
 		}
@@ -152,7 +178,7 @@ func (s *AutoSelect) completeStatus(ctx context.Context, selectedFile string) {
 		status.Step = "completed"
 		status.StepDetail = "Best file selected!"
 		status.SelectedFile = selectedFile
-		s.updateStatus(*status)
+		s.updateStatus(ctx, *status)
 	}
 }
 
@@ -187,11 +213,11 @@ func (s *AutoSelect) FindBestTorrent(
 	}
 
 	ctx = context.WithValue(ctx, statusKey, &status)
-	s.updateStatus(status)
+	s.updateStatus(ctx, status)
 
 	defer func() {
 		status.Active = false
-		s.updateStatus(status)
+		s.updateStatus(ctx, status)
 	}()
 
 	// 1. Search

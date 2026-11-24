@@ -30,7 +30,7 @@ func (r *Repository) findBestTorrent(ctx context.Context, provider debrid.Provid
 
 	r.logger.Debug().Msgf("debridstream: Finding best torrent for %s, Episode %d", media.GetTitleSafe(), episodeNumber)
 
-	profile, found := db_bridge.FindAutoSelectProfile(r.db)
+	profile, found := db_bridge.FindAutoSelectProfileCtx(ctx, r.db) // profiles-hook: the requesting profile
 	if !found {
 		resolution := r.settings.StreamPreferredResolution
 		if resolution == "" {

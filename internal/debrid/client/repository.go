@@ -54,6 +54,8 @@ type (
 		autoSelect *autoselect.AutoSelect
 
 		previousStreamOptions mo.Option[*StartStreamOptions]
+
+		directStreamObserver DirectStreamObserver // Garceslab Anime: viewer sessions
 	}
 
 	NewRepositoryOptions struct {
@@ -97,7 +99,11 @@ func NewRepository(opts *NewRepositoryOptions) (ret *Repository) {
 		TorrentRepository: opts.TorrentRepository,
 		MetadataProvider:  opts.MetadataProviderRef,
 		Platform:          opts.PlatformRef,
-		OnStatus: func(status autoselect.StreamAutoSelectStatusPayload) {
+		OnStatusCtx: func(ctx context.Context, status autoselect.StreamAutoSelectStatusPayload) {
+			if clientId := autoselect.StatusClient(ctx); clientId != "" { // Garceslab Anime: direct stream
+				opts.WSEventManager.SendEventTo(clientId, events.StreamAutoSelectStatus, status)
+				return
+			}
 			opts.WSEventManager.SendEvent(events.StreamAutoSelectStatus, status)
 		},
 	})
@@ -366,15 +372,59 @@ func (r *Repository) StartStream(ctx context.Context, opts *StartStreamOptions) 
 	return r.streamManager.startStream(ctx, opts)
 }
 
+// GetStreamURL returns the URL of the relayed stream (upstream's single stream).
 func (r *Repository) GetStreamURL() (string, bool) {
-	return r.streamManager.currentStreamUrl, r.streamManager.currentStreamUrl != ""
+	u := r.streamManager.streamURL("")
+	return u, u != ""
 }
 
+// GetStreamURLFor returns the URL of the client's direct stream, else the relayed one.
+func (r *Repository) GetStreamURLFor(clientId string) (string, bool) {
+	u := r.streamManager.streamURL(clientId)
+	return u, u != ""
+}
+
+// CancelStream cancels the relayed stream (upstream behaviour). Direct streams
+// of other clients keep going.
 func (r *Repository) CancelStream(opts *CancelStreamOptions) {
 	r.streamManager.cancelStream(opts)
 }
 
+// CancelStreamFor cancels the direct stream of clientId if it has one, else the
+// relayed stream (Garceslab Anime).
+func (r *Repository) CancelStreamFor(clientId string, opts *CancelStreamOptions) {
+	if r.streamManager.cancelClientStream(clientId, opts) {
+		return
+	}
+	r.streamManager.cancelStream(opts)
+}
+
+// CancelDirectStream cancels the direct stream of clientId, if any, and reports
+// whether there was one. The relayed stream is never touched.
+func (r *Repository) CancelDirectStream(clientId string, opts *CancelStreamOptions) bool {
+	return r.streamManager.cancelClientStream(clientId, opts)
+}
+
+// DirectStreamClientIds returns the clients with a direct stream.
+func (r *Repository) DirectStreamClientIds() []string {
+	return r.streamManager.directClientIds()
+}
+
+// SetProviderForTesting installs a provider without settings (tests and the
+// phase 2 E2E harness use fakes; no debrid service is called).
+func (r *Repository) SetProviderForTesting(p debrid.Provider) {
+	r.provider = mo.Some(p)
+	r.settings = &models.DebridSettings{Enabled: true, Provider: p.GetSettings().ID}
+}
+
+// SetDirectStreamObserver sets who hears how direct streams went (viewer sessions).
+func (r *Repository) SetDirectStreamObserver(f DirectStreamObserver) {
+	r.directStreamObserver = f
+}
+
 func (r *Repository) GetPreviousStreamOptions() (*StartStreamOptions, bool) {
+	r.streamManager.mu.Lock()
+	defer r.streamManager.mu.Unlock()
 	return r.previousStreamOptions.Get()
 }
 

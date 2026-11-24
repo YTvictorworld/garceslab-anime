@@ -1,6 +1,7 @@
 package db_bridge
 
 import (
+	"context"
 	"errors"
 	"seanime/internal/database/db"
 	"seanime/internal/database/models"
@@ -18,6 +19,28 @@ func FindAutoSelectProfile(db *db.Database) (*anime.AutoSelectProfile, bool) {
 // ProfileAutoSelectHook (profiles-hook) returns the auto-select profile of the
 // local profile that owns the playback, if it has one.
 var ProfileAutoSelectHook func() (*anime.AutoSelectProfile, bool)
+
+// ProfileAutoSelectCtxHook (profiles-hook, phase 2) returns the auto-select
+// profile of the local profile in ctx (the request's profile; nil if it has
+// none) and whether ctx carries a profile at all.
+var ProfileAutoSelectCtxHook func(ctx context.Context) (p *anime.AutoSelectProfile, hasProfile bool)
+
+// FindAutoSelectProfileCtx is FindAutoSelectProfile for the profile in ctx: with
+// several playbacks at once, a stream start uses the profile that asked for it
+// instead of the playback lane owner's (profiles-hook, phase 2).
+func FindAutoSelectProfileCtx(ctx context.Context, db *db.Database) (*anime.AutoSelectProfile, bool) {
+	if ProfileAutoSelectCtxHook != nil && ctx != nil {
+		if p, hasProfile := ProfileAutoSelectCtxHook(ctx); hasProfile {
+			if p != nil {
+				return p, true
+			}
+			// The profile has none of its own: the server's, never another profile's.
+			g, err := GetGlobalAutoSelectProfile(db)
+			return g, err == nil && g.DbID != 0
+		}
+	}
+	return FindAutoSelectProfile(db)
+}
 
 // GetAutoSelectProfile returns the single autoselect profile if it exists
 func GetAutoSelectProfile(db *db.Database) (*anime.AutoSelectProfile, error) {
