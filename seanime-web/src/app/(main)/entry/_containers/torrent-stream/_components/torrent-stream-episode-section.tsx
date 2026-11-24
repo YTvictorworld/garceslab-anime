@@ -1,5 +1,6 @@
 import { Anime_Entry, Anime_Episode, Anime_EpisodeCollection } from "@/api/generated/types"
 import { getEpisodeMinutesRemaining, getEpisodePercentageComplete, useGetContinuityWatchHistory } from "@/api/hooks/continuity.hooks"
+import { useEpisodeTags } from "@/api/hooks/episode_tags.hooks"
 import { EpisodeCard } from "@/app/(main)/_features/anime/_components/episode-card"
 import { EpisodeGridItem } from "@/app/(main)/_features/anime/_components/episode-grid-item"
 import { MediaEpisodeInfoModal } from "@/app/(main)/_features/media/_components/media-episode-info-modal"
@@ -11,6 +12,7 @@ import { IconButton } from "@/components/ui/button"
 import { Carousel, CarouselContent, CarouselDotButtons, CarouselItem } from "@/components/ui/carousel"
 import { ContextMenuItem } from "@/components/ui/context-menu"
 import { DropdownMenu, DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import { episodeTagFor } from "@/lib/episode-tags/episode-tags"
 import { useThemeSettings } from "@/lib/theme/theme-hooks"
 import React, { useMemo } from "react"
 import { BiDotsHorizontal } from "react-icons/bi"
@@ -41,6 +43,7 @@ export function TorrentStreamEpisodeSection(props: TorrentStreamEpisodeSectionPr
     } = props
 
     const { data: watchHistory } = useGetContinuityWatchHistory()
+    const episodeTags = useEpisodeTags(entry.mediaId)
 
 
     /**
@@ -139,6 +142,7 @@ export function TorrentStreamEpisodeSection(props: TorrentStreamEpisodeSectionPr
                             }}
                             description={episode?.episodeMetadata?.overview}
                             isFiller={episode?.episodeMetadata?.isFiller}
+                            episodeTag={episode?.type === "main" ? episodeTagFor(episodeTags, episode?.episodeNumber) : undefined}
                             length={episode?.episodeMetadata?.length}
                             isWatched={!!entry.listData?.progress && entry.listData.progress >= (episode?.progressNumber || 0)}
                             className="flex-none w-full"

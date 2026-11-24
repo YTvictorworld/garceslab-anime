@@ -122,6 +122,7 @@ func TestIsPublicRoute(t *testing.T) {
 	assert.True(t, IsPublicRoute("GET", "/api/v1/anilist/media-details/:id"))
 	assert.False(t, IsPublicRoute("POST", "/api/v1/anilist/list-entry"))
 	assert.True(t, IsPublicRoute("GET", "/api/v1/search/suggest"))
+	assert.True(t, IsPublicRoute("GET", "/api/v1/anime/episode-tags/:id"))
 	assert.False(t, IsPublicRoute("GET", "/api/v1/continuity/history"))
 	assert.False(t, IsPublicRoute("GET", "/api/v1/settings"))
 }
