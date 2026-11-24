@@ -559,6 +559,9 @@ func (h *Handler) HandleImportProfileAnilist(c echo.Context) error {
 		Mode:       importMode(b.Mode),
 		Favourites: b.Favourites == nil || *b.Favourites,
 	})
+	if b.Token != "" {
+		c.Set(importAuditSourceKey, "Private AniList list (token)")
+	}
 	b.Token = ""
 	if err != nil {
 		return h.respondImportError(c, err)

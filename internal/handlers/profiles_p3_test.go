@@ -184,6 +184,14 @@ func TestPhase3TokenImportEndpoint(t *testing.T) {
 	require.Equal(t, 200, code, res)
 	require.Len(t, dataList(t, res), 1)
 
+	// The audit names the source, never the token.
+	code, res = env.call("GET", "/api/v1/profiles/audit", "tv", tokA, nil)
+	require.Equal(t, 200, code, res)
+	audit := dataList(t, res)
+	require.NotEmpty(t, audit)
+	assert.Equal(t, "import", audit[0].(map[string]any)["action"])
+	assert.Equal(t, "Private AniList list (token)", audit[0].(map[string]any)["detail"])
+
 	// The token isn't anywhere in profiles.db.
 	var tables []string
 	require.NoError(t, env.svc.DB().Raw("SELECT name FROM sqlite_master WHERE type = 'table'").Scan(&tables).Error)

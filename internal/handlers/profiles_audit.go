@@ -15,8 +15,15 @@ func (h *Handler) auditProfileImport(c echo.Context, p *profiles.Profile) {
 	if h.App == nil || h.App.Profiles == nil {
 		return
 	}
-	h.App.Profiles.RecordAudit(c.Request().Context(), p, profiles.AuditImport, importAuditSource(c.Path()))
+	source := importAuditSource(c.Path())
+	if s, ok := c.Get(importAuditSourceKey).(string); ok && s != "" {
+		source = s // set by the handler (phase 3: token imports)
+	}
+	h.App.Profiles.RecordAudit(c.Request().Context(), p, profiles.AuditImport, source)
 }
+
+// importAuditSourceKey lets an import handler name its source more precisely.
+const importAuditSourceKey = "profileImportAuditSource"
 
 // importAuditSource names the import source of an import route.
 func importAuditSource(route string) string {
