@@ -51,7 +51,7 @@ type ProfileSettings struct {
 	// CompletedAction is the status for a COMPLETED anime when playback starts:
 	// "REPEATING" (default) or "CURRENT".
 	CompletedAction *string `json:"completedAction,omitempty"`
-	// Player is the client's player preferences (subtitles, audio...), opaque.
+	// Player is the player preferences per client (PlayerPrefs, player.go).
 	Player json.RawMessage `json:"player,omitempty"`
 }
 
@@ -107,6 +107,14 @@ func (s *ProfileSettings) Validate() error {
 		var obj map[string]json.RawMessage
 		if err := json.Unmarshal(s.Player, &obj); err != nil {
 			return fmt.Errorf("%w: player preferences must be a JSON object", ErrInvalidSetting)
+		}
+		// Phase 4: typed per-client sections (player.go).
+		prefs, err := ParsePlayerPrefs(s.Player)
+		if err != nil {
+			return err
+		}
+		if err := prefs.Validate(); err != nil {
+			return err
 		}
 	}
 	if s.Library != nil && s.Library.DefaultPlaybackSource != nil && len(*s.Library.DefaultPlaybackSource) > 200 {
@@ -257,6 +265,9 @@ type Store struct {
 
 	mu    sync.RWMutex
 	cache map[int64]*ProfileSettings
+
+	// playerMu serialises player preference patches (read-modify-write).
+	playerMu sync.Mutex
 }
 
 func NewStore(db *gorm.DB) *Store {
