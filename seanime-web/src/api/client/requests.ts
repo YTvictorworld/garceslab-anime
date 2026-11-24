@@ -394,6 +394,8 @@ export function getProfileErrorMessage(err: string): string {
             return "This file isn't a Garceslab Anime profile export or an AniList collection."
         case "PROFILE_IMPORT_NOTHING_TO_IMPORT":
             return "There was nothing to import."
+        case "PROFILE_IMPORT_INVALID_TOKEN":
+            return "AniList didn't accept this access token. Get a new one and try again."
         case "PROFILE_INVALID_SETTING":
             return "Invalid setting: " + err.slice(code.length + 1).trim()
     }

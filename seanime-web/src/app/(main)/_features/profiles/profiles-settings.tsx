@@ -4,7 +4,7 @@ import {
     describeImportResult,
     exportProfileRequest,
     ImportMode,
-    importAnilistRequest,
+    importAnilistWithOptionsRequest,
     importJSONRequest,
     importServerAccountRequest,
     selectProfileRequest,
@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { Modal } from "@/components/ui/modal"
 import { RadioGroup } from "@/components/ui/radio-group"
+import { Switch } from "@/components/ui/switch"
 import { TextInput } from "@/components/ui/text-input"
 import { useQueryClient } from "@tanstack/react-query"
 import { useAtomValue } from "jotai"
@@ -356,13 +357,19 @@ function ImportModal({ profile, onClose }: { profile: Profile, onClose: () => vo
     const qc = useQueryClient()
     const current = useCurrentProfile()
 
-    const [source, setSource] = React.useState<"anilist" | "json" | "server-account">("anilist")
+    const [source, setSource] = React.useState<"anilist" | "anilist-token" | "json" | "server-account">("anilist")
     const [mode, setMode] = React.useState<ImportMode>("merge")
     const [username, setUsername] = React.useState("")
+    // Used for this one import only: never saved by the browser or the server.
+    const [token, setToken] = React.useState("")
+    const [clientId, setClientId] = React.useState("")
+    const [favourites, setFavourites] = React.useState(true)
     const [file, setFile] = React.useState<File | null>(null)
     const [busy, setBusy] = React.useState(false)
 
-    const canImport = !busy && (source === "anilist" ? username.trim().length > 0 : source === "json" ? !!file : true)
+    const canImport = !busy && (source === "anilist" ? username.trim().length > 0
+        : source === "anilist-token" ? token.trim().length > 0
+            : source === "json" ? !!file : true)
 
     async function run() {
         if (!canImport) return
@@ -370,7 +377,10 @@ function ImportModal({ profile, onClose }: { profile: Profile, onClose: () => vo
         try {
             let res
             if (source === "anilist") {
-                res = await importAnilistRequest(profile.id, username.trim(), mode, password)
+                res = await importAnilistWithOptionsRequest(profile.id, { username: username.trim(), mode, favourites }, password)
+            } else if (source === "anilist-token") {
+                res = await importAnilistWithOptionsRequest(profile.id, { token: token.trim(), mode, favourites }, password)
+                setToken("")
             } else if (source === "server-account") {
                 res = await importServerAccountRequest(profile.id, mode, password)
             } else {
@@ -406,6 +416,7 @@ function ImportModal({ profile, onClose }: { profile: Profile, onClose: () => vo
                     onValueChange={v => setSource(v as typeof source)}
                     options={[
                         { value: "anilist", label: "Public AniList list (username)" },
+                        { value: "anilist-token", label: "Private AniList list (access token)" },
                         { value: "json", label: "Garceslab Anime export (JSON file)" },
                         { value: "server-account", label: "This server's AniList account list" },
                     ]}
@@ -415,6 +426,40 @@ function ImportModal({ profile, onClose }: { profile: Profile, onClose: () => vo
                     help="Only public lists can be imported. No AniList login is needed."
                     value={username}
                     onValueChange={setUsername}
+                />}
+                {source === "anilist-token" && <div className="space-y-3" data-import-token>
+                    <p className="text-sm text-[--muted]">
+                        The token is sent once for this import and is never saved. To get one, create an API client
+                        on AniList (Settings → Developer) with the redirect URL <code>https://anilist.co/api/v2/oauth/pin</code>,
+                        then open the authorization link and copy the token AniList shows you.
+                    </p>
+                    <div className="flex gap-2 items-end">
+                        <TextInput
+                            label="AniList API client ID"
+                            help="Only used to build the link below."
+                            value={clientId}
+                            inputMode="numeric"
+                            onValueChange={v => setClientId(v.replace(/\D/g, ""))}
+                        />
+                        <Button
+                            intent="gray-subtle"
+                            disabled={!clientId}
+                            onClick={() => window.open(`https://anilist.co/api/v2/oauth/authorize?client_id=${clientId}&response_type=token`,
+                                "_blank", "noopener,noreferrer")}
+                        >Open AniList</Button>
+                    </div>
+                    <TextInput
+                        label="AniList access token"
+                        type="password"
+                        autoComplete="off"
+                        value={token}
+                        onValueChange={setToken}
+                    />
+                </div>}
+                {(source === "anilist" || source === "anilist-token") && <Switch
+                    label="Also import favourites"
+                    value={favourites}
+                    onValueChange={setFavourites}
                 />}
                 {source === "json" && <input
                     type="file"

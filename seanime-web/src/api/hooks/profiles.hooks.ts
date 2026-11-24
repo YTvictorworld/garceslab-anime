@@ -165,6 +165,25 @@ export function importAnilistRequest(id: number, username: string, mode: ImportM
     })
 }
 
+/**
+ * AniList import with every option (phase 3). With a token the token owner's list is
+ * imported, private entries included; the server uses the token once and never stores it.
+ */
+export function importAnilistWithOptionsRequest(id: number, opts: {
+    username?: string
+    token?: string
+    mode: ImportMode
+    favourites: boolean
+}, password?: string, profileToken?: string) {
+    return buildSeaQuery<ProfileImportResult>({
+        endpoint: PD.ImportProfileAnilist.endpoint.replace("{id}", String(id)),
+        method: "POST",
+        data: opts,
+        password,
+        profileToken,
+    })
+}
+
 export function importServerAccountRequest(id: number, mode: ImportMode, password?: string, profileToken?: string) {
     return buildSeaQuery<ProfileImportResult>({
         endpoint: PD.ImportProfileServerAccount.endpoint.replace("{id}", String(id)),
@@ -197,5 +216,6 @@ export function describeImportResult(r: ProfileImportResult | undefined): string
     const parts = [`${r.imported} imported`]
     if (r.updated) parts.push(`${r.updated} updated`)
     if (r.skipped) parts.push(`${r.skipped} skipped`)
+    if (r.favourites) parts.push(`${r.favourites} favourites`)
     return "Import finished: " + parts.join(", ")
 }
