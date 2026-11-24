@@ -358,3 +358,41 @@ func (m *syncMetadata) GetAnimeMetadata(p metadata.Platform, mediaID int) (*meta
 	defer m.mu.Unlock()
 	return m.FakeMetadataProvider.GetAnimeMetadata(p, mediaID)
 }
+
+// A TV whose direct link failed asks again for the same release and file: the
+// link event names them (also for auto-select), and the retry reuses the
+// client's own direct slot.
+func TestDirectLinkNamesTheReleaseAndARetryReusesTheSlot(t *testing.T) {
+	provider := newGatedProvider()
+	repo, ws, _ := newSessionTestRepo(t, provider)
+	require.NoError(t, repo.StartStream(context.Background(), directStart("tv-a", 1, "hash0")))
+	require.NoError(t, repo.StartStream(context.Background(), directStart("tv-b", 2, "hash1")))
+	close(provider.gate("item-hash0"))
+	waitFor(t, "a's link", func() bool { _, ok := ws.openURL("tv-a"); return ok })
+
+	var payload ExternalPlayerLinkPayload
+	for _, e := range ws.all() {
+		if e.client == "tv-a" && e.kind == events.ExternalPlayerOpenURL {
+			payload = e.payload.(ExternalPlayerLinkPayload)
+		}
+	}
+	require.NotNil(t, payload.Torrent)
+	require.Equal(t, "hash0", payload.Torrent.InfoHash)
+	require.Equal(t, "1", payload.FileId)
+
+	// The retry: the same torrent and file, for a fresh link.
+	retry := directStart("tv-a", 1, "hash0")
+	retry.Torrent = payload.Torrent
+	retry.FileId = payload.FileId
+	require.NoError(t, repo.StartStream(context.Background(), retry))
+	waitFor(t, "a's second link", func() bool {
+		n := 0
+		for _, e := range ws.all() {
+			if e.client == "tv-a" && e.kind == events.ExternalPlayerOpenURL {
+				n++
+			}
+		}
+		return n == 2
+	})
+	require.ElementsMatch(t, []string{"tv-a", "tv-b"}, repo.DirectStreamClientIds(), "one slot per client, retries included")
+}

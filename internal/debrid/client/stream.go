@@ -91,6 +91,20 @@ type (
 		BatchEpisodeFiles *hibiketorrent.BatchEpisodeFiles
 	}
 
+	// ExternalPlayerLinkPayload is the external-player-open-url event of a
+	// debrid stream played by the client. Garceslab Anime: it also names the
+	// release and file the stream resolved (auto-select included), so a TV whose
+	// link failed can ask again for a fresh link to the same file without
+	// running auto-select again. Only the client that started it receives it.
+	ExternalPlayerLinkPayload struct {
+		Url           string                      `json:"url"`
+		MediaId       int                         `json:"mediaId"`
+		EpisodeNumber int                         `json:"episodeNumber"`
+		MediaTitle    string                      `json:"mediaTitle"`
+		Torrent       *hibiketorrent.AnimeTorrent `json:"torrent,omitempty"`
+		FileId        string                      `json:"fileId,omitempty"`
+	}
+
 	CancelStreamOptions struct {
 		// Whether to remove the torrent from the debrid service
 		RemoveTorrent bool `json:"removeTorrent"`
@@ -564,16 +578,13 @@ func (s *StreamManager) startStream(ctx context.Context, opts *StartStreamOption
 
 		case PlaybackTypeExternalPlayer:
 			// Send the external player link
-			ws.SendEventTo(opts.ClientId, events.ExternalPlayerOpenURL, struct {
-				Url           string `json:"url"`
-				MediaId       int    `json:"mediaId"`
-				EpisodeNumber int    `json:"episodeNumber"`
-				MediaTitle    string `json:"mediaTitle"`
-			}{
+			ws.SendEventTo(opts.ClientId, events.ExternalPlayerOpenURL, ExternalPlayerLinkPayload{
 				Url:           streamUrl,
 				MediaId:       opts.MediaId,
 				EpisodeNumber: opts.EpisodeNumber,
 				MediaTitle:    media.GetPreferredTitle(),
+				Torrent:       selectedTorrent,
+				FileId:        fileId,
 			}, true) // Garceslab Anime: never log the debrid link
 
 			// Signal to the client that the torrent has started playing (remove loading status)
