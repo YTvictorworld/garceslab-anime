@@ -1,25 +1,75 @@
-# Publishes the image to GHCR. Manual only, and only once the maintainer
-# approves the first release: run it from the Actions tab on a tag like
-# v3.10.5-p1 (Run workflow -> pick the tag). It never runs on push.
+# Publishes a release: the multi-arch image on GHCR and a GitHub Release that links the
+# exact source (GPL-3.0 section 6). Manual only; how and when: docs/releasing.md.
+#
+#   - From main (the usual way): Run workflow -> branch main, version = X.Y.Z,
+#     confirm = publish. Checks that vX.Y.Z doesn't exist and equals
+#     internal/constants.GarceslabVersion, builds and pushes the image, then creates the
+#     tag vX.Y.Z at the built commit and the GitHub Release.
+#   - On an existing tag vX.Y.Z (to finish a release whose tag already exists):
+#     Run workflow -> pick the tag, confirm = publish.
+#
+# Anything else (no "publish", another branch, a wrong version) fails with a message in the
+# "Check the request" step; it never skips quietly. The rules are in
+# .github/scripts/release-check.sh, tested by release-check_test.sh.
 name: Release image (manual)
 
 on:
   workflow_dispatch:
     inputs:
+      version:
+        description: 'Version to release, e.g. 1.0.0 (required when run from main; must match GarceslabVersion)'
+        required: false
+        default: ""
       confirm:
-        description: 'Type "publish" to push the image to GHCR'
+        description: 'Type "publish" to push the image to GHCR and create the release'
         required: true
 
-permissions:
-  contents: write
-  packages: write
+permissions: {}
+
+# One release at a time; a second run waits instead of racing for the same tag.
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
-  image:
-    if: github.event.inputs.confirm == 'publish' && startsWith(github.ref, 'refs/tags/v')
+  check:
+    name: Check the request
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+      tag: ${{ steps.check.outputs.tag }}
+      create_tag: ${{ steps.check.outputs.create_tag }}
     steps:
       - uses: actions/checkout@v7
+      - name: Test the release rules
+        run: bash .github/scripts/release-check_test.sh
+      - name: Check the request
+        id: check
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          GIT_REF: ${{ github.ref }}
+          CONFIRM: ${{ inputs.confirm }}
+          VERSION_INPUT: ${{ inputs.version }}
+        run: bash .github/scripts/release-check.sh
+
+  publish:
+    name: Image, tag and GitHub Release
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the tag and the release
+      packages: write # push to GHCR
+    env:
+      TAG: ${{ needs.check.outputs.tag }}
+      IMAGE: ghcr.io/ytvictorworld/garceslab-anime-server
+    steps:
+      # The commit the run was started on (main's head or the tag), never a newer main.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
       - uses: docker/setup-qemu-action@v4
       - uses: docker/setup-buildx-action@v4
       - uses: docker/login-action@v4
@@ -30,9 +80,10 @@ jobs:
       - id: meta
         uses: docker/metadata-action@v6
         with:
-          images: ghcr.io/ytvictorworld/garceslab-anime-server
+          images: ${{ env.IMAGE }}
           tags: |
-            type=ref,event=tag
+            type=raw,value=${{ needs.check.outputs.tag }}
+            type=raw,value=latest
       - uses: docker/build-push-action@v7
         with:
           context: .
@@ -41,14 +92,24 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            VERSION=${{ github.ref_name }}
+            VERSION=${{ needs.check.outputs.tag }}
             REVISION=${{ github.sha }}
+      # Created only after the image is pushed, so a failed build leaves no tag behind and
+      # the same run can simply be started again.
+      - name: Create the tag
+        if: needs.check.outputs.create_tag == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$TAG" -f sha="$GITHUB_SHA" >/dev/null
+          echo "Created tag $TAG at $GITHUB_SHA"
       - name: GitHub Release (links the exact source, GPL-3.0 section 6)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" --verify-tag \
-            --title "Garceslab Anime $GITHUB_REF_NAME" \
-            --notes "Image: ghcr.io/ytvictorworld/garceslab-anime-server:$GITHUB_REF_NAME
-          Source: https://github.com/$GITHUB_REPOSITORY/tree/$GITHUB_REF_NAME (commit $GITHUB_SHA)
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag \
+            --title "Garceslab Anime $TAG" \
+            --notes "Image: $IMAGE:$TAG (also tagged latest)
+          Source: https://github.com/$GITHUB_REPOSITORY/tree/$TAG (commit $GITHUB_SHA)
+          Install the matching TV app: https://github.com/YTvictorworld/garceslab-anime-tv/releases/tag/$TAG
           Garceslab Anime is derived from Seanime (5rahim) and is licensed GPL-3.0; see NOTICE and MODIFICATIONS.md."

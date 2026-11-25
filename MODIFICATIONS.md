@@ -167,6 +167,18 @@ AniList account, several playbacks at the same time) will be listed here as they
   `PR ready (WIP rule)` workflow (`.github/workflows/pr-ready.yml`,
   `.github/scripts/pr-ready.sh` with its tests). The existing CI workflows are unchanged.
 
+## 2026-11 (versioning and releases)
+
+- **Own version** (`internal/constants/constants.go`, `internal/handlers/status.go`,
+  `internal/core/app.go`): Garceslab Anime has its own version, `GarceslabVersion` (starting
+  at 1.0.0), returned as `garceslabVersion` in the status response and logged at startup.
+  Seanime's `Version` (3.10.5) is unchanged, because extensions, Nakama, config migrations
+  and the TV app compare it.
+- **Release workflow** (`.github/workflows/release.yml`, `.github/scripts/release-check.sh`
+  with its tests): it can be run from `main` with a version (it then creates the tag), and it
+  fails with a message instead of skipping when it is run without `confirm = publish`, from
+  another branch or with a version that doesn't match. See `docs/releasing.md`.
+
 ## GPL-3.0 compliance checklist
 
 - [x] **Prominent modification notices with dates (§5a):** this file, `NOTICE`, the README's

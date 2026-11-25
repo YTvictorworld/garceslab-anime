@@ -32,6 +32,7 @@ It is published only for self-hosting with LG webOS TVs: there is no hosted serv
 |---|---|
 | [../CONTRIBUTING.md](../CONTRIBUTING.md) | Issue first, the pull request checklist and the "(WIP)" rule, running the checks |
 | [../AGENTS.md](../AGENTS.md) | Guide for AI coding agents: layout, commands, checks, screenshots, privacy |
+| [releasing.md](releasing.md) | Versions (1.0.0 onwards, server and TV together), cutting a release with the workflow, verifying it, rolling back |
 | [../DEVELOPMENT_AND_BUILD.md](../DEVELOPMENT_AND_BUILD.md) | Building from source (inherited from Seanime) |
 | [../internal/profiles/HOOKS.md](../internal/profiles/HOOKS.md) | Every place where the profiles feature touches Seanime code |
 | [../MODIFICATIONS.md](../MODIFICATIONS.md) | Every change compared with Seanime v3.10.5, with dates (GPL-3.0 §5a) |
@@ -43,7 +44,7 @@ profiles; anime titles and art are AniList's public data.
 ## Roadmap
 
 - **1.0 release:** prebuilt server images on GHCR and the `.ipk` on the TV repository's
-  GitHub Releases, each built from a git tag.
+  GitHub Releases, each built from a git tag ([how](releasing.md)).
 - **Self-hosted subtitle translation (planned):** an optional service that runs on your own
   server and translates a release's subtitles into the profile's language when no release has
   them, so nothing is sent to a third-party translation service. It is not designed in detail
