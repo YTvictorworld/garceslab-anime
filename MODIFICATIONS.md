@@ -189,6 +189,11 @@ AniList account, several playbacks at the same time) will be listed here as they
   right after start-up, or on a server whose settings have no media player section, panicked. The
   repository is now stored before the call returns, guarded by its own lock, and every use returns
   `ErrNoMediaPlayer` instead of panicking. See [docs/testing.md](docs/testing.md).
+- **Playlist manager state behind a lock** (`internal/playlist/manager.go`): the current playlist,
+  episode, client id and cancel function are read and written through locked getters/setters, the
+  playlist goroutine keeps its own context, and `markCurrentAsCompleted` no longer unlocks a mutex it
+  doesn't own. Fixes data races found with `go test -race`. The test `FakePlatform`
+  (`internal/testmocks`) records update calls under a mutex.
 
 ## GPL-3.0 compliance checklist
 

@@ -47,7 +47,16 @@ used to panic now and then (more often on the CI runner) with a nil `*mediaplaye
   the streaming methods, `PlayNextEpisode`) returns `ErrNoMediaPlayer` when there is no repository instead
   of panicking. Playlists keep working with the native player and stream playback; local files that need
   the desktop player stop the playlist with "Failed to start playing local file".
+- **Data races in the playlist manager:** with the panic gone, `go test -race -count=200` still found
+  races: the playlist goroutine, `StopPlaylist` and the client event listener read and wrote the current
+  playlist, episode, client id and cancel function without a lock, and the playlist goroutine read
+  `m.ctx` on every loop (so it could wait on a newer playlist's context). That state now goes through
+  small locked getters and setters (`stateMu`), and the goroutine keeps its own context.
+  `markCurrentAsCompleted` no longer calls `m.mu.Unlock()` when no playlist is active (it unlocked a
+  mutex its caller held or didn't hold). The test `FakePlatform` records update calls under a mutex.
 - **Tests:** `TestPlaybackManagerWithoutMediaPlayerReturnsErrorInsteadOfPanicking`,
   `TestPlaybackManagerSetMediaPlayerRepositoryIsVisibleImmediately` and
   `TestPlaylistManagerPlayEpisodeWithoutMediaPlayer` (which panics on the old code every time).
-  `TestPlaylistManagerPlayEpisodePrevious` is no longer on the known-failing list.
+  `TestPlaylistManagerPlayEpisodePrevious` is no longer on the known-failing list. The playlist tests
+  read the manager's state through the same locked getters, and
+  `go test -race -count=200 ./internal/playlist/` passes.
