@@ -36,6 +36,7 @@ type Status struct {
 	Settings              *models.Settings              `json:"settings"`
 	Version               string                        `json:"version"`
 	VersionName           string                        `json:"versionName"`
+	GarceslabVersion      string                        `json:"garceslabVersion"` // Garceslab Anime's own version; Version stays Seanime's for compatibility
 	ThemeSettings         *models.Theme                 `json:"themeSettings"`
 	IsOffline             bool                          `json:"isOffline"`
 	MediastreamSettings   *models.MediastreamSettings   `json:"mediastreamSettings"`
@@ -121,6 +122,7 @@ func (h *Handler) NewStatus(c echo.Context) *Status {
 		Settings:              settings,
 		Version:               h.App.Version,
 		VersionName:           constants.VersionName,
+		GarceslabVersion:      constants.GarceslabVersion,
 		ThemeSettings:         theme,
 		IsOffline:             h.App.Config.Server.Offline,
 		MediastreamSettings:   h.App.SecondarySettings.Mediastream,

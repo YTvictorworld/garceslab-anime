@@ -214,7 +214,7 @@ func NewApp(configOpts *ConfigOptions, selfupdater *updater.SelfUpdater) *App {
 	logger := util.NewLogger()
 
 	// Log application version, OS, architecture and system info
-	logger.Info().Msgf("app: Seanime %s-%s", constants.Version, constants.VersionName)
+	logger.Info().Msgf("app: Garceslab Anime %s (based on Seanime %s-%s)", constants.GarceslabVersion, constants.Version, constants.VersionName)
 	logger.Info().Msgf("app: OS: %s", runtime.GOOS)
 	logger.Info().Msgf("app: Arch: %s", runtime.GOARCH)
 	logger.Info().Msgf("app: Processor count: %d", runtime.NumCPU())
