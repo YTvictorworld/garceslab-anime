@@ -34,6 +34,7 @@ It is published only for self-hosting with LG webOS TVs: there is no hosted serv
 | [../AGENTS.md](../AGENTS.md) | Guide for AI coding agents: layout, commands, checks, screenshots, privacy |
 | [../DEVELOPMENT_AND_BUILD.md](../DEVELOPMENT_AND_BUILD.md) | Building from source (inherited from Seanime) |
 | [../internal/profiles/HOOKS.md](../internal/profiles/HOOKS.md) | Every place where the profiles feature touches Seanime code |
+| [dependencies.md](dependencies.md) | Dependabot updates, and the chromedp v0.24 migration of the extensions' `ChromeDP` API with its tests |
 | [../MODIFICATIONS.md](../MODIFICATIONS.md) | Every change compared with Seanime v3.10.5, with dates (GPL-3.0 §5a) |
 | [../NOTICE](../NOTICE) | Copyright, licences and third-party data |
 
