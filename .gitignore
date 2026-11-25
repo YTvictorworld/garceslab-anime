@@ -84,6 +84,8 @@ internal/extension_repo/goja_plugin_test
 
 *.sh
 !branding/export.sh
+!scripts/check.sh
+!.github/scripts/*.sh
 
 seanime-web-tr/
 codegen/nonext/
