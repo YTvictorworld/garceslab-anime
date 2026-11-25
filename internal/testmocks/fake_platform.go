@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"seanime/internal/api/anilist"
+	"sync"
 )
 
 type FakePlatformBuilder struct {
@@ -37,8 +38,11 @@ type FakePlatform struct {
 	rawMangaCollectionCalls     int
 	animeAiringScheduleCalls    int
 	viewerStatsCalls            int
-	updateEntryCalls            []FakeUpdateEntryCall
-	updateEntryProgressCalls    []FakeUpdateEntryProgressCall
+	// callsMu guards the recorded update calls: production code makes them from goroutines while
+	// tests read them (e.g. inside require.Eventually).
+	callsMu                  sync.Mutex
+	updateEntryCalls         []FakeUpdateEntryCall
+	updateEntryProgressCalls []FakeUpdateEntryProgressCall
 }
 
 type FakeUpdateEntryCall struct {
@@ -138,6 +142,8 @@ func (f *FakePlatform) AnimeCollectionCalls() int {
 }
 
 func (f *FakePlatform) UpdateEntryProgressCalls() []FakeUpdateEntryProgressCall {
+	f.callsMu.Lock()
+	defer f.callsMu.Unlock()
 	ret := make([]FakeUpdateEntryProgressCall, len(f.updateEntryProgressCalls))
 	copy(ret, f.updateEntryProgressCalls)
 	return ret
@@ -146,6 +152,8 @@ func (f *FakePlatform) UpdateEntryProgressCalls() []FakeUpdateEntryProgressCall 
 func (f *FakePlatform) SetUsername(string) {}
 
 func (f *FakePlatform) UpdateEntryCalls() []FakeUpdateEntryCall {
+	f.callsMu.Lock()
+	defer f.callsMu.Unlock()
 	ret := make([]FakeUpdateEntryCall, len(f.updateEntryCalls))
 	copy(ret, f.updateEntryCalls)
 	return ret
@@ -173,7 +181,9 @@ func (f *FakePlatform) UpdateEntry(_ context.Context, mediaID int, status *anili
 		completedAtCopy := *completedAt
 		call.CompletedAt = &completedAtCopy
 	}
+	f.callsMu.Lock()
 	f.updateEntryCalls = append(f.updateEntryCalls, call)
+	f.callsMu.Unlock()
 	return nil
 }
 
@@ -184,7 +194,9 @@ func (f *FakePlatform) UpdateEntryProgress(_ context.Context, mediaID int, progr
 	if totalEpisodes != nil {
 		call.TotalEpisodes = new(*totalEpisodes)
 	}
+	f.callsMu.Lock()
 	f.updateEntryProgressCalls = append(f.updateEntryProgressCalls, call)
+	f.callsMu.Unlock()
 	return f.updateEntryProgressErr
 }
 

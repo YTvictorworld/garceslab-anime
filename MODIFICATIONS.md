@@ -180,6 +180,21 @@ AniList account, several playbacks at the same time) will be listed here as they
   `GARCESLAB_CHROMEDP_TESTS=1`, and three of them that had bugs in the test code (and an
   unconditional skip of the screenshot test) were fixed. See `docs/dependencies.md`.
 
+## 2026-11 (playback manager without a media player)
+
+- **No panic without a desktop media player** (`internal/library/playbackmanager/playback_manager.go`,
+  `progress_tracking.go`, tests in `playback_manager_test.go` and `internal/playlist/manager_test.go`):
+  `SetMediaPlayerRepository` stored the repository from a goroutine, and the playback manager
+  dereferenced it without a nil check, so a playlist episode change (which always calls `Cancel`)
+  right after start-up, or on a server whose settings have no media player section, panicked. The
+  repository is now stored before the call returns, guarded by its own lock, and every use returns
+  `ErrNoMediaPlayer` instead of panicking. See [docs/testing.md](docs/testing.md).
+- **Playlist manager state behind a lock** (`internal/playlist/manager.go`): the current playlist,
+  episode, client id and cancel function are read and written through locked getters/setters, the
+  playlist goroutine keeps its own context, and `markCurrentAsCompleted` no longer unlocks a mutex it
+  doesn't own. Fixes data races found with `go test -race`. The test `FakePlatform`
+  (`internal/testmocks`) records update calls under a mutex.
+
 ## GPL-3.0 compliance checklist
 
 - [x] **Prominent modification notices with dates (§5a):** this file, `NOTICE`, the README's
