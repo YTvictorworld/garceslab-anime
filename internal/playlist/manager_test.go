@@ -122,6 +122,52 @@ func TestPlaylistManagerPlayEpisodePrevious(t *testing.T) {
 	require.Same(t, episodeOne, payload.PlaylistEpisode)
 }
 
+func TestPlaylistManagerPlayEpisodeWithoutMediaPlayer(t *testing.T) {
+	// regression for issue #10: playEpisode cancels the desktop media player before every episode. Without a
+	// media player repository (no media player settings) that used to panic with a nil pointer; now the
+	// playlist keeps going and the client still gets the episode to play.
+	for _, tc := range []struct {
+		name    string
+		which   string
+		current *int
+	}{
+		{name: "next without current episode", which: "next"},
+		{name: "next", which: "next", current: new(0)},
+		{name: "previous", which: "previous", current: new(1)},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			h := newPlaylistTestWrapperWithMediaPlayer(t, false)
+			require.Nil(t, h.playbackManager.MediaPlayerRepository)
+			h.manager.clientId = "web"
+			episodes := []*anime.PlaylistEpisode{
+				newStreamPlaylistEpisode(251, 1, "1"),
+				newStreamPlaylistEpisode(251, 2, "2"),
+			}
+			h.manager.currentPlaylistData = mo.Some(&playlistData{
+				playlist: newPlaylistFixture("queue", episodes...),
+				options:  newClientPlaylistOptions("web"),
+			})
+			want := episodes[0]
+			if tc.current != nil {
+				h.manager.currentEpisode = mo.Some(episodes[*tc.current])
+				if tc.which == "next" {
+					want = episodes[*tc.current+1]
+				} else {
+					want = episodes[*tc.current-1]
+				}
+			}
+
+			require.NotPanics(t, func() { h.manager.PlayEpisode(tc.which, false) })
+
+			require.Same(t, want, h.manager.currentEpisode.MustGet())
+			event := h.wsEventManager.lastPlaylistServerEvent(t, ServerEventPlayEpisode)
+			payload, ok := event.Payload.(playEpisodePayload)
+			require.True(t, ok)
+			require.Same(t, want, payload.PlaylistEpisode)
+		})
+	}
+}
+
 func TestPlaylistManagerMarkCurrentAsCompletedPersistsAndUpdatesProgress(t *testing.T) {
 	// completing an episode should update both the stored playlist and the AniList progress bridge.
 	h := newPlaylistTestWrapper(t)
@@ -334,7 +380,16 @@ type playlistTestWrapper struct {
 	manager         *Manager
 }
 
+// newPlaylistTestWrapper builds a manager whose playback manager has an in-memory media player
+// repository (no player is ever launched).
 func newPlaylistTestWrapper(t *testing.T) *playlistTestWrapper {
+	t.Helper()
+	return newPlaylistTestWrapperWithMediaPlayer(t, true)
+}
+
+// newPlaylistTestWrapperWithMediaPlayer builds the manager with or without a media player repository;
+// without one it matches a server whose settings have no media player section yet (issue #10).
+func newPlaylistTestWrapperWithMediaPlayer(t *testing.T, withMediaPlayer bool) *playlistTestWrapper {
 	t.Helper()
 
 	env := testutil.NewTestEnv(t)
@@ -371,11 +426,16 @@ func newPlaylistTestWrapper(t *testing.T) *playlistTestWrapper {
 		MetadataProviderRef: util.NewRef(provider),
 		IsOfflineRef:        util.NewRef(false),
 	})
-	playbackManager.SetMediaPlayerRepository(mediaplayer.NewRepository(&mediaplayer.NewRepositoryOptions{
-		Logger:         logger,
-		Default:        "",
-		WSEventManager: wsEventManager,
-	}))
+	if withMediaPlayer {
+		// SetMediaPlayerRepository stores the repository before returning, so the manager below can use it
+		// straight away; the cleanup stops its event listener.
+		playbackManager.SetMediaPlayerRepository(mediaplayer.NewRepository(&mediaplayer.NewRepositoryOptions{
+			Logger:         logger,
+			Default:        "",
+			WSEventManager: wsEventManager,
+		}))
+		t.Cleanup(func() { playbackManager.SetMediaPlayerRepository(nil) })
+	}
 
 	mediacoreCoordinator := mediacore.NewCoordinator(mediacore.NewCoordinatorOptions{
 		Logger:              logger,

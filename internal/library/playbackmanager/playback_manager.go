@@ -46,7 +46,8 @@ type (
 	PlaybackManager struct {
 		Logger                *zerolog.Logger
 		Database              *db.Database
-		MediaPlayerRepository *mediaplayer.Repository // MediaPlayerRepository is used to control the media player
+		MediaPlayerRepository *mediaplayer.Repository // MediaPlayerRepository is used to control the media player (nil until SetMediaPlayerRepository; read it with mediaPlayer())
+		mediaPlayerMu         sync.RWMutex            // Guards MediaPlayerRepository, mediaPlayerRepoSubscriber and cancel
 		continuityManager     *continuity.Manager
 
 		settings *Settings
@@ -260,30 +261,50 @@ func (pm *PlaybackManager) SetSettings(s *Settings) {
 
 // SetMediaPlayerRepository sets the media player repository and starts listening to media player events
 // - This method is called when the media player is mounted (due to settings change or when the app starts)
+//
+// The repository is stored before the method returns: it used to be stored from a goroutine, so callers
+// that used the playback manager right after this call (the playlist manager, tests) could still see a nil
+// repository and panic. Only the event listener runs in the background.
 func (pm *PlaybackManager) SetMediaPlayerRepository(mediaPlayerRepository *mediaplayer.Repository) {
-	go func() {
-		// If a previous context exists, cancel it
-		if pm.cancel != nil {
-			pm.cancel()
-		}
+	pm.mediaPlayerMu.Lock()
+	defer pm.mediaPlayerMu.Unlock()
 
-		// Create a new context for listening to the MediaPlayer instance's event
-		// When this is canceled above, the previous listener goroutine will stop -- this is done to prevent multiple listeners
-		var ctx context.Context
-		ctx, pm.cancel = context.WithCancel(context.Background())
+	// If a previous listener exists, stop it so only one listener runs at a time
+	if pm.cancel != nil {
+		pm.cancel()
+		pm.cancel = nil
+	}
 
-		pm.mu.Lock()
-		// Set the new media player repository instance
-		pm.MediaPlayerRepository = mediaPlayerRepository
-		// Set up event listeners for the media player instance
-		pm.mediaPlayerRepoSubscriber = pm.MediaPlayerRepository.Subscribe("playbackmanager")
-		pm.mu.Unlock()
+	pm.MediaPlayerRepository = mediaPlayerRepository
+	pm.mediaPlayerRepoSubscriber = nil
+	if mediaPlayerRepository == nil {
+		pm.Logger.Warn().Msg("playback manager: Media player repository unset, desktop media player playback is unavailable")
+		return
+	}
 
-		// Start listening to new media player events
-		pm.listenToMediaPlayerEvents(ctx)
+	// Set up event listeners for the media player instance
+	subscriber := mediaPlayerRepository.Subscribe("playbackmanager")
+	pm.mediaPlayerRepoSubscriber = subscriber
 
-		// DEVNOTE: pm.listenToClientPlayerEvents()
-	}()
+	// Start listening to new media player events
+	// When the context is canceled above, this listener stops
+	var ctx context.Context
+	ctx, pm.cancel = context.WithCancel(context.Background())
+	pm.listenToMediaPlayerEvents(ctx, subscriber)
+
+	// DEVNOTE: pm.listenToClientPlayerEvents()
+}
+
+// mediaPlayer returns the current media player repository, or ErrNoMediaPlayer when none is set
+// (no media player settings yet). Every use of the repository goes through it instead of dereferencing
+// MediaPlayerRepository directly.
+func (pm *PlaybackManager) mediaPlayer() (*mediaplayer.Repository, error) {
+	pm.mediaPlayerMu.RLock()
+	defer pm.mediaPlayerMu.RUnlock()
+	if pm.MediaPlayerRepository == nil {
+		return nil, ErrNoMediaPlayer
+	}
+	return pm.MediaPlayerRepository, nil
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -319,8 +340,14 @@ func (pm *PlaybackManager) StartPlayingUsingMediaPlayer(opts *StartPlayingOption
 		pm.manualTrackingCtxCancel()
 	}
 
+	mediaPlayer, err := pm.mediaPlayer()
+	if err != nil {
+		pm.Logger.Error().Err(err).Msg("playback manager: Cannot play local file")
+		return err
+	}
+
 	// Send the media file to the media player
-	err = pm.MediaPlayerRepository.Play(opts.Payload)
+	err = mediaPlayer.Play(opts.Payload)
 	if err != nil {
 		return err
 	}
@@ -338,7 +365,7 @@ func (pm *PlaybackManager) StartPlayingUsingMediaPlayer(opts *StartPlayingOption
 	}
 
 	// Start tracking
-	pm.MediaPlayerRepository.StartTracking()
+	mediaPlayer.StartTracking()
 
 	return nil
 }
@@ -348,7 +375,11 @@ type AppendToMediaPlayerOptions struct {
 }
 
 func (pm *PlaybackManager) AppendToMediaPlayer(opts *AppendToMediaPlayerOptions) error {
-	err := pm.MediaPlayerRepository.Append(opts.Payload)
+	mediaPlayer, err := pm.mediaPlayer()
+	if err != nil {
+		return err
+	}
+	err = mediaPlayer.Append(opts.Payload)
 	if err != nil {
 		return err
 	}
@@ -383,7 +414,13 @@ func (pm *PlaybackManager) StartUntrackedStreamingUsingMediaPlayer(windowTitle s
 
 	episodeNumber := 0
 
-	err = pm.MediaPlayerRepository.Stream(opts.Payload, episodeNumber, 0, windowTitle)
+	mediaPlayer, err := pm.mediaPlayer()
+	if err != nil {
+		pm.Logger.Error().Err(err).Msg("playback manager: Cannot start streaming")
+		return err
+	}
+
+	err = mediaPlayer.Stream(opts.Payload, episodeNumber, 0, windowTitle)
 	if err != nil {
 		pm.Logger.Error().Err(err).Msg("playback manager: Failed to start streaming")
 		return err
@@ -428,6 +465,12 @@ func (pm *PlaybackManager) StartStreamingUsingMediaPlayer(windowTitle string, op
 		return errors.New("cannot start streaming, not enough data provided")
 	}
 
+	mediaPlayer, err := pm.mediaPlayer()
+	if err != nil {
+		pm.Logger.Error().Err(err).Msg("playback manager: Cannot start streaming")
+		return err
+	}
+
 	pm.Logger.Trace().Msg("playback manager: Starting the media player")
 
 	pm.mu.Lock()
@@ -458,7 +501,7 @@ func (pm *PlaybackManager) StartStreamingUsingMediaPlayer(windowTitle string, op
 		pm.Logger.Warn().Str("episode", aniDbEpisode).Msg("playback manager: Failed to find episode in episode collection")
 	}
 
-	err = pm.MediaPlayerRepository.Stream(event.Payload, episodeNumber, event.Media.ID, windowTitle)
+	err = mediaPlayer.Stream(event.Payload, episodeNumber, event.Media.ID, windowTitle)
 	if err != nil {
 		pm.Logger.Error().Err(err).Msg("playback manager: Failed to start streaming")
 		return err
@@ -478,7 +521,7 @@ func (pm *PlaybackManager) StartStreamingUsingMediaPlayer(windowTitle string, op
 		return nil
 	}
 
-	pm.MediaPlayerRepository.StartTrackingTorrentStream()
+	mediaPlayer.StartTrackingTorrentStream()
 
 	pm.Logger.Trace().Msg("playback manager: Started tracking torrent stream")
 
@@ -503,12 +546,16 @@ func (pm *PlaybackManager) PlayNextEpisode() (err error) {
 			return errors.New("could not play next episode")
 		}
 
-		err = pm.MediaPlayerRepository.Play(nextLf.Path)
+		mediaPlayer, err := pm.mediaPlayer()
+		if err != nil {
+			return err
+		}
+		err = mediaPlayer.Play(nextLf.Path)
 		if err != nil {
 			return err
 		}
 		// Start tracking the video
-		pm.MediaPlayerRepository.StartTracking()
+		mediaPlayer.StartTracking()
 
 	case StreamPlayback:
 		// TODO: Implement it for torrentstream
@@ -572,22 +619,38 @@ func (pm *PlaybackManager) AutoPlayNextEpisode() error {
 
 // Pause pauses the current media player playback.
 func (pm *PlaybackManager) Pause() error {
-	return pm.MediaPlayerRepository.Pause()
+	mediaPlayer, err := pm.mediaPlayer()
+	if err != nil {
+		return err
+	}
+	return mediaPlayer.Pause()
 }
 
 // Resume resumes the current media player playback.
 func (pm *PlaybackManager) Resume() error {
-	return pm.MediaPlayerRepository.Resume()
+	mediaPlayer, err := pm.mediaPlayer()
+	if err != nil {
+		return err
+	}
+	return mediaPlayer.Resume()
 }
 
 // SeekTo seeks to the specified time in the current media.
 func (pm *PlaybackManager) SeekTo(seconds float64) error {
-	return pm.MediaPlayerRepository.SeekTo(seconds)
+	mediaPlayer, err := pm.mediaPlayer()
+	if err != nil {
+		return err
+	}
+	return mediaPlayer.SeekTo(seconds)
 }
 
 // PullStatus pulls the current media player playback status at the time of the call.
 func (pm *PlaybackManager) PullStatus() (*mediaplayer.PlaybackStatus, bool) {
-	return pm.MediaPlayerRepository.PullStatus()
+	mediaPlayer, err := pm.mediaPlayer()
+	if err != nil {
+		return nil, false
+	}
+	return mediaPlayer.PullStatus()
 }
 
 func (pm *PlaybackManager) PullVideoState() (PlaybackState, bool) {
@@ -613,9 +676,16 @@ func (pm *PlaybackManager) PullStreamState() (PlaybackState, bool) {
 }
 
 // Cancel stops the current media player playback and publishes a "normal" event.
+// It returns ErrNoMediaPlayer, without panicking, when no media player repository is set: there is
+// nothing to stop then.
 func (pm *PlaybackManager) Cancel() error {
+	mediaPlayer, err := pm.mediaPlayer()
+	if err != nil {
+		pm.Logger.Debug().Err(err).Msg("playback manager: Cancel called, no media player to stop")
+		return err
+	}
 	pm.Logger.Debug().Msg("playback manager: Cancel called, stopping media player")
-	pm.MediaPlayerRepository.Stop()
+	mediaPlayer.Stop()
 	return nil
 }
 
