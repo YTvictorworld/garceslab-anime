@@ -14,7 +14,7 @@ through the first run: profiles, PINs and the optional AniList import.
 > Garceslab Anime does not provide, host or distribute any media content. You run everything on
 > your own hardware and are responsible for obtaining media legally.
 
-<!-- Screenshot placeholder: overview of the web interface ("Who's watching?") -->
+<img src="images/web-whos-watching.webp" alt="Who's watching? in the web interface" width="700"/>
 
 ## What you need
 
@@ -91,11 +91,12 @@ and set a **server password**. The TV app needs it: the server only accepts the 
 connection when a password is set, and the password is what keeps other devices on your
 network out.
 
-<!-- Screenshot placeholder: Settings → Server password -->
-
 ## 2. Install the TV app
 
-The TV app is a `.ipk` package, published on the
+The TV app is a `.ipk` package. Prebuilt packages are *coming with 1.0*; until then, build it
+as described in the TV repository's
+[docs/building-webos.md](https://github.com/YTvictorworld/garceslab-anime-tv/blob/main/docs/building-webos.md).
+Released packages will be published on the
 [releases page of garceslab-anime-tv](https://github.com/YTvictorworld/garceslab-anime-tv/releases)
 together with a `SHA256SUMS.txt` file. Download both and check the package:
 
@@ -122,16 +123,12 @@ Then:
 If the upload fails even though the TV is reachable, see "If the upload fails" in the
 [TV app's README](https://github.com/YTvictorworld/garceslab-anime-tv#install-on-an-lg-tv).
 
-<!-- Screenshot placeholder: the app in the TV's launcher -->
-
 ## 3. First run
 
 ### Connect the TV to the server
 
 The first screen asks for the server address and password. Enter the address with the port,
 for example `http://192.0.2.10:43211` (use your server's address), and the password you set.
-
-<!-- Screenshot placeholder: TV server setup screen -->
 
 ### Create the first profile
 
@@ -143,7 +140,7 @@ When the server has no profiles yet, both the web interface and the TV start wit
    (CC0 or CC BY with credit); there are no uploads.
 3. Optionally add a **PIN** and import an AniList list (see below).
 
-<!-- Screenshot placeholder: "Create your profile" on the TV -->
+<img src="images/tv-create-profile.webp" alt="Choosing an avatar while creating a profile on the TV" width="800"/>
 
 ### Who's watching?
 
@@ -160,7 +157,7 @@ avatar or colour, set or remove a PIN, export and import, and restore a deleted 
 the trash within 30 days. **Recent changes** on that page lists who created, renamed, deleted,
 restored, imported into or exported which profile, and who changed a PIN, and when.
 
-<!-- Screenshot placeholder: Settings → Profiles with "Recent changes" -->
+<img src="images/web-settings-profiles.webp" alt="Settings → Profiles with Recent changes" width="800"/>
 
 ### PINs
 
@@ -188,10 +185,10 @@ Browse on the TV with the remote (D-pad, OK, Back, media keys or the Magic Remot
 a TorBox account set in **Settings → Debrid** on the web interface, streams are played by the
 TV's own player. Local files from your library play too; files the TV cannot decode need
 transcoding turned on in **Settings → Media streaming**. See the TV app's
-[webOS notes](https://github.com/YTvictorworld/garceslab-anime-tv/blob/main/webos/README.md)
-for supported formats and remote shortcuts.
-
-<!-- Screenshot placeholder: playing an episode on the TV -->
+[docs](https://github.com/YTvictorworld/garceslab-anime-tv/tree/main/docs) for direct play,
+supported formats and remote shortcuts. Up to three devices can watch at once; **Settings →
+Profiles → Now watching** on the web shows who and can stop a session (see
+[phase2-direct-play.md](phase2-direct-play.md)).
 
 ## Troubleshooting
 
