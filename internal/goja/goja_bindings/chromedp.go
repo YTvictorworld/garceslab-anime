@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/chromedp/cdproto/cdp"
+	"github.com/chromedp/cdproto/cdp/jsonv2"
 	"github.com/chromedp/chromedp"
 	"github.com/dop251/goja"
 	"github.com/rs/zerolog/log"
@@ -180,30 +180,36 @@ func (c *ChromeDP) NewBrowser(call goja.FunctionCall) goja.Value {
 		}
 
 		c.responseCh <- func() {
-			browserObj := c.vm.NewObject()
-			browserObj.Set("navigate", browser.Navigate)
-			browserObj.Set("waitVisible", browser.WaitVisible)
-			browserObj.Set("waitReady", browser.WaitReady)
-			browserObj.Set("click", browser.Click)
-			browserObj.Set("sendKeys", browser.SendKeys)
-			browserObj.Set("evaluate", browser.EvaluateJS)
-			browserObj.Set("innerHTML", browser.InnerHTML)
-			browserObj.Set("outerHTML", browser.OuterHTML)
-			browserObj.Set("text", browser.Text)
-			browserObj.Set("attribute", browser.Attribute)
-			browserObj.Set("screenshot", browser.Screenshot)
-			browserObj.Set("fullScreenshot", browser.FullScreenshot)
-			browserObj.Set("sleep", browser.Sleep)
-			browserObj.Set("close", browser.Close)
-			browserObj.Set("listenBrowser", browser.ListenBrowser)
-			browserObj.Set("listenTarget", browser.ListenTarget)
-			browserObj.Set("executeCDP", browser.ExecuteCDP)
-
-			resolve(browserObj)
+			resolve(c.newBrowserObject(browser))
 		}
 	}()
 
 	return c.vm.ToValue(promise)
+}
+
+// newBrowserObject builds the JS object that ChromeDP.newBrowser() resolves with. It is
+// split out of NewBrowser so that a test can check the method names that extensions see
+// without starting a browser (see chromedp_surface_test.go).
+func (c *ChromeDP) newBrowserObject(browser *Browser) *goja.Object {
+	browserObj := c.vm.NewObject()
+	browserObj.Set("navigate", browser.Navigate)
+	browserObj.Set("waitVisible", browser.WaitVisible)
+	browserObj.Set("waitReady", browser.WaitReady)
+	browserObj.Set("click", browser.Click)
+	browserObj.Set("sendKeys", browser.SendKeys)
+	browserObj.Set("evaluate", browser.EvaluateJS)
+	browserObj.Set("innerHTML", browser.InnerHTML)
+	browserObj.Set("outerHTML", browser.OuterHTML)
+	browserObj.Set("text", browser.Text)
+	browserObj.Set("attribute", browser.Attribute)
+	browserObj.Set("screenshot", browser.Screenshot)
+	browserObj.Set("fullScreenshot", browser.FullScreenshot)
+	browserObj.Set("sleep", browser.Sleep)
+	browserObj.Set("close", browser.Close)
+	browserObj.Set("listenBrowser", browser.ListenBrowser)
+	browserObj.Set("listenTarget", browser.ListenTarget)
+	browserObj.Set("executeCDP", browser.ExecuteCDP)
+	return browserObj
 }
 
 func (c *ChromeDP) createBrowser(opts chromeOptions) (*Browser, error) {
@@ -228,7 +234,8 @@ func (c *ChromeDP) createBrowser(opts chromeOptions) (*Browser, error) {
 		timeout:     time.Duration(opts.Timeout) * time.Second,
 	}
 
-	if err := chromedp.Run(ctx); err != nil {
+	// chromedp v0.24: Do with no steps starts the browser and opens the tab (was Run(ctx)).
+	if err := chromedp.Do(ctx); err != nil {
 		cancel()
 		allocCancel()
 		return nil, fmt.Errorf("failed to start browser: %w", err)
@@ -271,7 +278,7 @@ func (b *Browser) Navigate(call goja.FunctionCall) goja.Value {
 		ctx, cancel := context.WithTimeout(b.ctx, b.timeout)
 		defer cancel()
 
-		err := chromedp.Run(ctx, chromedp.Navigate(url))
+		err := chromedp.Do(ctx, chromedp.Navigate(url))
 		if err != nil {
 			b.chromedp.responseCh <- func() {
 				reject(NewError(b.chromedp.vm, err))
@@ -308,7 +315,7 @@ func (b *Browser) WaitVisible(call goja.FunctionCall) goja.Value {
 		ctx, cancel := context.WithTimeout(b.ctx, b.timeout)
 		defer cancel()
 
-		err := chromedp.Run(ctx, chromedp.WaitVisible(selector))
+		err := chromedp.Do(ctx, chromedp.WaitVisible(selector))
 		if err != nil {
 			b.chromedp.responseCh <- func() {
 				reject(NewError(b.chromedp.vm, err))
@@ -345,7 +352,7 @@ func (b *Browser) WaitReady(call goja.FunctionCall) goja.Value {
 		ctx, cancel := context.WithTimeout(b.ctx, b.timeout)
 		defer cancel()
 
-		err := chromedp.Run(ctx, chromedp.WaitReady(selector))
+		err := chromedp.Do(ctx, chromedp.WaitReady(selector))
 		if err != nil {
 			b.chromedp.responseCh <- func() {
 				reject(NewError(b.chromedp.vm, err))
@@ -382,7 +389,7 @@ func (b *Browser) Click(call goja.FunctionCall) goja.Value {
 		ctx, cancel := context.WithTimeout(b.ctx, b.timeout)
 		defer cancel()
 
-		err := chromedp.Run(ctx, chromedp.Click(selector))
+		err := chromedp.Do(ctx, chromedp.Click(selector))
 		if err != nil {
 			b.chromedp.responseCh <- func() {
 				reject(NewError(b.chromedp.vm, err))
@@ -420,7 +427,7 @@ func (b *Browser) SendKeys(call goja.FunctionCall) goja.Value {
 		ctx, cancel := context.WithTimeout(b.ctx, b.timeout)
 		defer cancel()
 
-		err := chromedp.Run(ctx, chromedp.SendKeys(selector, keys))
+		err := chromedp.Do(ctx, chromedp.SendKeys(selector, keys))
 		if err != nil {
 			b.chromedp.responseCh <- func() {
 				reject(NewError(b.chromedp.vm, err))
@@ -457,13 +464,14 @@ func (b *Browser) EvaluateJS(call goja.FunctionCall) goja.Value {
 		ctx, cancel := context.WithTimeout(b.ctx, b.timeout)
 		defer cancel()
 
-		var result interface{}
 		wrappedJS := jsCode
 		if !strings.Contains(jsCode, "return") {
 			wrappedJS = fmt.Sprintf("(function() { return %s; })()", jsCode)
 		}
 
-		err := chromedp.Run(ctx, chromedp.Evaluate(wrappedJS, &result))
+		// Evaluate[any]: an interface can be nil, so null/undefined still give nil (no
+		// ErrJSNull), as the old Evaluate(expr, &result) did.
+		result, err := chromedp.Run(ctx, chromedp.Evaluate[any](wrappedJS))
 		if err != nil {
 			b.chromedp.responseCh <- func() {
 				reject(NewError(b.chromedp.vm, err))
@@ -500,8 +508,7 @@ func (b *Browser) InnerHTML(call goja.FunctionCall) goja.Value {
 		ctx, cancel := context.WithTimeout(b.ctx, b.timeout)
 		defer cancel()
 
-		var html string
-		err := chromedp.Run(ctx, chromedp.InnerHTML(selector, &html))
+		html, err := chromedp.Run(ctx, chromedp.InnerHTML(selector))
 		if err != nil {
 			b.chromedp.responseCh <- func() {
 				reject(NewError(b.chromedp.vm, err))
@@ -538,8 +545,7 @@ func (b *Browser) OuterHTML(call goja.FunctionCall) goja.Value {
 		ctx, cancel := context.WithTimeout(b.ctx, b.timeout)
 		defer cancel()
 
-		var html string
-		err := chromedp.Run(ctx, chromedp.OuterHTML(selector, &html))
+		html, err := chromedp.Run(ctx, chromedp.OuterHTML(selector))
 		if err != nil {
 			b.chromedp.responseCh <- func() {
 				reject(NewError(b.chromedp.vm, err))
@@ -576,8 +582,7 @@ func (b *Browser) Text(call goja.FunctionCall) goja.Value {
 		ctx, cancel := context.WithTimeout(b.ctx, b.timeout)
 		defer cancel()
 
-		var text string
-		err := chromedp.Run(ctx, chromedp.Text(selector, &text))
+		text, err := chromedp.Run(ctx, chromedp.Text(selector))
 		if err != nil {
 			b.chromedp.responseCh <- func() {
 				reject(NewError(b.chromedp.vm, err))
@@ -615,9 +620,7 @@ func (b *Browser) Attribute(call goja.FunctionCall) goja.Value {
 		ctx, cancel := context.WithTimeout(b.ctx, b.timeout)
 		defer cancel()
 
-		var attrValue string
-		var ok bool
-		err := chromedp.Run(ctx, chromedp.AttributeValue(selector, attrName, &attrValue, &ok))
+		attr, err := chromedp.Run(ctx, chromedp.AttributeValue(selector, attrName))
 		if err != nil {
 			b.chromedp.responseCh <- func() {
 				reject(NewError(b.chromedp.vm, err))
@@ -626,8 +629,8 @@ func (b *Browser) Attribute(call goja.FunctionCall) goja.Value {
 		}
 
 		b.chromedp.responseCh <- func() {
-			if ok {
-				resolve(b.chromedp.vm.ToValue(attrValue))
+			if attr.Exists {
+				resolve(b.chromedp.vm.ToValue(attr.Value))
 			} else {
 				resolve(goja.Null())
 			}
@@ -658,8 +661,7 @@ func (b *Browser) Screenshot(call goja.FunctionCall) goja.Value {
 		ctx, cancel := context.WithTimeout(b.ctx, b.timeout)
 		defer cancel()
 
-		var buf []byte
-		err := chromedp.Run(ctx, chromedp.Screenshot(selector, &buf))
+		buf, err := chromedp.Run(ctx, chromedp.Screenshot(selector))
 		if err != nil {
 			b.chromedp.responseCh <- func() {
 				reject(NewError(b.chromedp.vm, err))
@@ -691,8 +693,7 @@ func (b *Browser) FullScreenshot(call goja.FunctionCall) goja.Value {
 		ctx, cancel := context.WithTimeout(b.ctx, b.timeout)
 		defer cancel()
 
-		var buf []byte
-		err := chromedp.Run(ctx, chromedp.FullScreenshot(&buf, 100))
+		buf, err := chromedp.Run(ctx, chromedp.FullScreenshot(100))
 		if err != nil {
 			b.chromedp.responseCh <- func() {
 				reject(NewError(b.chromedp.vm, err))
@@ -729,7 +730,7 @@ func (b *Browser) Sleep(call goja.FunctionCall) goja.Value {
 		ctx, cancel := context.WithTimeout(b.ctx, b.timeout)
 		defer cancel()
 
-		err := chromedp.Run(ctx, chromedp.Sleep(time.Duration(duration)*time.Millisecond))
+		err := chromedp.Do(ctx, chromedp.Sleep(time.Duration(duration)*time.Millisecond))
 		if err != nil {
 			b.chromedp.responseCh <- func() {
 				reject(NewError(b.chromedp.vm, err))
@@ -776,12 +777,9 @@ func (b *Browser) ListenBrowser(call goja.FunctionCall) goja.Value {
 		PanicThrowErrorString(b.chromedp.vm, "listenBrowser argument must be a function")
 	}
 
-	chromedp.ListenBrowser(b.ctx, func(ev interface{}) {
+	err := chromedp.ListenBrowser(b.ctx, func(ev interface{}) {
 		method := getEventMethod(ev)
-		var params map[string]interface{}
-		if evBytes, err := json.Marshal(ev); err == nil {
-			_ = json.Unmarshal(evBytes, &params)
-		}
+		params := eventParams(ev)
 
 		b.chromedp.responseCh <- func() {
 			defer func() {
@@ -795,6 +793,11 @@ func (b *Browser) ListenBrowser(call goja.FunctionCall) goja.Value {
 			_, _ = callback(goja.Undefined(), eventObj)
 		}
 	})
+	if err != nil {
+		// v0.24 returns an error when it can't reach the browser or tab (the old func
+		// returned nothing). Keep the JS contract, which never threw here: log it.
+		log.Warn().Err(err).Msg("extension: chromedp could not register the event listener")
+	}
 
 	return goja.Undefined()
 }
@@ -810,12 +813,11 @@ func (b *Browser) ListenTarget(call goja.FunctionCall) goja.Value {
 		PanicThrowErrorString(b.chromedp.vm, "listenTarget argument must be a function")
 	}
 
-	chromedp.ListenTarget(b.ctx, func(ev interface{}) {
+	// chromedp v0.24 renamed ListenTarget to Listen; it calls fn with the same typed event
+	// structs (*network.EventRequestWillBeSent, ...).
+	err := chromedp.Listen(b.ctx, func(ev interface{}) {
 		method := getEventMethod(ev)
-		var params map[string]interface{}
-		if evBytes, err := json.Marshal(ev); err == nil {
-			_ = json.Unmarshal(evBytes, &params)
-		}
+		params := eventParams(ev)
 
 		b.chromedp.responseCh <- func() {
 			defer func() {
@@ -829,6 +831,11 @@ func (b *Browser) ListenTarget(call goja.FunctionCall) goja.Value {
 			_, _ = callback(goja.Undefined(), eventObj)
 		}
 	})
+	if err != nil {
+		// v0.24 returns an error when it can't reach the browser or tab (the old func
+		// returned nothing). Keep the JS contract, which never threw here: log it.
+		log.Warn().Err(err).Msg("extension: chromedp could not register the event listener")
+	}
 
 	return goja.Undefined()
 }
@@ -859,11 +866,11 @@ func (b *Browser) ExecuteCDP(call goja.FunctionCall) goja.Value {
 		ctx, cancel := context.WithTimeout(b.ctx, b.timeout)
 		defer cancel()
 
-		var result json.RawMessage
-		err := chromedp.Run(ctx, chromedp.ActionFunc(func(ctx context.Context) error {
-			executor := cdp.ExecutorFromContext(ctx)
-			return executor.Execute(ctx, method, params, &result)
-		}))
+		// chromedp v0.24 has no executor in the context; the action's target is the
+		// session, and Target.Call sends a raw method with JSON params.
+		resVal, err := chromedp.Run(ctx, func(ctx context.Context, t *chromedp.Target) (interface{}, error) {
+			return callRawCDP(ctx, t, method, params)
+		})
 
 		if err != nil {
 			b.chromedp.responseCh <- func() {
@@ -872,17 +879,44 @@ func (b *Browser) ExecuteCDP(call goja.FunctionCall) goja.Value {
 			return
 		}
 
-		var resVal interface{}
-		if len(result) > 0 {
-			_ = json.Unmarshal(result, &resVal)
-		}
-
 		b.chromedp.responseCh <- func() {
 			resolve(b.chromedp.vm.ToValue(resVal))
 		}
 	}()
 
 	return b.chromedp.vm.ToValue(promise)
+}
+
+// rawCDPCaller is the part of *chromedp.Target that executeCDP uses (an interface so tests
+// can check the result decoding without a browser).
+type rawCDPCaller interface {
+	Call(ctx context.Context, method string, params, res any) error
+}
+
+// callRawCDP sends method with params and decodes the result into plain Go values (maps,
+// slices, float64, string, bool, nil) for goja, as the old executor-based code did.
+func callRawCDP(ctx context.Context, s rawCDPCaller, method string, params interface{}) (interface{}, error) {
+	var result jsonv2.Value
+	if err := s.Call(ctx, method, params, &result); err != nil {
+		return nil, err
+	}
+	var resVal interface{}
+	if len(result) > 0 {
+		_ = json.Unmarshal(result, &resVal)
+	}
+	return resVal, nil
+}
+
+// eventParams turns a typed cdproto event into the "params" object that listenTarget and
+// listenBrowser callbacks get. cdproto v0.160 types marshal with encoding/json/v2 tags and
+// options, so use chromedp's own marshal options to get the protocol's wire names
+// (requestId, frameId, ...), exactly what Chrome sent.
+func eventParams(ev interface{}) map[string]interface{} {
+	var params map[string]interface{}
+	if evBytes, err := jsonv2.Marshal(ev, chromedp.DefaultMarshalOptions); err == nil {
+		_ = json.Unmarshal(evBytes, &params)
+	}
+	return params
 }
 
 func getEventMethod(ev interface{}) string {
@@ -1136,8 +1170,7 @@ func (c *ChromeDP) scrapeURL(url string, opts chromeOptions) (string, error) {
 	ctx, cancel = context.WithTimeout(ctx, time.Duration(opts.Timeout)*time.Second)
 	defer cancel()
 
-	var html string
-	var tasks []chromedp.Action
+	var tasks []chromedp.Action[chromedp.Void]
 
 	// Navigate to URL
 	tasks = append(tasks, chromedp.Navigate(url))
@@ -1153,9 +1186,7 @@ func (c *ChromeDP) scrapeURL(url string, opts chromeOptions) (string, error) {
 	}
 
 	// Get the outer HTML
-	tasks = append(tasks, chromedp.OuterHTML("html", &html))
-
-	err := chromedp.Run(ctx, tasks...)
+	html, err := chromedp.Run(ctx, stepsThen(tasks, chromedp.OuterHTML("html")))
 	if err != nil {
 		return "", fmt.Errorf("chromedp run failed: %w", err)
 	}
@@ -1181,8 +1212,7 @@ func (c *ChromeDP) screenshotURL(url string, opts chromeOptions) ([]byte, error)
 	ctx, cancel = context.WithTimeout(ctx, time.Duration(opts.Timeout)*time.Second)
 	defer cancel()
 
-	var buf []byte
-	var tasks []chromedp.Action
+	var tasks []chromedp.Action[chromedp.Void]
 
 	tasks = append(tasks, chromedp.Navigate(url))
 
@@ -1194,9 +1224,7 @@ func (c *ChromeDP) screenshotURL(url string, opts chromeOptions) ([]byte, error)
 		tasks = append(tasks, chromedp.Sleep(time.Duration(opts.WaitDuration)*time.Millisecond))
 	}
 
-	tasks = append(tasks, chromedp.FullScreenshot(&buf, 100))
-
-	err := chromedp.Run(ctx, tasks...)
+	buf, err := chromedp.Run(ctx, stepsThen(tasks, chromedp.FullScreenshot(100)))
 	if err != nil {
 		return nil, fmt.Errorf("chromedp screenshot failed: %w", err)
 	}
@@ -1222,8 +1250,7 @@ func (c *ChromeDP) evaluateJS(url string, jsCode string, opts chromeOptions) (in
 	ctx, cancel = context.WithTimeout(ctx, time.Duration(opts.Timeout)*time.Second)
 	defer cancel()
 
-	var result interface{}
-	var tasks []chromedp.Action
+	var tasks []chromedp.Action[chromedp.Void]
 
 	tasks = append(tasks, chromedp.Navigate(url))
 
@@ -1241,12 +1268,22 @@ func (c *ChromeDP) evaluateJS(url string, jsCode string, opts chromeOptions) (in
 		wrappedJS = fmt.Sprintf("(function() { return %s; })()", jsCode)
 	}
 
-	tasks = append(tasks, chromedp.Evaluate(wrappedJS, &result))
-
-	err := chromedp.Run(ctx, tasks...)
+	result, err := chromedp.Run(ctx, stepsThen(tasks, chromedp.Evaluate[any](wrappedJS)))
 	if err != nil {
 		return nil, fmt.Errorf("chromedp evaluate failed: %w", err)
 	}
 
 	return result, nil
+}
+
+// stepsThen runs the steps and then final in one action on the same tab, like the old
+// chromedp.Run(ctx, steps..., final) did before chromedp v0.24 made actions return values.
+func stepsThen[T any](steps []chromedp.Action[chromedp.Void], final chromedp.Action[T]) chromedp.Action[T] {
+	return func(ctx context.Context, t *chromedp.Target) (T, error) {
+		if _, err := chromedp.Steps(steps...)(ctx, t); err != nil {
+			var zero T
+			return zero, err
+		}
+		return final(ctx, t)
+	}
 }
