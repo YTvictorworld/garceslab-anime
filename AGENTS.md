@@ -61,6 +61,9 @@ cd seanime-web && npm ci && npm test && npm run build
 
 # The WIP rule's own tests (when .github/scripts/pr-ready.sh changed)
 bash .github/scripts/pr-ready_test.sh
+
+# The release rules (when .github/workflows/release.yml or release-check.sh changed)
+bash .github/scripts/release-check_test.sh
 ```
 
 Tests in `.github/scripts/known-failing-go-tests.txt` already fail on a clean Seanime v3.10.5

@@ -47184,6 +47184,17 @@
         "comments": []
       },
       {
+        "name": "GarceslabVersion",
+        "jsonName": "garceslabVersion",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": [
+          " Garceslab Anime's own version; Version stays Seanime's for compatibility"
+        ]
+      },
+      {
         "name": "ThemeSettings",
         "jsonName": "themeSettings",
         "goType": "models.Theme",

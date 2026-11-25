@@ -3052,6 +3052,10 @@ export type Status = {
     settings?: Models_Settings
     version: string
     versionName: string
+    /**
+     * Garceslab Anime's own version; Version stays Seanime's for compatibility
+     */
+    garceslabVersion: string
     themeSettings?: Models_Theme
     isOffline: boolean
     mediastreamSettings?: Models_MediastreamSettings
