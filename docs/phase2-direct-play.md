@@ -19,7 +19,7 @@ no per-viewer directstream, videocore or mediacore "lane" on the server.
    that client only.
 4. The link goes to that client only (`external-player-open-url`), and is never logged.
 5. The TV's `<video>` plays the link; it reads the MKV's subtitles itself with paced,
-   coalesced HTTP Range reads (see the TV repo's `webos/README.md`).
+   coalesced HTTP Range reads (see the TV repo's `docs/direct-play.md`).
 6. The player starts manual tracking (`POST /playback-manager/manual-tracking/start`): the
    session becomes *playing* and the anime is marked as watching for the profile (native
    auto-watching). Progress is saved per profile by the TV's own requests (continuity
@@ -27,8 +27,12 @@ no per-viewer directstream, videocore or mediacore "lane" on the server.
 7. Leaving the player cancels the tracking for that episode
    (`manual-tracking/cancel` with `{mediaId, episodeNumber}`), which frees the slot.
 
-If the TV can't play the link, it starts the same release once through the server's
-direct stream (relayed) and says "Playing through the server instead."
+If the TV can't play the link (or read the file's header), it asks the server for a fresh
+link to the same release and file and plays it directly again, up to **3 times** (2 s, 4 s and
+8 s apart, as the same device, so no extra slot is used). Only after the third failed retry does
+it start the same release through the server's direct stream (relayed) and say "Playing through
+the server instead." Decode errors go to the server at once. Details: the TV repository's
+[docs/direct-play.md](https://github.com/YTvictorworld/garceslab-anime-tv/blob/main/docs/direct-play.md).
 
 ## Viewer sessions (`internal/profiles/sessions`)
 
