@@ -32,6 +32,7 @@ It is published only for self-hosting with LG webOS TVs: there is no hosted serv
 |---|---|
 | [../CONTRIBUTING.md](../CONTRIBUTING.md) | Issue first, the pull request checklist and the "(WIP)" rule, running the checks |
 | [../AGENTS.md](../AGENTS.md) | Guide for AI coding agents: layout, commands, checks, screenshots, privacy |
+| [testing.md](testing.md) | Go tests: the known-failing list, keeping tests deterministic, the playlist / media player flake (#10) |
 | [../DEVELOPMENT_AND_BUILD.md](../DEVELOPMENT_AND_BUILD.md) | Building from source (inherited from Seanime) |
 | [../internal/profiles/HOOKS.md](../internal/profiles/HOOKS.md) | Every place where the profiles feature touches Seanime code |
 | [dependencies.md](dependencies.md) | Dependabot updates, and the chromedp v0.24 migration of the extensions' `ChromeDP` API with its tests |
