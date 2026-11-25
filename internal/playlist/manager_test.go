@@ -89,8 +89,8 @@ func TestPlaylistManagerPlayEpisodeNextWithoutCurrentEpisode(t *testing.T) {
 		t.Fatal("PlayEpisode(next) deadlocked without a current episode")
 	}
 
-	require.True(t, h.manager.currentEpisode.IsPresent())
-	require.Same(t, episodeOne, h.manager.currentEpisode.MustGet())
+	require.NotNil(t, h.currentEpisode())
+	require.Same(t, episodeOne, h.currentEpisode())
 
 	event := h.wsEventManager.lastPlaylistServerEvent(t, ServerEventPlayEpisode)
 	payload, ok := event.Payload.(playEpisodePayload)
@@ -113,13 +113,59 @@ func TestPlaylistManagerPlayEpisodePrevious(t *testing.T) {
 
 	h.manager.PlayEpisode("previous", false)
 
-	require.True(t, h.manager.currentEpisode.IsPresent())
-	require.Same(t, episodeOne, h.manager.currentEpisode.MustGet())
+	require.NotNil(t, h.currentEpisode())
+	require.Same(t, episodeOne, h.currentEpisode())
 
 	event := h.wsEventManager.lastPlaylistServerEvent(t, ServerEventPlayEpisode)
 	payload, ok := event.Payload.(playEpisodePayload)
 	require.True(t, ok)
 	require.Same(t, episodeOne, payload.PlaylistEpisode)
+}
+
+func TestPlaylistManagerPlayEpisodeWithoutMediaPlayer(t *testing.T) {
+	// regression for issue #10: playEpisode cancels the desktop media player before every episode. Without a
+	// media player repository (no media player settings) that used to panic with a nil pointer; now the
+	// playlist keeps going and the client still gets the episode to play.
+	for _, tc := range []struct {
+		name    string
+		which   string
+		current *int
+	}{
+		{name: "next without current episode", which: "next"},
+		{name: "next", which: "next", current: new(0)},
+		{name: "previous", which: "previous", current: new(1)},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			h := newPlaylistTestWrapperWithMediaPlayer(t, false)
+			require.Nil(t, h.playbackManager.MediaPlayerRepository)
+			h.manager.clientId = "web"
+			episodes := []*anime.PlaylistEpisode{
+				newStreamPlaylistEpisode(251, 1, "1"),
+				newStreamPlaylistEpisode(251, 2, "2"),
+			}
+			h.manager.currentPlaylistData = mo.Some(&playlistData{
+				playlist: newPlaylistFixture("queue", episodes...),
+				options:  newClientPlaylistOptions("web"),
+			})
+			want := episodes[0]
+			if tc.current != nil {
+				h.manager.currentEpisode = mo.Some(episodes[*tc.current])
+				if tc.which == "next" {
+					want = episodes[*tc.current+1]
+				} else {
+					want = episodes[*tc.current-1]
+				}
+			}
+
+			require.NotPanics(t, func() { h.manager.PlayEpisode(tc.which, false) })
+
+			require.Same(t, want, h.currentEpisode())
+			event := h.wsEventManager.lastPlaylistServerEvent(t, ServerEventPlayEpisode)
+			payload, ok := event.Payload.(playEpisodePayload)
+			require.True(t, ok)
+			require.Same(t, want, payload.PlaylistEpisode)
+		})
+	}
 }
 
 func TestPlaylistManagerMarkCurrentAsCompletedPersistsAndUpdatesProgress(t *testing.T) {
@@ -179,8 +225,8 @@ func TestPlaylistManagerStopPlaylistDeletesCompletedPlaylistAndResetsState(t *te
 	h.manager.StopPlaylist("done")
 
 	require.True(t, canceled)
-	require.True(t, h.manager.currentPlaylistData.IsAbsent())
-	require.True(t, h.manager.currentEpisode.IsAbsent())
+	require.False(t, h.hasPlaylist())
+	require.Nil(t, h.currentEpisode())
 	require.Nil(t, h.manager.cancel)
 	require.Eventually(t, func() bool {
 		_, err := db_bridge.GetPlaylist(h.database, playlist.DbId)
@@ -211,7 +257,7 @@ func TestPlaylistManagerListenToEventsStartsPlaylistAndServesCurrentPlaylist(t *
 	}})
 
 	require.Eventually(t, func() bool {
-		return h.manager.currentEpisode.IsPresent() && h.manager.currentEpisode.MustGet().Episode.AniDBEpisode == "1"
+		return h.currentEpisode() != nil && h.currentEpisode().Episode.AniDBEpisode == "1"
 	}, time.Second, 10*time.Millisecond)
 
 	playEvent := h.wsEventManager.waitForPlaylistServerEvent(t, ServerEventPlayEpisode)
@@ -243,7 +289,7 @@ func TestPlaylistManagerNativeLifecycleAdvancesToNextEpisode(t *testing.T) {
 	h.manager.startPlaylist(playlist, newClientPlaylistOptions("web"))
 
 	require.Eventually(t, func() bool {
-		return h.manager.currentEpisode.IsPresent() && h.manager.currentEpisode.MustGet().Episode.AniDBEpisode == "1"
+		return h.currentEpisode() != nil && h.currentEpisode().Episode.AniDBEpisode == "1"
 	}, time.Second, 10*time.Millisecond)
 
 	h.sendNativeLoadedSequence(t, "web", episodeOne)
@@ -267,7 +313,7 @@ func TestPlaylistManagerNativeLifecycleAdvancesToNextEpisode(t *testing.T) {
 	h.sendMpvCoreClientEvent("web", mpvcore.ClientEventEnded, map[string]any{"autoNext": false})
 
 	require.Eventually(t, func() bool {
-		return h.manager.currentEpisode.IsPresent() && h.manager.currentEpisode.MustGet().Episode.AniDBEpisode == "2"
+		return h.currentEpisode() != nil && h.currentEpisode().Episode.AniDBEpisode == "2"
 	}, time.Second, 10*time.Millisecond)
 	playEvent := h.wsEventManager.lastPlaylistServerEvent(t, ServerEventPlayEpisode)
 	playPayload, ok := playEvent.Payload.(playEpisodePayload)
@@ -288,7 +334,7 @@ func TestPlaylistManagerNativeTerminationStopsPlaylist(t *testing.T) {
 	h.manager.startPlaylist(playlist, newClientPlaylistOptions("web"))
 
 	require.Eventually(t, func() bool {
-		return h.manager.currentEpisode.IsPresent() && h.manager.currentEpisode.MustGet().Episode.AniDBEpisode == "1"
+		return h.currentEpisode() != nil && h.currentEpisode().Episode.AniDBEpisode == "1"
 	}, time.Second, 10*time.Millisecond)
 
 	h.sendNativeLoadedSequence(t, "web", episodeOne)
@@ -303,7 +349,7 @@ func TestPlaylistManagerNativeTerminationStopsPlaylist(t *testing.T) {
 	})
 
 	require.Eventually(t, func() bool {
-		return h.manager.currentPlaylistData.IsAbsent() && h.manager.currentEpisode.IsAbsent()
+		return !h.hasPlaylist() && h.currentEpisode() == nil
 	}, time.Second, 10*time.Millisecond)
 	require.Contains(t, h.wsEventManager.eventTypesForClient("web"), events.InfoToast)
 }
@@ -334,7 +380,16 @@ type playlistTestWrapper struct {
 	manager         *Manager
 }
 
+// newPlaylistTestWrapper builds a manager whose playback manager has an in-memory media player
+// repository (no player is ever launched).
 func newPlaylistTestWrapper(t *testing.T) *playlistTestWrapper {
+	t.Helper()
+	return newPlaylistTestWrapperWithMediaPlayer(t, true)
+}
+
+// newPlaylistTestWrapperWithMediaPlayer builds the manager with or without a media player repository;
+// without one it matches a server whose settings have no media player section yet (issue #10).
+func newPlaylistTestWrapperWithMediaPlayer(t *testing.T, withMediaPlayer bool) *playlistTestWrapper {
 	t.Helper()
 
 	env := testutil.NewTestEnv(t)
@@ -371,11 +426,16 @@ func newPlaylistTestWrapper(t *testing.T) *playlistTestWrapper {
 		MetadataProviderRef: util.NewRef(provider),
 		IsOfflineRef:        util.NewRef(false),
 	})
-	playbackManager.SetMediaPlayerRepository(mediaplayer.NewRepository(&mediaplayer.NewRepositoryOptions{
-		Logger:         logger,
-		Default:        "",
-		WSEventManager: wsEventManager,
-	}))
+	if withMediaPlayer {
+		// SetMediaPlayerRepository stores the repository before returning, so the manager below can use it
+		// straight away; the cleanup stops its event listener.
+		playbackManager.SetMediaPlayerRepository(mediaplayer.NewRepository(&mediaplayer.NewRepositoryOptions{
+			Logger:         logger,
+			Default:        "",
+			WSEventManager: wsEventManager,
+		}))
+		t.Cleanup(func() { playbackManager.SetMediaPlayerRepository(nil) })
+	}
 
 	mediacoreCoordinator := mediacore.NewCoordinator(mediacore.NewCoordinatorOptions{
 		Logger:              logger,
@@ -410,6 +470,18 @@ func newPlaylistTestWrapper(t *testing.T) *playlistTestWrapper {
 		mpvCore:         mpvCore,
 		manager:         manager,
 	}
+}
+
+// currentEpisode and hasPlaylist read the manager's state through its locked getters: the playlist
+// goroutines write it while the test (or require.Eventually's goroutine) reads it.
+func (h *playlistTestWrapper) currentEpisode() *anime.PlaylistEpisode {
+	episode, _ := h.manager.getCurrentEpisode()
+	return episode
+}
+
+func (h *playlistTestWrapper) hasPlaylist() bool {
+	_, ok := h.manager.getPlaylistData()
+	return ok
 }
 
 func (h *playlistTestWrapper) sendPlaylistClientEvent(t *testing.T, clientID string, payload ClientEvent) {

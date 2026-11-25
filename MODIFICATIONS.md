@@ -167,6 +167,34 @@ AniList account, several playbacks at the same time) will be listed here as they
   `PR ready (WIP rule)` workflow (`.github/workflows/pr-ready.yml`,
   `.github/scripts/pr-ready.sh` with its tests). The existing CI workflows are unchanged.
 
+## 2026-11 (Go dependency updates, chromedp v0.24)
+
+- **Go dependencies:** the 28 minor/patch updates of Dependabot's `go-minor-patch` group
+  (`go.mod`, `go.sum`), including `github.com/chromedp/chromedp` v0.16.0 -> v0.24.0 and
+  `github.com/chromedp/cdproto` v0.160.8, whose Go API changed.
+- **Extension `ChromeDP` bindings** (`internal/goja/goja_bindings/chromedp.go`): moved to
+  chromedp v0.24's API (generic actions that return their value, `Do`, `Listen`, raw CDP calls
+  through the action's target, events marshalled with cdproto's JSON options). The JS API that
+  extensions use is unchanged. Tests: `chromedp_surface_test.go` (no browser),
+  `chromedp_values_test.go` (real browser); the existing browser tests can run with
+  `GARCESLAB_CHROMEDP_TESTS=1`, and three of them that had bugs in the test code (and an
+  unconditional skip of the screenshot test) were fixed. See `docs/dependencies.md`.
+
+## 2026-11 (playback manager without a media player)
+
+- **No panic without a desktop media player** (`internal/library/playbackmanager/playback_manager.go`,
+  `progress_tracking.go`, tests in `playback_manager_test.go` and `internal/playlist/manager_test.go`):
+  `SetMediaPlayerRepository` stored the repository from a goroutine, and the playback manager
+  dereferenced it without a nil check, so a playlist episode change (which always calls `Cancel`)
+  right after start-up, or on a server whose settings have no media player section, panicked. The
+  repository is now stored before the call returns, guarded by its own lock, and every use returns
+  `ErrNoMediaPlayer` instead of panicking. See [docs/testing.md](docs/testing.md).
+- **Playlist manager state behind a lock** (`internal/playlist/manager.go`): the current playlist,
+  episode, client id and cancel function are read and written through locked getters/setters, the
+  playlist goroutine keeps its own context, and `markCurrentAsCompleted` no longer unlocks a mutex it
+  doesn't own. Fixes data races found with `go test -race`. The test `FakePlatform`
+  (`internal/testmocks`) records update calls under a mutex.
+
 ## 2026-11 (versioning and releases)
 
 - **Own version** (`internal/constants/constants.go`, `internal/handlers/status.go`,

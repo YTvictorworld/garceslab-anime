@@ -17,9 +17,14 @@ import (
 var (
 	ErrProgressUpdateAnilist = errors.New("playback manager: Failed to update progress on AniList")
 	ErrProgressUpdateMAL     = errors.New("playback manager: Failed to update progress on MyAnimeList")
+	// ErrNoMediaPlayer is returned by the methods that drive the desktop media player when no media player
+	// repository is set (e.g. the settings have no media player section yet).
+	ErrNoMediaPlayer = errors.New("playback manager: no media player is configured")
 )
 
-func (pm *PlaybackManager) listenToMediaPlayerEvents(ctx context.Context) {
+// listenToMediaPlayerEvents reads the events of one subscriber until ctx is canceled. The subscriber is
+// passed in rather than read from the struct so a listener never reads the subscriber of a newer repository.
+func (pm *PlaybackManager) listenToMediaPlayerEvents(ctx context.Context, subscriber *mediaplayer.RepositorySubscriber) {
 	// Listen for media player events
 	go func() {
 		for {
@@ -27,7 +32,7 @@ func (pm *PlaybackManager) listenToMediaPlayerEvents(ctx context.Context) {
 			// Stop listening when the context is cancelled -- meaning a new MediaPlayer instance is set
 			case <-ctx.Done():
 				return
-			case event := <-pm.mediaPlayerRepoSubscriber.EventCh:
+			case event := <-subscriber.EventCh:
 				switch e := event.(type) {
 				// Local file events
 				case mediaplayer.TrackingStartedEvent: // New video has started playing
@@ -79,7 +84,9 @@ func (pm *PlaybackManager) handleTrackingStarted(status *mediaplayer.PlaybackSta
 		// Send error event to the client
 		pm.wsEventManager.SendEvent(events.ErrorToast, err.Error())
 		//
-		pm.MediaPlayerRepository.Cancel()
+		if mediaPlayer, err := pm.mediaPlayer(); err == nil {
+			mediaPlayer.Cancel()
+		}
 		return
 	}
 
@@ -119,7 +126,7 @@ func (pm *PlaybackManager) handleTrackingStarted(status *mediaplayer.PlaybackSta
 	if !pm.isPlaylistActive.Load() && pm.settings.AutoPlayNextEpisode {
 		if nextEpisode, ok := currentLocalFileWrapperEntry.FindNextEpisode(currentLocalFile); ok {
 			pm.Logger.Debug().Msg("playback manager: Appending next episode file path to media player")
-			_ = pm.MediaPlayerRepository.Append(nextEpisode.Path)
+			_ = pm.AppendToMediaPlayer(&AppendToMediaPlayerOptions{Payload: nextEpisode.Path})
 		}
 	}
 

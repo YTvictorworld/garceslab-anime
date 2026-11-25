@@ -96,6 +96,12 @@ type playlistData struct {
 
 type (
 	Manager struct {
+		// stateMu guards clientId, currentPlaylistData, currentEpisode, ctx and cancel. They are read and
+		// written by the client event listener, the playlist goroutine and the public methods at the same
+		// time, so they are only accessed through the small getters/setters below, which never hold the
+		// lock while calling out. (mu still serializes whole operations, as before.)
+		stateMu sync.RWMutex
+
 		// Playlist being played currently
 		clientId              string
 		currentPlaylistData   mo.Option[*playlistData]
@@ -161,6 +167,46 @@ func NewManager(opts *NewManagerOptions) *Manager {
 	return ret
 }
 
+func (m *Manager) getClientId() string {
+	m.stateMu.RLock()
+	defer m.stateMu.RUnlock()
+	return m.clientId
+}
+
+func (m *Manager) setClientId(clientId string) {
+	m.stateMu.Lock()
+	defer m.stateMu.Unlock()
+	m.clientId = clientId
+}
+
+func (m *Manager) getPlaylistData() (*playlistData, bool) {
+	m.stateMu.RLock()
+	defer m.stateMu.RUnlock()
+	return m.currentPlaylistData.Get()
+}
+
+func (m *Manager) getCurrentEpisode() (*anime.PlaylistEpisode, bool) {
+	m.stateMu.RLock()
+	defer m.stateMu.RUnlock()
+	return m.currentEpisode.Get()
+}
+
+func (m *Manager) setCurrentEpisode(episode *anime.PlaylistEpisode) {
+	m.stateMu.Lock()
+	defer m.stateMu.Unlock()
+	m.currentEpisode = mo.Some(episode)
+}
+
+// cancelCurrentPlaylist cancels the context of the running playlist goroutine, if any.
+func (m *Manager) cancelCurrentPlaylist() {
+	m.stateMu.RLock()
+	cancel := m.cancel
+	m.stateMu.RUnlock()
+	if cancel != nil {
+		cancel()
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 type (
@@ -178,11 +224,12 @@ type (
 )
 
 func (m *Manager) sendCurrentPlaylistToClient() {
-	playlistEpisode, _ := m.currentEpisode.Get()
+	playlistEpisode, _ := m.getCurrentEpisode()
+	clientId := m.getClientId()
 
-	data, ok := m.currentPlaylistData.Get()
+	data, ok := m.getPlaylistData()
 	if !ok {
-		m.wsEventManager.SendEventTo(m.clientId, string(events.PlaylistEvent), ServerEvent{
+		m.wsEventManager.SendEventTo(clientId, string(events.PlaylistEvent), ServerEvent{
 			Type: ServerEventCurrentPlaylist,
 			Payload: struct {
 				PlaylistEpisode *anime.PlaylistEpisode `json:"playlistEpisode"`
@@ -194,7 +241,7 @@ func (m *Manager) sendCurrentPlaylistToClient() {
 		})
 		return
 	}
-	m.wsEventManager.SendEventTo(m.clientId, string(events.PlaylistEvent), ServerEvent{
+	m.wsEventManager.SendEventTo(clientId, string(events.PlaylistEvent), ServerEvent{
 		Type: ServerEventCurrentPlaylist,
 		Payload: struct {
 			PlaylistEpisode *anime.PlaylistEpisode `json:"playlistEpisode"`
@@ -234,17 +281,15 @@ func (m *Manager) listenToEvents() {
 				m.isStartingPlaylist.Store(true)
 
 				// cancel any existing playback
-				if m.cancel != nil {
-					m.cancel()
-				}
+				m.cancelCurrentPlaylist()
 				payload := startPlaylistPayload{}
 				if err := event.UnmarshalAs(&payload); err == nil {
 					// Get the playlist
-					m.clientId = payload.ClientId
+					m.setClientId(payload.ClientId)
 					playlist, err := db_bridge.GetPlaylist(m.db, payload.DbId)
 					if err != nil {
 						m.logger.Error().Err(err).Msg("playlist: failed to get playlist")
-						m.wsEventManager.SendEventTo(m.clientId, events.ErrorToast, "Failed to retrieve playlist info")
+						m.wsEventManager.SendEventTo(payload.ClientId, events.ErrorToast, "Failed to retrieve playlist info")
 						m.isStartingPlaylist.Store(false)
 						continue
 					}
@@ -273,22 +318,22 @@ func (m *Manager) startPlaylist(playlist *anime.Playlist, options *startPlaylist
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	if m.cancel != nil {
-		m.cancel()
-	}
+	m.cancelCurrentPlaylist()
 
 	m.logger.Debug().Uint("dbId", playlist.DbId).Msg("playlist: Starting playlist")
 
-	// store the playlist
+	// store the playlist and create a new context; the goroutine below keeps its own copy of ctx so it
+	// never waits on the context of a newer playlist
+	ctx, cancel := context.WithCancel(context.Background())
+	m.stateMu.Lock()
 	m.currentPlaylistData = mo.Some(&playlistData{
 		playlist: playlist,
 		options:  options,
 	})
+	m.ctx, m.cancel = ctx, cancel
+	m.stateMu.Unlock()
 
 	m.sendCurrentPlaylistToClient()
-
-	// create a new context
-	m.ctx, m.cancel = context.WithCancel(context.Background())
 
 	playbackManagerSubscriber := m.playbackManager.SubscribeToPlaybackStatus("playlist-manager")
 	var mediacoreSubscriber *mediacore.Subscriber
@@ -302,7 +347,7 @@ func (m *Manager) startPlaylist(playlist *anime.Playlist, options *startPlaylist
 	go func() {
 		for {
 			select {
-			case <-m.ctx.Done():
+			case <-ctx.Done():
 				m.logger.Trace().Uint("dbId", playlist.DbId).Msg("playlist: Current playlist context done")
 				m.resetPlaylist()
 				m.playbackManager.UnsubscribeFromPlaybackStatus("playlist-manager")
@@ -336,7 +381,7 @@ func (m *Manager) startPlaylist(playlist *anime.Playlist, options *startPlaylist
 					m.state.Store(StateStarted)
 					m.playerType.Store(SystemPlayer)
 
-					data, ok := m.currentPlaylistData.Get()
+					data, ok := m.getPlaylistData()
 					if !ok {
 						continue
 					}
@@ -351,7 +396,7 @@ func (m *Manager) startPlaylist(playlist *anime.Playlist, options *startPlaylist
 					}
 					if ok {
 						// Check if correct episode
-						currentEpisode, ok := m.currentEpisode.Get()
+						currentEpisode, ok := m.getCurrentEpisode()
 						if ok {
 							if currentEpisode.Episode.EpisodeNumber != state.EpisodeNumber || currentEpisode.Episode.BaseAnime.ID != state.MediaId {
 								// Find the episode
@@ -367,7 +412,7 @@ func (m *Manager) startPlaylist(playlist *anime.Playlist, options *startPlaylist
 									m.StopPlaylist("Playlist stopped, cannot find episode in playlist", true)
 									continue
 								}
-								m.currentEpisode = mo.Some(actualEpisode)
+								m.setCurrentEpisode(actualEpisode)
 								m.sendCurrentPlaylistToClient()
 							}
 						}
@@ -437,12 +482,12 @@ func (m *Manager) playNextEpisode() {
 
 	m.logger.Trace().Msg("playlist: Playing next episode")
 
-	m.wsEventManager.SendEventTo(m.clientId, string(events.PlaylistEvent), ServerEvent{
+	m.wsEventManager.SendEventTo(m.getClientId(), string(events.PlaylistEvent), ServerEvent{
 		Type:    ServerEventPlayingEpisode,
 		Payload: nil,
 	})
 
-	data, ok := m.currentPlaylistData.Get()
+	data, ok := m.getPlaylistData()
 	if !ok {
 		m.logger.Error().Msg("playlist: Cannot play next episode, no playlist is currently playing")
 		return
@@ -450,7 +495,7 @@ func (m *Manager) playNextEpisode() {
 
 	var episode *anime.PlaylistEpisode
 
-	currentEpisode, found := m.currentEpisode.Get()
+	currentEpisode, found := m.getCurrentEpisode()
 
 	if !found {
 		// find episode
@@ -476,7 +521,7 @@ func (m *Manager) playNextEpisode() {
 }
 
 func (m *Manager) hasNextEpisode() bool {
-	data, ok := m.currentPlaylistData.Get()
+	data, ok := m.getPlaylistData()
 	if !ok {
 		return false
 	}
@@ -496,13 +541,13 @@ func (m *Manager) hasNextEpisode() bool {
 func (m *Manager) markCurrentAsCompleted() {
 	m.logger.Trace().Msg("playlist: Marking current episode as completed")
 
-	data, ok := m.currentPlaylistData.Get()
+	data, ok := m.getPlaylistData()
 	if !ok {
-		m.mu.Unlock()
+		// (this used to call m.mu.Unlock(), unlocking a mutex the caller may not hold)
 		return
 	}
 
-	currentEpisode, ok := m.currentEpisode.Get()
+	currentEpisode, ok := m.getCurrentEpisode()
 	if !ok {
 		return
 	}
@@ -534,14 +579,16 @@ func (m *Manager) markCurrentAsCompleted() {
 
 func (m *Manager) resetPlaylist() {
 	m.playbackManager.SetPlaylistActive(false)
+	m.stateMu.Lock()
 	m.currentPlaylistData = mo.None[*playlistData]()
 	m.currentEpisode = mo.None[*anime.PlaylistEpisode]()
 	m.cancel = nil
+	m.stateMu.Unlock()
 	m.sendCurrentPlaylistToClient()
 }
 
 func (m *Manager) playEpisode(episode *anime.PlaylistEpisode) {
-	data, ok := m.currentPlaylistData.Get()
+	data, ok := m.getPlaylistData()
 	if !ok {
 		return
 	}
@@ -552,7 +599,7 @@ func (m *Manager) playEpisode(episode *anime.PlaylistEpisode) {
 	m.state.Store(StateIdle)
 	_ = m.playbackManager.Cancel()
 
-	m.wsEventManager.SendEventTo(m.clientId, string(events.PlaylistEvent), ServerEvent{
+	m.wsEventManager.SendEventTo(m.getClientId(), string(events.PlaylistEvent), ServerEvent{
 		Type:    ServerEventPlayingEpisode,
 		Payload: nil,
 	})
@@ -560,7 +607,7 @@ func (m *Manager) playEpisode(episode *anime.PlaylistEpisode) {
 	m.state.Store(StateIdle)
 
 	// store pointer to episode
-	m.currentEpisode = mo.Some(episode)
+	m.setCurrentEpisode(episode)
 
 	m.sendCurrentPlaylistToClient()
 
@@ -634,7 +681,7 @@ func (m *Manager) playEpisode(episode *anime.PlaylistEpisode) {
 	// nakama and desktop media player or native player, play it from server
 	if isNakama && (data.options.LocalFilePlaybackMethod == ClientPlaybackMethodDefault || data.options.LocalFilePlaybackMethod == ClientPlaybackMethodNativePlayer) {
 		m.logger.Debug().Msg("playlist: Nakama stream and desktop media player, playing from server")
-		err := m.nakamaManager.PlayHostAnimeLibraryFile(episode.Episode.LocalFile.Path, "", m.clientId, episode.Episode.BaseAnime, episode.Episode.AniDBEpisode, "")
+		err := m.nakamaManager.PlayHostAnimeLibraryFile(episode.Episode.LocalFile.Path, "", m.getClientId(), episode.Episode.BaseAnime, episode.Episode.AniDBEpisode, "")
 		if err != nil {
 			m.logger.Error().Err(err).Msg("playlist: Failed to start playing nakama stream")
 			m.StopPlaylist("Failed to start playing nakama stream")
@@ -647,7 +694,7 @@ func (m *Manager) playEpisode(episode *anime.PlaylistEpisode) {
 
 	m.logger.Trace().Msg("playlist: Sending play episode event to client")
 
-	m.wsEventManager.SendEventTo(m.clientId, string(events.PlaylistEvent), ServerEvent{
+	m.wsEventManager.SendEventTo(m.getClientId(), string(events.PlaylistEvent), ServerEvent{
 		Type: ServerEventPlayEpisode,
 		Payload: playEpisodePayload{
 			PlaylistEpisode: episode,
@@ -660,12 +707,12 @@ func (m *Manager) playEpisode(episode *anime.PlaylistEpisode) {
 func (m *Manager) prepareNextEpisode() {
 	m.logger.Trace().Msg("playlist: Preparing next episode")
 
-	data, ok := m.currentPlaylistData.Get()
+	data, ok := m.getPlaylistData()
 	if !ok {
 		return
 	}
 
-	currentEpisode, ok := m.currentEpisode.Get()
+	currentEpisode, ok := m.getCurrentEpisode()
 	if !ok {
 		return
 	}
@@ -695,10 +742,9 @@ func (m *Manager) prepareNextEpisode() {
 
 func (m *Manager) StopPlaylist(reason string, isError ...bool) {
 	m.logger.Trace().Str("reason", reason).Msg("playlist: Stopping current playlist")
-	if m.cancel != nil {
-		m.cancel()
-	}
-	data, ok := m.currentPlaylistData.Get()
+	m.cancelCurrentPlaylist()
+	clientId := m.getClientId()
+	data, ok := m.getPlaylistData()
 	// Delete playlist if all episodes are completed
 	go func(data *playlistData, ok bool) {
 		if !ok || data == nil {
@@ -716,16 +762,16 @@ func (m *Manager) StopPlaylist(reason string, isError ...bool) {
 		}
 		if completedEpisodes == len(d.playlist.Episodes) {
 			_ = db_bridge.DeletePlaylist(m.db, d.playlist.DbId)
-			m.wsEventManager.SendEventTo(m.clientId, events.InvalidateQueries, []string{events.GetPlaylistsEndpoint})
+			m.wsEventManager.SendEventTo(clientId, events.InvalidateQueries, []string{events.GetPlaylistsEndpoint})
 		}
 	}(data, ok)
 	m.isStartingPlaylist.Store(false)
 	m.resetPlaylist()
 	if len(isError) > 0 && isError[0] {
-		m.wsEventManager.SendEventTo(m.clientId, events.ErrorToast, reason)
+		m.wsEventManager.SendEventTo(clientId, events.ErrorToast, reason)
 		return
 	}
-	m.wsEventManager.SendEventTo(m.clientId, events.InfoToast, reason)
+	m.wsEventManager.SendEventTo(clientId, events.InfoToast, reason)
 }
 
 // PlayEpisode plays the next episode in the playlist
@@ -740,12 +786,12 @@ func (m *Manager) PlayEpisode(which string, isCurrentCompleted bool) {
 		m.markCurrentAsCompleted()
 	}
 
-	data, ok := m.currentPlaylistData.Get()
+	data, ok := m.getPlaylistData()
 	if !ok {
 		return
 	}
 
-	currentEpisode, ok := m.currentEpisode.Get()
+	currentEpisode, ok := m.getCurrentEpisode()
 	if !ok {
 		if which == "next" {
 			m.logger.Debug().Msg("playlist: No episodes in playlist, playing next episode")
@@ -784,12 +830,12 @@ func (m *Manager) ReopenEpisode() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	_, ok := m.currentPlaylistData.Get()
+	_, ok := m.getPlaylistData()
 	if !ok {
 		return
 	}
 
-	currentEpisode, ok := m.currentEpisode.Get()
+	currentEpisode, ok := m.getCurrentEpisode()
 	if !ok {
 		return
 	}

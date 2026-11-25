@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"seanime/internal/testutil"
 	"seanime/internal/util"
 	"testing"
@@ -14,9 +15,21 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// requireChrome skips a test that starts a real Chrome/Chromium unless live tests are on
+// (flags.enable_live_tests in test/config.toml) or GARCESLAB_CHROMEDP_TESTS=1 is set. The
+// env var runs only the browser tests, without the other live tests (AniList, torrents...).
+// See docs/dependencies.md ("chromedp").
+func requireChrome(t *testing.T) {
+	t.Helper()
+	if os.Getenv("GARCESLAB_CHROMEDP_TESTS") == "1" {
+		return
+	}
+	testutil.InitTestProvider(t, testutil.Live())
+}
+
 func setupChromeVMWithServer(t *testing.T) (*goja.Runtime, *ChromeDP, *httptest.Server) {
 	t.Helper()
-	testutil.InitTestProvider(t, testutil.Live())
+	requireChrome(t)
 
 	vm := goja.New()
 	chrome := BindChromeDP(vm)
@@ -383,7 +396,7 @@ func TestChromeDPEvaluate_DOMManipulation(t *testing.T) {
 	jsCode := fmt.Sprintf(`
 		(async () => {
 			const result = await ChromeDP.evaluate(%q, 
-				"document.getElementById('increment-btn').click(); document.getElementById('counter').textContent"
+				"(document.getElementById('increment-btn').click(), document.getElementById('counter').textContent)"
 			);
 			return result;
 		})();
@@ -506,8 +519,6 @@ func TestChromeDPEvaluate_MissingArguments(t *testing.T) {
 }
 
 func TestChromeDPScreenshot_Basic(t *testing.T) {
-	t.Skip("Skipping screenshot test - requires headless browser environment")
-
 	vm, chrome, server := setupChromeVMWithServer(t)
 	defer server.Close()
 	defer chrome.Close()
@@ -585,8 +596,8 @@ func TestChromeDPIntegration_ScrapeAndParse(t *testing.T) {
 			const $ = LoadDoc(html);
 			const title = $("#title").text();
 			const items = [];
-			$("#list li").each(function() {
-				items.push(this.text());
+			$("#list li").each((i, el) => {
+				items.push(el.text());
 			});
 			return { title, items };
 		})();
@@ -638,8 +649,8 @@ func TestChromeDPIntegration_ScrapeWithDynamicContent(t *testing.T) {
 			
 			const title = $("#title").text();
 			const items = [];
-			$("#list li").each(function() {
-				items.push(this.text());
+			$("#list li").each((i, el) => {
+				items.push(el.text());
 			});
 			
 			const ajaxContent = $("#ajax-data").text();

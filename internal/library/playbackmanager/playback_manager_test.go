@@ -534,6 +534,48 @@ func TestPlaybackManagerUnitManualProgressTrackingSyncsProgress(t *testing.T) {
 	require.True(t, h.playbackManager.currentManualTrackingState.IsAbsent())
 }
 
+func TestPlaybackManagerWithoutMediaPlayerReturnsErrorInsteadOfPanicking(t *testing.T) {
+	// regression for issue #10: with no media player settings the repository is nil, and Cancel (called by
+	// the playlist manager before every episode) used to dereference it and panic.
+	h := newPlaybackManagerTestWrapper(t)
+	require.Nil(t, h.playbackManager.MediaPlayerRepository)
+
+	require.NotPanics(t, func() {
+		require.ErrorIs(t, h.playbackManager.Cancel(), ErrNoMediaPlayer)
+		require.ErrorIs(t, h.playbackManager.Pause(), ErrNoMediaPlayer)
+		require.ErrorIs(t, h.playbackManager.Resume(), ErrNoMediaPlayer)
+		require.ErrorIs(t, h.playbackManager.SeekTo(42), ErrNoMediaPlayer)
+		require.ErrorIs(t, h.playbackManager.AppendToMediaPlayer(&AppendToMediaPlayerOptions{Payload: "/anime/next.mkv"}), ErrNoMediaPlayer)
+		status, ok := h.playbackManager.PullStatus()
+		require.False(t, ok)
+		require.Nil(t, status)
+	})
+}
+
+func TestPlaybackManagerSetMediaPlayerRepositoryIsVisibleImmediately(t *testing.T) {
+	// regression for issue #10: the repository used to be stored from a goroutine, so a Cancel right after
+	// SetMediaPlayerRepository could still see nil. It must be usable as soon as the call returns.
+	h := newPlaybackManagerTestWrapper(t)
+	repo := mediaplayer.NewRepository(&mediaplayer.NewRepositoryOptions{
+		Logger:         util.NewLogger(),
+		Default:        "",
+		WSEventManager: events.NewMockWSEventManager(util.NewLogger()),
+	})
+
+	h.playbackManager.SetMediaPlayerRepository(repo)
+	t.Cleanup(func() { h.playbackManager.SetMediaPlayerRepository(nil) })
+
+	got, err := h.playbackManager.mediaPlayer()
+	require.NoError(t, err)
+	require.Same(t, repo, got)
+	require.NoError(t, h.playbackManager.Cancel())
+
+	// unsetting it stops the listener and brings back the clear error
+	h.playbackManager.SetMediaPlayerRepository(nil)
+	require.Nil(t, h.playbackManager.cancel)
+	require.ErrorIs(t, h.playbackManager.Cancel(), ErrNoMediaPlayer)
+}
+
 func TestPlaybackManagerLiveRepositoryEventsReachCallbacks(t *testing.T) {
 	// this uses the real repository subscription wiring, but it stays in-memory and never launches a player.
 	h := newPlaybackManagerTestWrapper(t)
@@ -550,9 +592,9 @@ func TestPlaybackManagerLiveRepositoryEventsReachCallbacks(t *testing.T) {
 		}
 	})
 
-	require.Eventually(t, func() bool {
-		return h.playbackManager.MediaPlayerRepository == repo && h.playbackManager.mediaPlayerRepoSubscriber != nil
-	}, time.Second, 10*time.Millisecond)
+	// SetMediaPlayerRepository stores the repository before it returns (issue #10).
+	require.Same(t, repo, h.playbackManager.MediaPlayerRepository)
+	require.NotNil(t, h.playbackManager.mediaPlayerRepoSubscriber)
 
 	received := make(chan PlaybackErrorEvent, 1)
 	h.playbackManager.RegisterMediaPlayerCallback(func(event PlaybackEvent) bool {
@@ -602,9 +644,9 @@ func TestPlaybackManagerLiveRepositoryStreamCompletionSyncsProgress(t *testing.T
 		}
 	})
 
-	require.Eventually(t, func() bool {
-		return h.playbackManager.MediaPlayerRepository == repo && h.playbackManager.mediaPlayerRepoSubscriber != nil
-	}, time.Second, 10*time.Millisecond)
+	// SetMediaPlayerRepository stores the repository before it returns (issue #10).
+	require.Same(t, repo, h.playbackManager.MediaPlayerRepository)
+	require.NotNil(t, h.playbackManager.mediaPlayerRepoSubscriber)
 
 	h.playbackManager.mediaPlayerRepoSubscriber.EventCh <- mediaplayer.StreamingTrackingStartedEvent{Status: &mediaplayer.PlaybackStatus{
 		Filename:             "Stream",
