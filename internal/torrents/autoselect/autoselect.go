@@ -2,6 +2,7 @@ package autoselect
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"seanime/internal/api/anilist"
 	"seanime/internal/api/metadata_provider"
@@ -26,8 +27,8 @@ const (
 )
 
 var (
-	ErrNoFileFound     = fmt.Errorf("no file found")
-	ErrNoTorrentsFound = fmt.Errorf("no torrents found")
+	ErrNoFileFound     = errors.New("no file found")
+	ErrNoTorrentsFound = errors.New("no torrents found")
 )
 
 type (

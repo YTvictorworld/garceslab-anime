@@ -2,6 +2,7 @@ package debrid_client
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"seanime/internal/api/anilist"
 	"seanime/internal/database/db_bridge"
@@ -84,10 +85,7 @@ func (r *Repository) findBestTorrent(ctx context.Context, provider debrid.Provid
 	)
 	if err != nil {
 		r.logger.Error().Err(err).Msg("debridstream: Auto-select failed")
-		if err.Error() == "no torrents found" {
-			return nil, fmt.Errorf("no torrents found, please select manually")
-		}
-		return nil, err
+		return nil, preserveAutoSelectError(err)
 	}
 
 	if result.DebridTorrent == nil {
@@ -105,6 +103,15 @@ func (r *Repository) findBestTorrent(ctx context.Context, provider debrid.Provid
 	}
 
 	return ret, nil
+}
+
+func preserveAutoSelectError(err error) error {
+	if errors.Is(err, autoselect.ErrNoTorrentsFound) {
+		// Keep the sentinel in the error chain so the API can distinguish a
+		// permanent no-source result from a transient Debrid failure.
+		return fmt.Errorf("%w, please select manually", err)
+	}
+	return err
 }
 
 // findBestTorrentFromManualSelection is like findBestTorrent but for a pre-selected torrent
