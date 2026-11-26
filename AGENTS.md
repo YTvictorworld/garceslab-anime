@@ -32,6 +32,13 @@ Start with [docs/README.md](docs/README.md): it links every feature doc.
 ## The workflow you must follow
 
 1. **Issue first.** Every change has an issue; the PR description says `Closes #N`.
+
+   If your change covers only part of an issue, don't write `Part of #N` (the PR ready check
+   doesn't accept it, and `Closes #N` would close the whole issue too early). Use a
+   **sub-issue**: create one under the parent issue for exactly your scope (GitHub → the parent
+   issue → Sub-issues → Create sub-issue, or ask a maintainer), and write `Closes #<sub-issue>`
+   in the PR. The parent issue closes when all its sub-issues are done.
+
 2. **Tests in every PR, including regression tests.** A bug fix adds a test that fails before
    the fix and passes after it (run it both ways). A feature adds tests that lock its behaviour.
 3. **Docs in every PR**, in `./docs` (new doc → add it to `docs/README.md`).
