@@ -5,6 +5,7 @@ For a box that doesn't apply, write "n/a" next to it and tick it.
 -->
 
 Closes #
+<!-- Closes #N — for partial work, link a sub-issue (`Closes #<sub-issue>`, see CONTRIBUTING.md). -->
 
 ## Summary
 
