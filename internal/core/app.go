@@ -52,6 +52,7 @@ import (
 	"seanime/internal/torrent_clients/torrent_client"
 	"seanime/internal/torrents/torrent"
 	"seanime/internal/torrentstream"
+	"seanime/internal/tvupdates"
 	"seanime/internal/updater"
 	"seanime/internal/user"
 	"seanime/internal/util"
@@ -198,6 +199,9 @@ type (
 
 		// Garceslab Anime: canon/filler/recap episode tags (nil when disabled)
 		EpisodeTags *episodetags.Manager
+
+		// Garceslab Anime: proxy to the optional TV app updater (never nil after NewApp)
+		TVUpdates *tvupdates.Service
 	}
 )
 
@@ -603,6 +607,9 @@ func NewApp(configOpts *ConfigOptions, selfupdater *updater.SelfUpdater) *App {
 
 	// Garceslab Anime: episode tags (fetched in the background on first request)
 	app.initEpisodeTags()
+
+	// Garceslab Anime: optional TV app updater (docs/tv-updates.md)
+	app.initTVUpdates()
 
 	return app
 }
