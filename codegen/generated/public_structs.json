@@ -29240,6 +29240,17 @@
         "required": false,
         "public": true,
         "comments": []
+      },
+      {
+        "name": "TVUpdates",
+        "jsonName": "TVUpdates",
+        "goType": "tvupdates.Service",
+        "typescriptType": "TVUpdates_Service",
+        "usedTypescriptType": "TVUpdates_Service",
+        "usedStructName": "tvupdates.Service",
+        "required": false,
+        "public": true,
+        "comments": []
       }
     ],
     "comments": []
@@ -55457,7 +55468,20 @@
         "required": false,
         "public": true,
         "comments": [
-          " MediaPlayerRepository is used to control the media player"
+          " MediaPlayerRepository is used to control the media player (nil until SetMediaPlayerRepository; read it with mediaPlayer())"
+        ]
+      },
+      {
+        "name": "mediaPlayerMu",
+        "jsonName": "mediaPlayerMu",
+        "goType": "sync.RWMutex",
+        "typescriptType": "RWMutex",
+        "usedTypescriptType": "RWMutex",
+        "usedStructName": "sync.RWMutex",
+        "required": false,
+        "public": false,
+        "comments": [
+          " Guards MediaPlayerRepository, mediaPlayerRepoSubscriber and cancel"
         ]
       },
       {
@@ -81921,6 +81945,17 @@
     "package": "playlist",
     "fields": [
       {
+        "name": "stateMu",
+        "jsonName": "stateMu",
+        "goType": "sync.RWMutex",
+        "typescriptType": "RWMutex",
+        "usedTypescriptType": "RWMutex",
+        "usedStructName": "sync.RWMutex",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
         "name": "clientId",
         "jsonName": "clientId",
         "goType": "string",
@@ -96067,6 +96102,17 @@
         "comments": []
       },
       {
+        "name": "callsMu",
+        "jsonName": "callsMu",
+        "goType": "sync.Mutex",
+        "typescriptType": "Mutex",
+        "usedTypescriptType": "Mutex",
+        "usedStructName": "sync.Mutex",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
         "name": "updateEntryCalls",
         "jsonName": "updateEntryCalls",
         "goType": "[]FakeUpdateEntryCall",
@@ -105050,6 +105096,361 @@
       }
     ],
     "comments": []
+  },
+  {
+    "filepath": "../internal/tvupdates/tvupdates.go",
+    "filename": "tvupdates.go",
+    "name": "StatusResponse",
+    "formattedName": "TVUpdates_StatusResponse",
+    "package": "tvupdates",
+    "fields": [
+      {
+        "name": "Configured",
+        "jsonName": "configured",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Reachable",
+        "jsonName": "reachable",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Error",
+        "jsonName": "error",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Status",
+        "jsonName": "status",
+        "goType": "json.RawMessage",
+        "typescriptType": "RawMessage",
+        "usedTypescriptType": "RawMessage",
+        "usedStructName": "json.RawMessage",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " StatusResponse is GET /api/v1/tv-updates/status.",
+      "",
+      "   - not configured: {\"configured\": false}",
+      "   - unreachable:    {\"configured\": true, \"reachable\": false, \"error\": \"...\"}",
+      "   - ok:             {\"configured\": true, \"reachable\": true, \"status\": \u003cupdater GET /status\u003e}"
+    ]
+  },
+  {
+    "filepath": "../internal/tvupdates/tvupdates.go",
+    "filename": "tvupdates.go",
+    "name": "ActionResponse",
+    "formattedName": "TVUpdates_ActionResponse",
+    "package": "tvupdates",
+    "fields": [
+      {
+        "name": "OK",
+        "jsonName": "ok",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Result",
+        "jsonName": "result",
+        "goType": "json.RawMessage",
+        "typescriptType": "RawMessage",
+        "usedTypescriptType": "RawMessage",
+        "usedStructName": "json.RawMessage",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " ActionResponse is POST /api/v1/tv-updates/install and /later: the updater's",
+      " answer. OK is true when the updater answered 2xx and its JSON doesn't say",
+      " \"ok\": false. Result is the updater's JSON, unchanged."
+    ]
+  },
+  {
+    "filepath": "../internal/tvupdates/tvupdates.go",
+    "filename": "tvupdates.go",
+    "name": "SettingsView",
+    "formattedName": "TVUpdates_SettingsView",
+    "package": "tvupdates",
+    "fields": [
+      {
+        "name": "Configured",
+        "jsonName": "configured",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "URL",
+        "jsonName": "url",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "TokenConfigured",
+        "jsonName": "tokenConfigured",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "URLFromEnv",
+        "jsonName": "urlFromEnv",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "TokenFromEnv",
+        "jsonName": "tokenFromEnv",
+        "goType": "bool",
+        "typescriptType": "boolean",
+        "required": true,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " SettingsView is what clients see of the settings: never the token."
+    ]
+  },
+  {
+    "filepath": "../internal/tvupdates/tvupdates.go",
+    "filename": "tvupdates.go",
+    "name": "SettingsPatch",
+    "formattedName": "TVUpdates_SettingsPatch",
+    "package": "tvupdates",
+    "fields": [
+      {
+        "name": "URL",
+        "jsonName": "url",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Token",
+        "jsonName": "token",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " SettingsPatch changes the saved settings. A nil field keeps its value; an",
+      " empty string clears it."
+    ]
+  },
+  {
+    "filepath": "../internal/tvupdates/tvupdates.go",
+    "filename": "tvupdates.go",
+    "name": "Options",
+    "formattedName": "TVUpdates_Options",
+    "package": "tvupdates",
+    "fields": [
+      {
+        "name": "DataDir",
+        "jsonName": "DataDir",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Logger",
+        "jsonName": "Logger",
+        "goType": "zerolog.Logger",
+        "typescriptType": "Logger",
+        "usedTypescriptType": "Logger",
+        "usedStructName": "zerolog.Logger",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "Getenv",
+        "jsonName": "Getenv",
+        "goType": "",
+        "typescriptType": "any",
+        "required": true,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "HTTPClient",
+        "jsonName": "HTTPClient",
+        "goType": "http.Client",
+        "typescriptType": "Client",
+        "usedTypescriptType": "Client",
+        "usedStructName": "http.Client",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "StatusTimeout",
+        "jsonName": "StatusTimeout",
+        "goType": "time.Duration",
+        "typescriptType": "Duration",
+        "usedTypescriptType": "Duration",
+        "usedStructName": "time.Duration",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
+        "name": "ActionTimeout",
+        "jsonName": "ActionTimeout",
+        "goType": "time.Duration",
+        "typescriptType": "Duration",
+        "usedTypescriptType": "Duration",
+        "usedStructName": "time.Duration",
+        "required": false,
+        "public": true,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Options configure a Service. Zero values take the defaults."
+    ]
+  },
+  {
+    "filepath": "../internal/tvupdates/tvupdates.go",
+    "filename": "tvupdates.go",
+    "name": "Service",
+    "formattedName": "TVUpdates_Service",
+    "package": "tvupdates",
+    "fields": [
+      {
+        "name": "mu",
+        "jsonName": "mu",
+        "goType": "sync.RWMutex",
+        "typescriptType": "RWMutex",
+        "usedTypescriptType": "RWMutex",
+        "usedStructName": "sync.RWMutex",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "path",
+        "jsonName": "path",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "saved",
+        "jsonName": "saved",
+        "goType": "stored",
+        "typescriptType": "TVUpdates_stored",
+        "usedTypescriptType": "TVUpdates_stored",
+        "usedStructName": "tvupdates.stored",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "envURL",
+        "jsonName": "envURL",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "envToken",
+        "jsonName": "envToken",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": true,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "logger",
+        "jsonName": "logger",
+        "goType": "zerolog.Logger",
+        "typescriptType": "Logger",
+        "usedTypescriptType": "Logger",
+        "usedStructName": "zerolog.Logger",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "client",
+        "jsonName": "client",
+        "goType": "http.Client",
+        "typescriptType": "Client",
+        "usedTypescriptType": "Client",
+        "usedStructName": "http.Client",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "statusTO",
+        "jsonName": "statusTO",
+        "goType": "time.Duration",
+        "typescriptType": "Duration",
+        "usedTypescriptType": "Duration",
+        "usedStructName": "time.Duration",
+        "required": false,
+        "public": false,
+        "comments": []
+      },
+      {
+        "name": "actionTO",
+        "jsonName": "actionTO",
+        "goType": "time.Duration",
+        "typescriptType": "Duration",
+        "usedTypescriptType": "Duration",
+        "usedStructName": "time.Duration",
+        "required": false,
+        "public": false,
+        "comments": []
+      }
+    ],
+    "comments": [
+      " Service holds the settings and talks to the updater."
+    ]
   },
   {
     "filepath": "../internal/updater/announcement.go",

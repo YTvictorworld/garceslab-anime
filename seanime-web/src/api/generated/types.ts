@@ -6179,6 +6179,57 @@ export type Torrentstream_TorrentStatus = {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Tvupdates
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * - Filepath: internal/tvupdates/tvupdates.go
+ * - Filename: tvupdates.go
+ * - Package: tvupdates
+ * @description
+ *  ActionResponse is POST /api/v1/tv-updates/install and /later: the updater's
+ *  answer. OK is true when the updater answered 2xx and its JSON doesn't say
+ *  "ok": false. Result is the updater's JSON, unchanged.
+ */
+export type TVUpdates_ActionResponse = {
+    ok: boolean
+    result?: Record<string, any>
+}
+
+/**
+ * - Filepath: internal/tvupdates/tvupdates.go
+ * - Filename: tvupdates.go
+ * - Package: tvupdates
+ * @description
+ *  SettingsView is what clients see of the settings: never the token.
+ */
+export type TVUpdates_SettingsView = {
+    configured: boolean
+    url: string
+    tokenConfigured: boolean
+    urlFromEnv: boolean
+    tokenFromEnv: boolean
+}
+
+/**
+ * - Filepath: internal/tvupdates/tvupdates.go
+ * - Filename: tvupdates.go
+ * - Package: tvupdates
+ * @description
+ *  StatusResponse is GET /api/v1/tv-updates/status.
+ *  
+ *  - not configured: {"configured": false}
+ *  - unreachable:    {"configured": true, "reachable": false, "error": "..."}
+ *  - ok:             {"configured": true, "reachable": true, "status": <updater GET /status>}
+ */
+export type TVUpdates_StatusResponse = {
+    configured: boolean
+    reachable?: boolean
+    error?: string
+    status?: Record<string, any>
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Updater
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

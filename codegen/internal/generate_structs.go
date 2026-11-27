@@ -92,6 +92,7 @@ var typePrefixesByPackage = map[string]string{
 	"summary":                "Summary_",
 	"titleindex":             "TitleIndex_",
 	"episodetags":            "EpisodeTags_",
+	"tvupdates":              "TVUpdates_",
 	"filesystem":             "Filesystem_",
 	"filecache":              "Filecache_",
 	"core":                   "INTERNAL_",

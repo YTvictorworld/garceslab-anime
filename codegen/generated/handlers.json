@@ -11717,6 +11717,29 @@
     }
   },
   {
+    "name": "TestDirectPlayRetryReusesTheDevicesSession",
+    "trimmedName": "TestDirectPlayRetryReusesTheDevicesSession",
+    "comments": [
+      "Direct play retries (the TV asks for a fresh link to the same file up to",
+      "three times) restart the stream as the same client: they replace its own",
+      "viewer session and never need a free slot.",
+      ""
+    ],
+    "filepath": "internal/handlers/profiles_viewers_test.go",
+    "filename": "profiles_viewers_test.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
     "name": "HandleInstallLatestUpdate",
     "trimmedName": "InstallLatestUpdate",
     "comments": [
@@ -13067,6 +13090,28 @@
     }
   },
   {
+    "name": "TestStatusCarriesBothVersions",
+    "trimmedName": "TestStatusCarriesBothVersions",
+    "comments": [
+      "The status response carries Seanime's version (for compatibility checks) and",
+      "Garceslab Anime's own version side by side.",
+      ""
+    ],
+    "filepath": "internal/handlers/status_version_test.go",
+    "filename": "status_version_test.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
     "name": "guardStrictLocalOnlyAction",
     "trimmedName": "guardStrictLocalOnlyAction",
     "comments": [
@@ -14186,6 +14231,261 @@
     ],
     "filepath": "internal/handlers/torrentstream.go",
     "filename": "torrentstream.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "HandleGetTvUpdatesStatus",
+    "trimmedName": "GetTvUpdatesStatus",
+    "comments": [
+      "HandleGetTvUpdatesStatus",
+      "",
+      "\t@summary returns the TV app update status from the optional TV updater.",
+      "\t@desc Not configured: {\"configured\": false} (clients hide all update UI).",
+      "\t@desc Configured but the updater doesn't answer within 3 s: {\"configured\": true, \"reachable\": false, \"error\": \"...\"}.",
+      "\t@desc Otherwise: {\"configured\": true, \"reachable\": true, \"status\": \u003cthe updater's GET /status, unchanged\u003e}.",
+      "\t@route /api/v1/tv-updates/status [GET]",
+      "\t@returns tvupdates.StatusResponse",
+      ""
+    ],
+    "filepath": "internal/handlers/tv_updates.go",
+    "filename": "tv_updates.go",
+    "api": {
+      "summary": "returns the TV app update status from the optional TV updater.",
+      "descriptions": [
+        "Not configured: {\"configured\": false} (clients hide all update UI).",
+        "Configured but the updater doesn't answer within 3 s: {\"configured\": true, \"reachable\": false, \"error\": \"...\"}.",
+        "Otherwise: {\"configured\": true, \"reachable\": true, \"status\": \u003cthe updater's GET /status, unchanged\u003e}."
+      ],
+      "endpoint": "/api/v1/tv-updates/status",
+      "methods": [
+        "GET"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "tvupdates.StatusResponse",
+      "returnGoType": "tvupdates.StatusResponse",
+      "returnTypescriptType": "TVUpdates_StatusResponse"
+    }
+  },
+  {
+    "name": "HandleInstallTvUpdate",
+    "trimmedName": "InstallTvUpdate",
+    "comments": [
+      "HandleInstallTvUpdate",
+      "",
+      "\t@summary confirms the installation of the pending TV app build.",
+      "\t@desc Forwards to the updater's POST /install with the server-side token and returns {\"ok\", \"result\": \u003cthe updater's JSON\u003e}.",
+      "\t@desc The updater queues the install (it waits for the TV if it is off) and the TV app closes while it installs.",
+      "\t@desc 409 PLAYBACK_ACTIVE while a viewer session runs on an LG TV or a playback goes through the server.",
+      "\t@desc 404 TV_UPDATER_NOT_CONFIGURED without an updater URL; 502 TV_UPDATER_UNREACHABLE when the updater doesn't answer.",
+      "\t@route /api/v1/tv-updates/install [POST]",
+      "\t@returns tvupdates.ActionResponse",
+      ""
+    ],
+    "filepath": "internal/handlers/tv_updates.go",
+    "filename": "tv_updates.go",
+    "api": {
+      "summary": "confirms the installation of the pending TV app build.",
+      "descriptions": [
+        "Forwards to the updater's POST /install with the server-side token and returns {\"ok\", \"result\": \u003cthe updater's JSON\u003e}.",
+        "The updater queues the install (it waits for the TV if it is off) and the TV app closes while it installs.",
+        "409 PLAYBACK_ACTIVE while a viewer session runs on an LG TV or a playback goes through the server.",
+        "404 TV_UPDATER_NOT_CONFIGURED without an updater URL; 502 TV_UPDATER_UNREACHABLE when the updater doesn't answer."
+      ],
+      "endpoint": "/api/v1/tv-updates/install",
+      "methods": [
+        "POST"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "tvupdates.ActionResponse",
+      "returnGoType": "tvupdates.ActionResponse",
+      "returnTypescriptType": "TVUpdates_ActionResponse"
+    }
+  },
+  {
+    "name": "HandleDismissTvUpdate",
+    "trimmedName": "DismissTvUpdate",
+    "comments": [
+      "HandleDismissTvUpdate",
+      "",
+      "\t@summary dismisses the pending TV app build (\"Later\").",
+      "\t@desc Forwards to the updater's POST /later with the server-side token and returns {\"ok\", \"result\": \u003cthe updater's JSON\u003e}.",
+      "\t@desc The updater offers the next build when one comes out. It also cancels an install waiting for the TV.",
+      "\t@route /api/v1/tv-updates/later [POST]",
+      "\t@returns tvupdates.ActionResponse",
+      ""
+    ],
+    "filepath": "internal/handlers/tv_updates.go",
+    "filename": "tv_updates.go",
+    "api": {
+      "summary": "dismisses the pending TV app build (\"Later\").",
+      "descriptions": [
+        "Forwards to the updater's POST /later with the server-side token and returns {\"ok\", \"result\": \u003cthe updater's JSON\u003e}.",
+        "The updater offers the next build when one comes out. It also cancels an install waiting for the TV."
+      ],
+      "endpoint": "/api/v1/tv-updates/later",
+      "methods": [
+        "POST"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "tvupdates.ActionResponse",
+      "returnGoType": "tvupdates.ActionResponse",
+      "returnTypescriptType": "TVUpdates_ActionResponse"
+    }
+  },
+  {
+    "name": "HandleGetTvUpdatesSettings",
+    "trimmedName": "GetTvUpdatesSettings",
+    "comments": [
+      "HandleGetTvUpdatesSettings",
+      "",
+      "\t@summary returns the TV updater settings, without the token.",
+      "\t@desc \"tokenConfigured\" says whether a token is set; the token itself is never returned.",
+      "\t@desc \"urlFromEnv\" / \"tokenFromEnv\": set by SEANIME_TV_UPDATER_URL / SEANIME_TV_UPDATER_TOKEN, read-only in the web.",
+      "\t@route /api/v1/tv-updates/settings [GET]",
+      "\t@returns tvupdates.SettingsView",
+      ""
+    ],
+    "filepath": "internal/handlers/tv_updates.go",
+    "filename": "tv_updates.go",
+    "api": {
+      "summary": "returns the TV updater settings, without the token.",
+      "descriptions": [
+        "\"tokenConfigured\" says whether a token is set; the token itself is never returned.",
+        "\"urlFromEnv\" / \"tokenFromEnv\": set by SEANIME_TV_UPDATER_URL / SEANIME_TV_UPDATER_TOKEN, read-only in the web."
+      ],
+      "endpoint": "/api/v1/tv-updates/settings",
+      "methods": [
+        "GET"
+      ],
+      "params": [],
+      "bodyFields": [],
+      "returns": "tvupdates.SettingsView",
+      "returnGoType": "tvupdates.SettingsView",
+      "returnTypescriptType": "TVUpdates_SettingsView"
+    }
+  },
+  {
+    "name": "HandleSaveTvUpdatesSettings",
+    "trimmedName": "SaveTvUpdatesSettings",
+    "comments": [
+      "HandleSaveTvUpdatesSettings",
+      "",
+      "\t@summary saves the TV updater URL and/or token.",
+      "\t@desc An omitted field keeps its value; an empty string clears it. The token is stored on the server only.",
+      "\t@desc 400 TV_UPDATER_INVALID_SETTINGS for a bad URL; 409 TV_UPDATER_SET_BY_ENV when the value comes from an environment variable.",
+      "\t@route /api/v1/tv-updates/settings [PATCH]",
+      "\t@returns tvupdates.SettingsView",
+      ""
+    ],
+    "filepath": "internal/handlers/tv_updates.go",
+    "filename": "tv_updates.go",
+    "api": {
+      "summary": "saves the TV updater URL and/or token.",
+      "descriptions": [
+        "An omitted field keeps its value; an empty string clears it. The token is stored on the server only.",
+        "400 TV_UPDATER_INVALID_SETTINGS for a bad URL; 409 TV_UPDATER_SET_BY_ENV when the value comes from an environment variable."
+      ],
+      "endpoint": "/api/v1/tv-updates/settings",
+      "methods": [
+        "PATCH"
+      ],
+      "params": [],
+      "bodyFields": [
+        {
+          "name": "URL",
+          "jsonName": "url",
+          "goType": "string",
+          "usedStructType": "",
+          "typescriptType": "string",
+          "required": false,
+          "descriptions": []
+        },
+        {
+          "name": "Token",
+          "jsonName": "token",
+          "goType": "string",
+          "usedStructType": "",
+          "typescriptType": "string",
+          "required": false,
+          "descriptions": []
+        }
+      ],
+      "returns": "tvupdates.SettingsView",
+      "returnGoType": "tvupdates.SettingsView",
+      "returnTypescriptType": "TVUpdates_SettingsView"
+    }
+  },
+  {
+    "name": "tvPlaybackActive",
+    "trimmedName": "tvPlaybackActive",
+    "comments": [
+      "tvPlaybackActive fails with PLAYBACK_ACTIVE when the TV may be playing:",
+      "  - a viewer session (direct play, phase 2) started from an LG TV, or",
+      "  - the relayed playback lane is in use: the server doesn't record which",
+      "    device holds it, so any playback through the server counts.",
+      "",
+      "Without profiles there are no viewer sessions or lane, so the server has no",
+      "signal and doesn't refuse (docs/tv-updates.md).",
+      ""
+    ],
+    "filepath": "internal/handlers/tv_updates.go",
+    "filename": "tv_updates.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "rawCall",
+    "trimmedName": "rawCall",
+    "comments": [
+      "rawCall is env.call that also returns the raw body.",
+      ""
+    ],
+    "filepath": "internal/handlers/tv_updates_test.go",
+    "filename": "tv_updates_test.go",
+    "api": {
+      "summary": "",
+      "descriptions": [],
+      "endpoint": "",
+      "methods": null,
+      "params": [],
+      "bodyFields": [],
+      "returns": "bool",
+      "returnGoType": "bool",
+      "returnTypescriptType": "boolean"
+    }
+  },
+  {
+    "name": "newTVUpdatesLoggedEnv",
+    "trimmedName": "newTVUpdatesLoggedEnv",
+    "comments": [
+      "newTVUpdatesLoggedEnv is newProfilesTestEnv with every log line (requests",
+      "included) written to logs.",
+      ""
+    ],
+    "filepath": "internal/handlers/tv_updates_test.go",
+    "filename": "tv_updates_test.go",
     "api": {
       "summary": "",
       "descriptions": [],

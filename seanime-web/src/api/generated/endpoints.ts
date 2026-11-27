@@ -2690,6 +2690,66 @@ export const API_ENDPOINTS = {
             endpoint: "/api/v1/torrentstream/batch-history/delete",
         },
     },
+    TV_UPDATES: {
+        /**
+         *  @description
+         *  Route returns the TV app update status from the optional TV updater.
+         *  Not configured: {"configured": false} (clients hide all update UI).
+         *  Configured but the updater doesn't answer within 3 s: {"configured": true, "reachable": false, "error": "..."}.
+         *  Otherwise: {"configured": true, "reachable": true, "status": <the updater's GET /status, unchanged>}.
+         */
+        GetTvUpdatesStatus: {
+            key: "TV-UPDATES-get-tv-updates-status",
+            methods: ["GET"],
+            endpoint: "/api/v1/tv-updates/status",
+        },
+        /**
+         *  @description
+         *  Route confirms the installation of the pending TV app build.
+         *  Forwards to the updater's POST /install with the server-side token and returns {"ok", "result": <the updater's JSON>}.
+         *  The updater queues the install (it waits for the TV if it is off) and the TV app closes while it installs.
+         *  409 PLAYBACK_ACTIVE while a viewer session runs on an LG TV or a playback goes through the server.
+         *  404 TV_UPDATER_NOT_CONFIGURED without an updater URL; 502 TV_UPDATER_UNREACHABLE when the updater doesn't answer.
+         */
+        InstallTvUpdate: {
+            key: "TV-UPDATES-install-tv-update",
+            methods: ["POST"],
+            endpoint: "/api/v1/tv-updates/install",
+        },
+        /**
+         *  @description
+         *  Route dismisses the pending TV app build ("Later").
+         *  Forwards to the updater's POST /later with the server-side token and returns {"ok", "result": <the updater's JSON>}.
+         *  The updater offers the next build when one comes out. It also cancels an install waiting for the TV.
+         */
+        DismissTvUpdate: {
+            key: "TV-UPDATES-dismiss-tv-update",
+            methods: ["POST"],
+            endpoint: "/api/v1/tv-updates/later",
+        },
+        /**
+         *  @description
+         *  Route returns the TV updater settings, without the token.
+         *  "tokenConfigured" says whether a token is set; the token itself is never returned.
+         *  "urlFromEnv" / "tokenFromEnv": set by SEANIME_TV_UPDATER_URL / SEANIME_TV_UPDATER_TOKEN, read-only in the web.
+         */
+        GetTvUpdatesSettings: {
+            key: "TV-UPDATES-get-tv-updates-settings",
+            methods: ["GET"],
+            endpoint: "/api/v1/tv-updates/settings",
+        },
+        /**
+         *  @description
+         *  Route saves the TV updater URL and/or token.
+         *  An omitted field keeps its value; an empty string clears it. The token is stored on the server only.
+         *  400 TV_UPDATER_INVALID_SETTINGS for a bad URL; 409 TV_UPDATER_SET_BY_ENV when the value comes from an environment variable.
+         */
+        SaveTvUpdatesSettings: {
+            key: "TV-UPDATES-save-tv-updates-settings",
+            methods: ["PATCH"],
+            endpoint: "/api/v1/tv-updates/settings",
+        },
+    },
     VIDEOCORE: {
         VideoCoreInSightGetCharacterDetails: {
             key: "VIDEOCORE-video-core-in-sight-get-character-details",
