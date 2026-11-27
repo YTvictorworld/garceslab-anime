@@ -220,3 +220,17 @@ AniList account, several playbacks at the same time) will be listed here as they
       `org.opencontainers.image.source` and `org.opencontainers.image.revision` labels
       (see `Dockerfile` and `.github/workflows/release.yml`), and the release notes link to
       the tag. Ticked when the first release is published.
+
+## 2026-11 (TV app updates)
+
+- **Proxy to an optional TV app updater** (new `internal/tvupdates`, `internal/core/tv_updates.go`,
+  `internal/handlers/tv_updates.go`; `TVUpdates` field and its initialisation in
+  `internal/core/app.go`, routes in `internal/handlers/routes.go`): `GET /api/v1/tv-updates/status`,
+  `POST /api/v1/tv-updates/install` and `/later`, and `GET`/`PATCH /api/v1/tv-updates/settings`
+  forward to a self-hosted updater with a shared token that never leaves the server
+  (`SEANIME_TV_UPDATER_URL`, `SEANIME_TV_UPDATER_TOKEN`, `SEANIME_TV_UPDATER_TOKEN_FILE`, or the
+  web settings). The install is refused while a TV viewer session or a relayed playback runs.
+- **Web:** a "TV updates" tab in Settings (`seanime-web/src/app/(main)/settings/page.tsx`, new
+  `_containers/tv-updates-settings.tsx`, `src/api/hooks/tv_updates.hooks.ts`,
+  `src/lib/tv-updates/`); generated API types updated (`codegen/`, with the `tvupdates` package
+  prefix in `codegen/internal/generate_structs.go`). See `docs/tv-updates.md`.

@@ -15,6 +15,8 @@ directory). The features it adds read these **environment variables**; set them 
 | `SEANIME_TITLE_INDEX_DISABLED` | `false` | `true`: don't download the title index; search suggestions use AniList only | [title-search.md](title-search.md) |
 | `SEANIME_EPISODE_TAGS_DISABLED` | `false` | `true`: no CANON / FILLER / RECAP tags | [episode-tags.md](episode-tags.md) |
 | `SEANIME_EPISODE_TAGS_PROVIDERS` | `tenrai,jikan-edge,jikan` | Episode tag APIs and their order; `jikan4=<url>` or `edge=<url>` adds another instance | [episode-tags.md](episode-tags.md) |
+| `SEANIME_TV_UPDATER_URL` | — | URL of an optional TV app updater (e.g. `http://tv-updater:8095`); wins over the URL saved in Settings → TV updates | [tv-updates.md](tv-updates.md) |
+| `SEANIME_TV_UPDATER_TOKEN` / `SEANIME_TV_UPDATER_TOKEN_FILE` | — | The updater's shared token, or a file with it; wins over the saved token. Never returned to clients | [tv-updates.md](tv-updates.md) |
 
 The server password is set in the web settings or in `config.toml`:
 
@@ -25,4 +27,4 @@ password = "your password"
 
 Data written by these features lives in the data directory
 (`/home/seanime/.config/Seanime` in the container): `profiles.db`, `title-index/`,
-`episode-tags/` and `track-probe/`. Back up the volume to keep the profiles.
+`episode-tags/`, `track-probe/` and `tv-updates.json`. Back up the volume to keep the profiles.
