@@ -83,6 +83,12 @@ secrets:
 
 When the updater doesn't answer, the card says so, with a **Try again** button.
 
+![Settings → TV updates with a pending version: changes grouped as New, Fixes and Other, Install on TV and Later](images/web-settings-tv-updates.webp)
+
+Without an updater, the tab only has the **TV updater** settings:
+
+![Settings → TV updates without an updater: the URL and token fields](images/web-settings-tv-updates-off.webp)
+
 Installing closes the TV app (the updater reopens it if it was open). If the TV is off, the
 updater keeps the request and installs when the TV turns on. **Later** dismisses the pending
 version; you are told about the next one.
