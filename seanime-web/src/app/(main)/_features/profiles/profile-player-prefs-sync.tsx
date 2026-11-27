@@ -2,6 +2,7 @@ import { getMyPlayerPrefsRequest, patchMyPlayerPrefsRequest } from "@/api/hooks/
 import { serverAuthTokenAtom } from "@/app/(main)/_atoms/server-status.atoms"
 import { mediaCoreDefaultPreferences, MediaCorePreferences, mediaCorePreferencesAtom } from "@/app/(main)/_features/media-core/media-core-preferences"
 import { vc_settingsRaw, VideoCoreSettings } from "@/app/(main)/_features/video-core/video-core.atoms"
+import { migrateSubtitleDefault } from "@/app/(main)/_features/video-core/video-core-subtitle-default"
 import { useAtom, useAtomValue } from "jotai"
 import React from "react"
 
@@ -35,8 +36,13 @@ export function ProfilePlayerPrefsSync({ profileId }: { profileId: number }) {
                 let nextVideoCore = latest.current.videoCore
                 let nextMediaCore = latest.current.mediaCore
                 if (web?.videoCore) {
-                    nextVideoCore = web.videoCore as Partial<VideoCoreSettings>
+                    const saved = web.videoCore as Partial<VideoCoreSettings>
+                    // Garceslab Anime: the old English-only default moves to the Spanish-first one,
+                    // once per profile (the marker is saved with the profile's settings).
+                    const migrated = migrateSubtitleDefault(saved)
+                    nextVideoCore = migrated ?? saved
                     setVideoCore(nextVideoCore)
+                    if (migrated) seed.videoCore = migrated
                 } else {
                     seed.videoCore = nextVideoCore
                 }

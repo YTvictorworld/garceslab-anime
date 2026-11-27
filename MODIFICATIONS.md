@@ -234,3 +234,13 @@ AniList account, several playbacks at the same time) will be listed here as they
   `_containers/tv-updates-settings.tsx`, `src/api/hooks/tv_updates.hooks.ts`,
   `src/lib/tv-updates/`); generated API types updated (`codegen/`, with the `tvupdates` package
   prefix in `codegen/internal/generate_structs.go`). See `docs/tv-updates.md`.
+
+## 2026-11 (web player: Spanish-first subtitle default)
+
+- **Default subtitle languages** of the web player (`seanime-web/src/app/(main)/_features/video-core/video-core.atoms.ts`,
+  new `video-core-subtitle-default.ts`): `es-419,spa,es,spanish,eng,en,english` instead of
+  Seanime's `en,eng,english`. Settings whose saved value is exactly the old default are moved to
+  the new one once (marker `subtitleDefaultVersion`), when read (`vc_settings`) and, for profiles,
+  when the profile's saved settings are loaded (`_features/profiles/profile-player-prefs-sync.tsx`,
+  written back through the sync). Tests in `video-core-subtitle-default.test.ts`; see
+  `docs/profiles.md`.

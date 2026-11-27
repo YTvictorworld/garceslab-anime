@@ -48,7 +48,31 @@ in Recent changes). The server password protects the server.
 - Settings and theme, auto-select profile, and **player preferences**
   (`GET/PATCH /api/v1/profiles/me/player-prefs`): the TV's audio and subtitle languages,
   subtitle size, autoplay, next episode, skipping, "Skip filler and recaps", and the web
-  player's own section.
+  player's own section. The server stores them as the apps send them and has no defaults of
+  its own: a missing value means the app's default.
+
+### Default subtitle languages: Spanish first
+
+The web player and the TV app both default to **Latin American Spanish, then any Spanish,
+then English**. The web player's list is `es-419,spa,es,spanish,eng,en,english` (Seanime's
+was `en,eng,english`). Its matcher takes the first language in the list that the release has:
+`es-419` matches tracks tagged `es-419`, and `spa` matches any Spanish track.
+
+Profiles that used the web player before this change were saved with the old default. The
+app can't tell that value from one typed in by hand, so a saved value **equal to the old
+default** (same list, ignoring case and spaces) is treated as never customised and moved to
+the new default **once**:
+
+- **Per profile:** when the profile is entered in the web interface. Only the subtitle
+  languages change, and a marker (`subtitleDefaultVersion: 2`) is saved with them in the
+  profile's `web.videoCore` through the normal player-prefs sync. After that, an English list
+  chosen by hand stays.
+- **Per browser (no profile sync):** the browser's settings read the same way, and they are
+  saved with the marker the next time the player settings are saved.
+- Any other value (`en,eng`, `jpn`, `spa,es`...) is never touched; it only gets the marker.
+
+The TV app has the same default and the same rule for its own section; see the TV repository's
+`docs/subtitles.md`.
 
 Details of favourites, the entry editor, custom lists and stats:
 [profiles-phase3.md](profiles-phase3.md).
