@@ -3342,6 +3342,61 @@
 // }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// tv_updates
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// export function useGetTvUpdatesStatus() {
+//     return useServerQuery<TVUpdates_StatusResponse>({
+//         endpoint: API_ENDPOINTS.TV_UPDATES.GetTvUpdatesStatus.endpoint,
+//         method: API_ENDPOINTS.TV_UPDATES.GetTvUpdatesStatus.methods[0],
+//         queryKey: [API_ENDPOINTS.TV_UPDATES.GetTvUpdatesStatus.key],
+//         enabled: true,
+//     })
+// }
+
+// export function useInstallTvUpdate() {
+//     return useServerMutation<TVUpdates_ActionResponse>({
+//         endpoint: API_ENDPOINTS.TV_UPDATES.InstallTvUpdate.endpoint,
+//         method: API_ENDPOINTS.TV_UPDATES.InstallTvUpdate.methods[0],
+//         mutationKey: [API_ENDPOINTS.TV_UPDATES.InstallTvUpdate.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useDismissTvUpdate() {
+//     return useServerMutation<TVUpdates_ActionResponse>({
+//         endpoint: API_ENDPOINTS.TV_UPDATES.DismissTvUpdate.endpoint,
+//         method: API_ENDPOINTS.TV_UPDATES.DismissTvUpdate.methods[0],
+//         mutationKey: [API_ENDPOINTS.TV_UPDATES.DismissTvUpdate.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+// export function useGetTvUpdatesSettings() {
+//     return useServerQuery<TVUpdates_SettingsView>({
+//         endpoint: API_ENDPOINTS.TV_UPDATES.GetTvUpdatesSettings.endpoint,
+//         method: API_ENDPOINTS.TV_UPDATES.GetTvUpdatesSettings.methods[0],
+//         queryKey: [API_ENDPOINTS.TV_UPDATES.GetTvUpdatesSettings.key],
+//         enabled: true,
+//     })
+// }
+
+// export function useSaveTvUpdatesSettings() {
+//     return useServerMutation<TVUpdates_SettingsView, SaveTvUpdatesSettings_Variables>({
+//         endpoint: API_ENDPOINTS.TV_UPDATES.SaveTvUpdatesSettings.endpoint,
+//         method: API_ENDPOINTS.TV_UPDATES.SaveTvUpdatesSettings.methods[0],
+//         mutationKey: [API_ENDPOINTS.TV_UPDATES.SaveTvUpdatesSettings.key],
+//         onSuccess: async () => {
+//
+//         },
+//     })
+// }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // videocore
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

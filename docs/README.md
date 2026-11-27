@@ -25,6 +25,7 @@ It is published only for self-hosting with LG webOS TVs: there is no hosted serv
 | [subtitle-autoselect.md](subtitle-autoselect.md) | Auto-select that prefers cached releases with the profile's subtitle language |
 | [title-search.md](title-search.md) | Search as you type with the local title index (anime-offline-database, ODbL) |
 | [episode-tags.md](episode-tags.md) | CANON / FILLER / RECAP / MIX episode tags from MyAnimeList data, providers and caching |
+| [tv-updates.md](tv-updates.md) | Optional TV app updates confirmed from the web or the TV: the updater URL and token, the server and updater APIs, the playback check, security |
 
 ## Developing
 

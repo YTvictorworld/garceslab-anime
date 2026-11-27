@@ -62,7 +62,7 @@ import {
     LuTabletSmartphone,
     LuWandSparkles,
 } from "react-icons/lu"
-import { LuCode, LuRefreshCw, LuUsers } from "react-icons/lu"
+import { LuCode, LuRefreshCw, LuTv, LuUsers } from "react-icons/lu"
 import { MdOutlineConnectWithoutContact, MdOutlineDownloading, MdOutlinePalette } from "react-icons/md"
 import { RiFolderDownloadFill } from "react-icons/ri"
 import { SiBittorrent, SiQbittorrent, SiTransmission } from "react-icons/si"
@@ -71,6 +71,7 @@ import { VscDebugAlt } from "react-icons/vsc"
 import { toast } from "sonner"
 import { SettingsCard, SettingsNavCard, SettingsPageHeader } from "./_components/settings-card"
 import { ProfilesSettings } from "@/app/(main)/_features/profiles/profiles-settings"
+import { TvUpdatesSettings } from "@/app/(main)/settings/_containers/tv-updates-settings"
 import { DenshiSettings } from "./_containers/denshi-settings"
 import { DiscordRichPresenceSettings } from "./_containers/discord-rich-presence-settings"
 import { LocalSettings } from "./_containers/local-settings"
@@ -201,6 +202,11 @@ export default function Page() {
                                         className="group"
                                         data-settings-tab-profiles
                                     ><LuUsers className="text-base mr-2 transition-transform duration-200" /> Profiles</TabsTrigger>}
+                                    <TabsTrigger
+                                        value="tv-updates"
+                                        className="group"
+                                        data-settings-tab-tv-updates
+                                    ><LuTv className="text-base mr-2 transition-transform duration-200" /> TV updates</TabsTrigger>
                                     {/* <TabsTrigger
                                      value="local"
                                      className="group"
@@ -1024,6 +1030,18 @@ export default function Page() {
                             <ProfilesSettings />
 
                         </TabsContent>}
+
+                        <TabsContent value="tv-updates" className={tabContentClass}>
+
+                            <SettingsPageHeader
+                                title="TV updates"
+                                description="Install new versions of the TV app from your own updater, after you confirm"
+                                icon={LuTv}
+                            />
+
+                            <TvUpdatesSettings />
+
+                        </TabsContent>
 
                         <TabsContent value="ui" className={tabContentClass}>
 
