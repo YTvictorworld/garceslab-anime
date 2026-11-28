@@ -253,6 +253,11 @@ func RunItem(ctx context.Context, m *Manifest, it Item, o Options) (*ItemResult,
 		results = append(results, r...)
 		s = e
 	}
+	if stats.Requests == 0 && stats.FailedRequests > 0 {
+		// Every request failed (server down, crashed GPU driver): no result rather
+		// than a result full of fallbacks that would look like a bad model.
+		return nil, fmt.Errorf("item %s: every request failed; is the server still up?", it.ID)
+	}
 	res.WallS = time.Since(start).Seconds()
 	res.Batches, res.RetriedBatches, res.Requests, res.FailedRequests = stats.Batches, stats.RetriedBatches, stats.Requests, stats.FailedRequests
 	res.PromptTokens, res.CachedTokens, res.CompletionTokens = stats.PromptTokens, stats.CachedTokens, stats.CompletionTokens

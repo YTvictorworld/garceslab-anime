@@ -337,3 +337,26 @@ func TestParseGPUSample(t *testing.T) {
 		t.Error("idle (0x1) is not a slowdown")
 	}
 }
+
+type downModel struct{}
+
+func (downModel) Complete(context.Context, translate.ChatRequest) (translate.ChatResponse, error) {
+	return translate.ChatResponse{}, &translate.HTTPError{Status: "502 Bad Gateway"}
+}
+
+// A dead server must not produce a result that looks like a bad model.
+func TestRunItemServerDown(t *testing.T) {
+	dir := t.TempDir()
+	if _, err := WriteSample(dir); err != nil {
+		t.Fatal(err)
+	}
+	m, _ := LoadManifest(filepath.Join(dir, "manifest.json"))
+	o := options(t, filepath.Join(dir, "results"), "model-a")
+	o.Client = downModel{}
+	if _, err := RunItem(context.Background(), m, m.Items[0], o); err == nil {
+		t.Fatal("expected an error")
+	}
+	if results, _ := LoadResults(filepath.Join(dir, "results")); len(results) != 0 {
+		t.Errorf("%d results saved", len(results))
+	}
+}
