@@ -303,8 +303,12 @@ func TestLineMode(t *testing.T) {
 	if st.Requests != 2 || len(f.reqs[0].Schema) != 0 || f.reqs[0].Messages[0].Role != "user" {
 		t.Fatalf("line mode requests %+v", f.reqs[0])
 	}
-	if !strings.Contains(f.reqs[0].Messages[0].Content, "professional English (en) to Latin American Spanish (es-419) translator") {
+	if !strings.Contains(f.reqs[0].Messages[0].Content, "professional English (en) to Spanish (es-419) translator") {
 		t.Errorf("TranslateGemma prompt: %s", f.reqs[0].Messages[0].Content)
+	}
+	// Its chat template only takes structured content: raw /completion in Gemma's turns.
+	if raw := f.reqs[0].RawPrompt; !strings.HasPrefix(raw, "<start_of_turn>user\nYou are a professional") || !strings.HasSuffix(raw, "<end_of_turn>\n<start_of_turn>model\n") {
+		t.Errorf("raw prompt %q", raw)
 	}
 	if res[0].Fallback || !strings.HasPrefix(res[0].Final, `Te digo que esto {\i1}sí {\i0}sí está bien`) {
 		t.Errorf("result %+v", res[0])
@@ -348,12 +352,12 @@ func TestConfig(t *testing.T) {
 		"Qwen_Qwen3-4B-Instruct-2507-Q4_K_M": {Mode: "batch"},
 		"Qwen3.5-4B.Q5_K_M":                  {Mode: "batch", NoThink: true},
 		"qwen3-8b":                           {Mode: "batch", NoThink: true},
-		"translategemma-4b-it.Q4_K_M":        {Mode: "line", LineTemplate: "translategemma"},
+		"translategemma-4b-it.Q4_K_M":        {Mode: "line", LineTemplate: "translategemma", RawTemplate: "gemma"},
 		"gemma-3-4b-it-qat-Q4_0":             {Mode: "batch"},
 	}
 	for model, want := range cases {
 		got := c.Hint(model)
-		if got.Mode != want.Mode || got.NoThink != want.NoThink || got.LineTemplate != want.LineTemplate {
+		if got.Mode != want.Mode || got.NoThink != want.NoThink || got.LineTemplate != want.LineTemplate || got.RawTemplate != want.RawTemplate {
 			t.Errorf("Hint(%s) = %+v, want %+v", model, got, want)
 		}
 	}
@@ -396,5 +400,22 @@ func TestSystemPromptPerPair(t *testing.T) {
 	p, _ := reg.NewPair("en", "es-419")
 	if r := honorificsRule("adapt", p.Target); !strings.Contains(r, "señor/señora") {
 		t.Errorf("adapt rule %q", r)
+	}
+}
+
+// A model that thinks until max_tokens answers with an empty content.
+type thinker struct{}
+
+func (thinker) Complete(context.Context, ChatRequest) (ChatResponse, error) {
+	return ChatResponse{Content: "<think>\nThe user wants", CompletionTokens: 600}, nil
+}
+
+func TestThinkingModelIsReported(t *testing.T) {
+	var buf bytes.Buffer
+	tr := newTranslator(thinker{})
+	tr.Log = zerolog.New(&buf)
+	res, st, _ := tr.Translate(context.Background(), lines("Where were you?"))
+	if !res[0].Fallback || st.FailedRequests != 2 || !strings.Contains(buf.String(), "probably thinking") {
+		t.Fatalf("res %+v stats %+v log %s", res[0], st, buf.String())
 	}
 }

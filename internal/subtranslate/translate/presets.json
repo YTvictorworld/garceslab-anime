@@ -44,7 +44,8 @@
       "match": "translategemma",
       "mode": "line",
       "line_template": "translategemma",
-      "_why": "TranslateGemma does not do JSON and has a 2K context: one line per request with its own prompt."
+      "raw_template": "gemma",
+      "_why": "TranslateGemma does not do JSON and has a 2K context: one line per request with its own prompt. Its chat template only takes structured content, so the prompt goes to /completion in Gemma's turn format."
     },
     {
       "match": "instruct-2507",

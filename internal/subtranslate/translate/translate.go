@@ -345,13 +345,17 @@ func (t *Translator) request(ctx context.Context, batch []Line, before []context
 			if err != nil {
 				return out, stats, err
 			}
-			resp, err := t.Client.Complete(ctx, ChatRequest{
+			req := ChatRequest{
 				Model:       t.Model,
 				Messages:    []Message{{Role: "user", Content: prompt}},
 				Temperature: temp, TopP: t.Preset.TopP, Seed: t.Preset.Seed,
 				MaxTokens: 64 + 4*utf8.RuneCountInString(l.Masked.Text),
 				NoThink:   t.Hint.NoThink,
-			})
+			}
+			if wrap := rawPrompts[t.Hint.RawTemplate]; wrap != nil {
+				req.RawPrompt = wrap(prompt)
+			}
+			resp, err := t.Client.Complete(ctx, req)
 			if err != nil {
 				return out, stats, err
 			}
@@ -392,6 +396,9 @@ func (t *Translator) request(ctx context.Context, batch []Line, before []context
 		return nil, stats, err
 	}
 	stats.add(resp)
+	if strings.TrimSpace(stripThink(resp.Content)) == "" && resp.CompletionTokens > 0 {
+		return nil, stats, errors.New("empty answer after generating tokens: the model is probably thinking (start llama-server with --reasoning-budget 0)")
+	}
 	gotID, out, err := parseBatchReply(resp.Content)
 	if err != nil {
 		return nil, stats, err

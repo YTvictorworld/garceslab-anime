@@ -31,7 +31,10 @@ type Language struct {
 	// Base is the canonical key of trackprobe.Normalize ("es" for every Spanish).
 	Base string `json:"base"`
 	// Name is the English name used in prompts and reports.
-	Name       string `json:"name"`
+	Name string `json:"name"`
+	// ShortName is the plain language name without the variant ("Spanish"), for
+	// prompts that expect it (TranslateGemma's).
+	ShortName  string `json:"short_name,omitempty"`
 	NativeName string `json:"native_name,omitempty"`
 	// DefaultForBase picks this entry when only the base language is known
 	// ("spa", "Spanish" -> es-419).
@@ -104,6 +107,9 @@ func (r *Registry) merge(data []byte) error {
 		l := f.Languages[i]
 		if err := l.validate(); err != nil {
 			return err
+		}
+		if l.ShortName == "" {
+			l.ShortName = l.Name
 		}
 		for j := range l.FunctionWords {
 			l.FunctionWords[j] = strings.ToLower(l.FunctionWords[j])

@@ -54,8 +54,10 @@ LLAMA_SERVER=~/llama.cpp/build/bin/llama-server LLAMA_DEVICE=Vulkan1 \
 The script listens on `127.0.0.1:8080` and adapts a few flags per model: TranslateGemma gets
 2K of context per slot (its trained context) and hybrid Qwen3 / Qwen3.5 models get
 `--reasoning off`. Other settings are environment variables (`LLAMA_CTX`, `LLAMA_SLOTS`,
-`LLAMA_NGL`, `LLAMA_PORT`…, see the script's header). The default context is 8192 (4K per
-slot): with a 4 GB GPU and the Vulkan backend the plan's 16384 runs out of VRAM.
+`LLAMA_NGL`, `LLAMA_PORT`…, see the script's header); extra arguments go to llama-server. The
+default context is 8192 (4K per slot): with a 4 GB GPU and the Vulkan backend the plan's 16384
+runs out of VRAM. The first request after loading is much slower than the rest (Vulkan
+compiles its shaders): the tool sends a warm-up request before timing the first chunk.
 
 **The tool.** Build it with Go, or with the Go image if Go isn't installed:
 
@@ -259,6 +261,7 @@ variant, and the code only reads entries:
 | Field | Use |
 |---|---|
 | `code` | canonical tag: ISO 639-1, plus a region for variants (`es-419`, `es-ES`, `pt-BR`) |
+| `short_name` | the plain language name without the variant (`Spanish`), for prompts that expect it (TranslateGemma's) |
 | `base` | the canonical key of `internal/torrents/trackprobe` (`es`), the same table the auto-select and the TV use; checked on load |
 | `default_for_base` | the variant used when only the language is known (`spa`, `Spanish` → `es-419`) |
 | `aliases` | other tags for exactly this variant (`es-mx`, `latino`) |
@@ -292,11 +295,17 @@ retries once at `0.4`, telling the model which lines failed and why (issue codes
 The same file has **model hints**, matched on the model name and the GGUF file name:
 
 - **TranslateGemma** doesn't do JSON and has a 2K context: it runs in **line mode**, one line
-  per request with its own prompt (the one from its model card), validated the same way.
+  per request with its own prompt (the one its chat template builds, plus a sentence about
+  the tags), validated the same way. Its chat template only accepts structured content
+  (`source_lang_code`, `target_lang_code`), so the prompt goes to llama-server's native
+  `/completion` endpoint wrapped in Gemma's turn format (`raw_template: "gemma"`).
 - **Qwen3 / Qwen3.5 hybrid models** think by default, which wastes tokens and breaks the JSON:
-  requests carry `chat_template_kwargs: {"enable_thinking": false}` (and the launcher passes
-  `--reasoning off`); any `<think>` block is stripped. Qwen3 **Instruct-2507** has no thinking
-  mode.
+  requests carry `chat_template_kwargs: {"enable_thinking": false}`, any `<think>` block is
+  stripped, and the launcher passes `--reasoning off --reasoning-budget 0`. The budget matters:
+  some GGUFs' templates (seen with a Qwen3.5-4B GGUF) always open `<think>` and ignore
+  `enable_thinking`, so without it the model thinks until it runs out of tokens and the answer
+  is empty (the tool then reports "the model is probably thinking"). Qwen3 **Instruct-2507**
+  has no thinking mode.
 
 Batch mode asks for `{"id":"…","t":[[id,"text"],…]}` with a strict JSON schema that pins the
 ids and the count, which llama-server turns into a grammar.

@@ -3,6 +3,7 @@
   "languages": [
     {
       "code": "es-419",
+      "short_name": "Spanish",
       "base": "es",
       "name": "Latin American Spanish",
       "native_name": "Español (Latinoamérica)",
@@ -21,6 +22,7 @@
     },
     {
       "code": "es-ES",
+      "short_name": "Spanish",
       "base": "es",
       "name": "Castilian Spanish (Spain)",
       "native_name": "Español (España)",
@@ -71,6 +73,7 @@
     },
     {
       "code": "pt-BR",
+      "short_name": "Portuguese",
       "base": "pt",
       "name": "Brazilian Portuguese",
       "native_name": "Português (Brasil)",

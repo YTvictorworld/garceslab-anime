@@ -34,6 +34,15 @@ func fakeServer(t *testing.T, check func(body map[string]any)) *httptest.Server 
 			_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"{\"id\":\"b1\",\"t\":[[0,\"Hola\"]]}"},"finish_reason":"stop"}],
 				"usage":{"prompt_tokens":120,"completion_tokens":12},
 				"timings":{"cache_n":20,"prompt_n":100,"prompt_ms":80.5,"predicted_n":12,"predicted_ms":240.0}}`))
+		case "/completion":
+			data, _ := io.ReadAll(r.Body)
+			var body map[string]any
+			_ = json.Unmarshal(data, &body)
+			if check != nil {
+				check(body)
+			}
+			_, _ = w.Write([]byte(`{"content":" Te juro que no fue mi culpa.","tokens_evaluated":90,"tokens_predicted":9,
+				"timings":{"cache_n":10,"prompt_ms":30,"predicted_ms":150}}`))
 		case "/v1/models":
 			_, _ = w.Write([]byte(`{"data":[{"id":"Qwen_Qwen3-4B-Instruct-2507-Q4_K_M"}]}`))
 		case "/props":
@@ -113,5 +122,24 @@ func TestClientServerInfo(t *testing.T) {
 	m, err := c.Metrics(ctx)
 	if err != nil || m["llamacpp:prompt_tokens_total"] != 1234 || m["llamacpp:tokens_predicted_total"] != 56 {
 		t.Fatalf("%v %v", m, err)
+	}
+}
+
+func TestClientRawCompletion(t *testing.T) {
+	var got map[string]any
+	srv := fakeServer(t, func(b map[string]any) { got = b })
+	defer srv.Close()
+	resp, err := NewClient(srv.URL).Complete(context.Background(), ChatRequest{
+		RawPrompt: "<start_of_turn>user\nhi<end_of_turn>\n<start_of_turn>model\n", Temperature: 0.2, Seed: 42, MaxTokens: 50,
+		Messages: []Message{{Role: "user", Content: "ignored"}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got["prompt"] != "<start_of_turn>user\nhi<end_of_turn>\n<start_of_turn>model\n" || got["n_predict"].(float64) != 50 || got["messages"] != nil {
+		t.Errorf("body %v", got)
+	}
+	if resp.Content != " Te juro que no fue mi culpa." || resp.PromptTokens != 90 || resp.CompletionTokens != 9 || resp.PredictedMS != 150 || resp.CachedTokens != 10 {
+		t.Errorf("resp %+v", resp)
 	}
 }

@@ -32,6 +32,9 @@ type ChatRequest struct {
 	Schema json.RawMessage
 	// NoThink disables the thinking mode of hybrid models through the chat template.
 	NoThink bool
+	// RawPrompt, when set, is sent as is to llama-server's /completion (no chat
+	// template); Messages and Schema are ignored.
+	RawPrompt string
 }
 
 // ChatResponse is the model's answer with its cost.
@@ -131,6 +134,9 @@ type chatReply struct {
 
 // Complete sends one chat completion (no streaming).
 func (c *Client) Complete(ctx context.Context, req ChatRequest) (ChatResponse, error) {
+	if req.RawPrompt != "" {
+		return c.completeRaw(ctx, req)
+	}
 	body := chatBody{
 		Model:       req.Model,
 		Messages:    req.Messages,
@@ -323,4 +329,60 @@ func (c *Client) Metrics(ctx context.Context) (map[string]float64, error) {
 		}
 	}
 	return out, sc.Err()
+}
+
+type rawReply struct {
+	Content         string `json:"content"`
+	TokensEvaluated int    `json:"tokens_evaluated"`
+	TokensPredicted int    `json:"tokens_predicted"`
+	Timings         *struct {
+		CacheN      int     `json:"cache_n"`
+		PromptMS    float64 `json:"prompt_ms"`
+		PredictedMS float64 `json:"predicted_ms"`
+	} `json:"timings"`
+	Error *struct {
+		Message string `json:"message"`
+	} `json:"error"`
+}
+
+// completeRaw uses llama-server's native /completion endpoint with a prompt that is
+// already in the model's turn format.
+func (c *Client) completeRaw(ctx context.Context, req ChatRequest) (ChatResponse, error) {
+	body := map[string]any{
+		"prompt": req.RawPrompt, "temperature": req.Temperature, "seed": req.Seed,
+		"cache_prompt": true, "stream": false,
+	}
+	if req.TopP > 0 {
+		body["top_p"] = req.TopP
+	}
+	if req.MaxTokens > 0 {
+		body["n_predict"] = req.MaxTokens
+	}
+	start := time.Now()
+	resp, err := c.do(ctx, http.MethodPost, "/completion", body)
+	if err != nil {
+		return ChatResponse{}, err
+	}
+	defer resp.Body.Close()
+	data, err := io.ReadAll(io.LimitReader(resp.Body, 16<<20))
+	if err != nil {
+		return ChatResponse{}, err
+	}
+	var r rawReply
+	jerr := json.Unmarshal(data, &r)
+	if resp.StatusCode != http.StatusOK {
+		e := &HTTPError{Status: resp.Status}
+		if r.Error != nil {
+			e.Detail = firstLine(r.Error.Message, 300)
+		}
+		return ChatResponse{}, e
+	}
+	if jerr != nil {
+		return ChatResponse{}, fmt.Errorf("decoding the reply: %w", jerr)
+	}
+	out := ChatResponse{Content: r.Content, PromptTokens: r.TokensEvaluated, CompletionTokens: r.TokensPredicted, Wall: time.Since(start)}
+	if t := r.Timings; t != nil {
+		out.PromptMS, out.PredictedMS, out.CachedTokens = t.PromptMS, t.PredictedMS, t.CacheN
+	}
+	return out, nil
 }

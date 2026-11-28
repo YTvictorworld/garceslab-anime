@@ -54,8 +54,10 @@ case "$lower" in
     ;;
 *qwen3*)
     # Hybrid thinking models (Qwen3, Qwen3.5): thinking off on the server too; the
-    # eval tool also sends chat_template_kwargs.enable_thinking=false.
-    extra+=(--reasoning off)
+    # eval tool also sends chat_template_kwargs.enable_thinking=false. Some GGUFs'
+    # templates always open <think> and ignore enable_thinking (seen with a
+    # Qwen3.5-4B GGUF): a reasoning budget of 0 closes it at once.
+    extra+=(--reasoning off --reasoning-budget 0)
     ;;
 esac
 
@@ -77,8 +79,8 @@ for f in --flash-attn --cache-type-k --parallel --jinja --metrics --no-webui --a
         exit 1
     fi
 done
-if [ "${#extra[@]}" -gt 0 ] && ! grep -q -- "--reasoning " <<<"$help"; then
-    echo "note: this llama-server has no --reasoning flag; relying on enable_thinking=false per request" >&2
+if [ "${#extra[@]}" -gt 0 ] && ! grep -q -- "--reasoning-budget" <<<"$help"; then
+    echo "note: this llama-server has no --reasoning/--reasoning-budget flags; relying on enable_thinking=false per request" >&2
     extra=()
 fi
 

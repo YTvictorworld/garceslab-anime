@@ -40,6 +40,11 @@ type ModelHint struct {
 	LineTemplate string `json:"line_template,omitempty"`
 	// NoThink sends chat_template_kwargs.enable_thinking=false and strips <think>.
 	NoThink bool `json:"no_think,omitempty"`
+	// RawTemplate sends line-mode prompts to llama-server's /completion, wrapped in
+	// this chat format ("gemma"), instead of /v1/chat/completions. For models whose
+	// chat template does not take a plain text message (TranslateGemma's wants
+	// structured content with language codes).
+	RawTemplate string `json:"raw_template,omitempty"`
 }
 
 // Config is presets.json.

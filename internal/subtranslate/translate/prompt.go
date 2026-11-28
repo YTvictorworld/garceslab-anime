@@ -46,13 +46,14 @@ GLOSSARY ({{.Source.Name}} → {{.Target.Name}})
 {{end}}`))
 
 // The line-mode prompts: one subtitle per request, plain text out. "translategemma"
-// is the prompt from the TranslateGemma model card, plus the tag rule.
+// is the prompt TranslateGemma's chat template builds (names without the variant,
+// codes with it), plus one sentence about the tags.
 var lineTmpls = map[string]*template.Template{
 	"generic": template.Must(template.New("generic").Parse(`Translate this anime subtitle line from {{.Source.Name}} into {{.Target.Name}}. Keep tokens like ⟦1⟧ and ⟦N⟧ exactly as they are. Reply with the translation only.
 
 {{.Text}}`)),
-	"translategemma": template.Must(template.New("translategemma").Parse(`You are a professional {{.Source.Name}} ({{.Source.Code}}) to {{.Target.Name}} ({{.Target.Code}}) translator. Your goal is to accurately convey the meaning and nuances of the original {{.Source.Name}} text while adhering to {{.Target.Name}} grammar, vocabulary, and cultural sensitivities. Keep tokens like ⟦1⟧ and ⟦N⟧ exactly as they are.
-Produce only the {{.Target.Name}} translation, without any additional explanations or commentary. Please translate the following {{.Source.Name}} text into {{.Target.Name}}:
+	"translategemma": template.Must(template.New("translategemma").Parse(`You are a professional {{.Source.ShortName}} ({{.Source.Code}}) to {{.Target.ShortName}} ({{.Target.Code}}) translator. Your goal is to accurately convey the meaning and nuances of the original {{.Source.ShortName}} text while adhering to {{.Target.ShortName}} grammar, vocabulary, and cultural sensitivities.
+Produce only the {{.Target.ShortName}} translation, without any additional explanations or commentary. Keep tokens like ⟦1⟧ and ⟦N⟧ exactly as they are. Please translate the following {{.Source.ShortName}} text into {{.Target.ShortName}}:
 
 
 {{.Text}}`)),
@@ -219,4 +220,11 @@ func stripThink(s string) string {
 		s = s[:i] + s[i+j+len("</think>"):]
 	}
 	return strings.TrimSpace(s)
+}
+
+// rawPrompts wrap a line-mode prompt in a model's chat turn format for /completion.
+var rawPrompts = map[string]func(string) string{
+	"gemma": func(p string) string {
+		return "<start_of_turn>user\n" + p + "<end_of_turn>\n<start_of_turn>model\n"
+	},
 }
