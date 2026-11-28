@@ -34,6 +34,7 @@ It is published only for self-hosting with LG webOS TVs: there is no hosted serv
 |---|---|
 | [../CONTRIBUTING.md](../CONTRIBUTING.md) | Issue first, the pull request checklist and the "(WIP)" rule, squash merges and Conventional Commit PR titles, running the checks |
 | [../AGENTS.md](../AGENTS.md) | Guide for AI coding agents: layout, commands, checks, screenshots, privacy |
+| [subtitle-translation-eval.md](subtitle-translation-eval.md) | Subtitle translation, phase F1: the evaluation tool (`cmd/subtranslate-eval`), the private eval set, llama-server, reports, blind review, adding languages |
 | [testing.md](testing.md) | Go tests: the known-failing list, keeping tests deterministic, the playlist / media player flake (#10) |
 | [releasing.md](releasing.md) | Versions (1.0.0 onwards, server and TV together), cutting a release with the workflow, verifying it, rolling back |
 | [../DEVELOPMENT_AND_BUILD.md](../DEVELOPMENT_AND_BUILD.md) | Building from source (inherited from Seanime) |
@@ -51,6 +52,7 @@ profiles; anime titles and art are AniList's public data.
   GitHub Releases, each built from a git tag ([how](releasing.md)).
 - **Self-hosted subtitle translation (planned):** an optional service that runs on your own
   server and translates a release's subtitles into the profile's language when no release has
-  them, so nothing is sent to a third-party translation service. It is not designed in detail
-  yet and will get its own doc here when work starts.
+  them, so nothing is sent to a third-party translation service. Work has started with the
+  model comparison ([evaluation tool](subtitle-translation-eval.md)); the service itself gets
+  its own doc when it lands.
 - **Own app id for the TV app** (it still installs as `app.seanime.tenji`).

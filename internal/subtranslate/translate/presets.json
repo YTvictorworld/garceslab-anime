@@ -1,0 +1,59 @@
+{
+  "_comment": "Translation presets and per-model hints. The exact model per preset is fixed after the F1 comparison (docs/subtitle-translation-eval.md). Model hints match the model name (from the server or -model), lowercase substring, first match wins.",
+  "default_preset": "equilibrado",
+  "presets": {
+    "rapido": {
+      "batch_size": 40,
+      "max_batch_chars": 6000,
+      "context_before": 3,
+      "context_after": 0,
+      "temperature": 0.2,
+      "retry_temperature": 0.4,
+      "top_p": 0.9,
+      "seed": 42,
+      "max_chars": 42,
+      "honorifics": "keep"
+    },
+    "equilibrado": {
+      "batch_size": 30,
+      "max_batch_chars": 6000,
+      "context_before": 6,
+      "context_after": 3,
+      "temperature": 0.2,
+      "retry_temperature": 0.4,
+      "top_p": 0.9,
+      "seed": 42,
+      "max_chars": 42,
+      "honorifics": "keep"
+    },
+    "calidad": {
+      "batch_size": 20,
+      "max_batch_chars": 4000,
+      "context_before": 8,
+      "context_after": 3,
+      "temperature": 0.2,
+      "retry_temperature": 0.4,
+      "top_p": 0.9,
+      "seed": 42,
+      "max_chars": 42,
+      "honorifics": "keep"
+    }
+  },
+  "model_hints": [
+    {
+      "match": "translategemma",
+      "mode": "line",
+      "line_template": "translategemma",
+      "_why": "TranslateGemma does not do JSON and has a 2K context: one line per request with its own prompt."
+    },
+    {
+      "match": "instruct-2507",
+      "_why": "Qwen3 Instruct-2507 has no thinking mode."
+    },
+    {
+      "match": "qwen3",
+      "no_think": true,
+      "_why": "Qwen3 / Qwen3.5 hybrid models think by default: wasted tokens and broken JSON. enable_thinking=false in the chat template."
+    }
+  ]
+}

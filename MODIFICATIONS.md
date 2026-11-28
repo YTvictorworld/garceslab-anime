@@ -260,3 +260,14 @@ AniList account, several playbacks at the same time) will be listed here as they
   when the profile's saved settings are loaded (`_features/profiles/profile-player-prefs-sync.tsx`,
   written back through the sync). Tests in `video-core-subtitle-default.test.ts`; see
   `docs/profiles.md`.
+
+## 2026-11 (subtitle translation, phase F1: evaluation tool, #31)
+
+- **New code only, no Seanime code changed:** `internal/subtranslate/` (language registry
+  `lang/` reusing `internal/torrents/trackprobe`'s canonical language keys, tag placeholders
+  `markers/`, lossless ASS reader/writer `ass/`, SRT reader/writer `srt/`, batches, prompt,
+  OpenAI-compatible client for llama.cpp's llama-server and validation `translate/`, metrics,
+  reports and blind review `eval/`), the developer CLI `cmd/subtranslate-eval` and
+  `scripts/subtranslate-llama-server.sh`. Nothing is wired into the server yet. `.gitignore`
+  gets rules that keep eval data (real subtitles, translations, results) out of the repository,
+  and `TestNoEvalDataInRepo` checks it. See `docs/subtitle-translation-eval.md`.
