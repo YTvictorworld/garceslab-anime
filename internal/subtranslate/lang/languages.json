@@ -1,0 +1,117 @@
+{
+  "_comment": "Language registry for subtitle translation. One entry per language or regional variant. Adding a source or target language means adding an entry here (see docs/subtitle-translation-eval.md). 'base' must be the canonical key of internal/torrents/trackprobe (ISO 639-1). 'function_words' are short, very frequent words used to tell whether a line is in this language; 'marks' are characters that only this language uses among the registered ones.",
+  "languages": [
+    {
+      "code": "es-419",
+      "short_name": "Spanish",
+      "base": "es",
+      "name": "Latin American Spanish",
+      "native_name": "Español (Latinoamérica)",
+      "default_for_base": true,
+      "aliases": ["es-la", "es-us", "es-mx", "es-ar", "es-co", "es-cl", "es-pe", "es-ve", "latino", "latam"],
+      "target_rules": [
+        "Latin American neutral Spanish. Use 'ustedes', never 'vosotros'.",
+        "Use 'tú' between friends, family and peers, 'usted' for strangers, elders and superiors.",
+        "Neutral vocabulary (computadora, celular, carro, enojarse). No Spain-only slang (tío, vale, mola, coger in the sense of take).",
+        "Spanish punctuation: opening ¿ and ¡ (¿…? ¡…!), no space before ? or !.",
+        "Spanish interjections: ¿Eh?, ¿Qué?, Tsk, ¡Ah!, ¡Oye!."
+      ],
+      "honorifics_adapt": "señor/señora, profesor, hermano/hermana",
+      "marks": "¿¡ñ",
+      "function_words": ["de", "que", "el", "los", "las", "y", "es", "por", "con", "para", "una", "pero", "qué", "está", "eso", "esto", "yo", "tú", "del", "al", "hay", "muy", "aquí", "así", "nada", "todo", "vamos", "porque", "también", "ahora", "puedo", "estoy", "eres", "soy", "cómo", "dónde", "cuando", "algo", "bien", "creo", "sé", "tengo", "quiero", "mi", "tu", "su", "esta", "este", "ya", "más", "lo"]
+    },
+    {
+      "code": "es-ES",
+      "short_name": "Spanish",
+      "base": "es",
+      "name": "Castilian Spanish (Spain)",
+      "native_name": "Español (España)",
+      "aliases": ["es-es", "castellano", "castilian"],
+      "target_rules": [
+        "Castilian Spanish from Spain. Use 'vosotros' for plural 'you'.",
+        "Use 'tú' between friends, family and peers, 'usted' for strangers, elders and superiors.",
+        "Spain vocabulary (ordenador, móvil, coche, vale, tío in casual speech).",
+        "Spanish punctuation: opening ¿ and ¡ (¿…? ¡…!), no space before ? or !.",
+        "Spanish interjections: ¿Eh?, ¿Qué?, Tsk, ¡Ah!, ¡Oye!."
+      ],
+      "honorifics_adapt": "señor/señora, profesor, hermano/hermana",
+      "marks": "¿¡ñ",
+      "function_words": ["de", "que", "el", "los", "las", "y", "es", "por", "con", "para", "una", "pero", "qué", "está", "eso", "esto", "yo", "tú", "del", "al", "hay", "muy", "aquí", "así", "nada", "todo", "vamos", "porque", "también", "ahora", "puedo", "estoy", "eres", "soy", "cómo", "dónde", "cuando", "algo", "bien", "creo", "sé", "tengo", "quiero", "mi", "tu", "su", "esta", "este", "ya", "más", "lo", "vosotros", "vale"]
+    },
+    {
+      "code": "en",
+      "base": "en",
+      "name": "English",
+      "native_name": "English",
+      "default_for_base": true,
+      "aliases": ["en-us", "en-gb"],
+      "target_rules": [
+        "Natural spoken English. Keep contractions where a native speaker would use them."
+      ],
+      "honorifics_adapt": "Mr./Ms., teacher, brother/sister",
+      "function_words": ["the", "you", "to", "and", "is", "it", "that", "of", "what", "this", "i", "in", "me", "my", "we", "are", "don't", "not", "be", "have", "was", "your", "do", "for", "on", "with", "can", "just", "so", "he", "she", "they", "i'm", "it's", "you're", "there", "here", "know", "get", "want", "right", "now", "why", "how", "where", "will", "would", "about", "all", "if", "but", "an", "a"]
+    },
+    {
+      "code": "fr",
+      "base": "fr",
+      "name": "French",
+      "native_name": "Français",
+      "default_for_base": true,
+      "aliases": ["fr-fr", "fr-ca", "fr-be", "fr-ch"],
+      "source_notes": [
+        "French subtitles put a space before ? ! : ; and use « » quotes: do not copy that typography; use the target language's punctuation.",
+        "'tu' and 'vous' carry register (familiar vs. polite or plural): keep the same register in the translation.",
+        "'ne' is often dropped in spoken French ('j'sais pas'); slang like 'mec', 'putain', 'grave' should be rendered with equivalent colloquial words."
+      ],
+      "target_rules": [
+        "Natural spoken French. Use 'tu' or 'vous' according to the relationship.",
+        "French punctuation: « » quotes and a space before ? ! : ;."
+      ],
+      "honorifics_adapt": "monsieur/madame, professeur, grand frère/grande sœur",
+      "marks": "«»œç",
+      "function_words": ["le", "les", "des", "et", "est", "je", "il", "elle", "qui", "pas", "ne", "une", "ce", "ça", "du", "vous", "nous", "on", "mais", "pour", "avec", "suis", "sur", "au", "oui", "non", "moi", "toi", "c'est", "j'ai", "qu'est-ce", "tout", "bien", "fais", "faire", "peux", "veux", "sais", "vais", "dans", "comme", "aussi", "alors", "quoi", "où", "ici", "rien", "mon", "ton", "son", "cette", "être", "avoir", "t'es", "j'suis", "y", "a", "l'", "d'"]
+    },
+    {
+      "code": "pt-BR",
+      "short_name": "Portuguese",
+      "base": "pt",
+      "name": "Brazilian Portuguese",
+      "native_name": "Português (Brasil)",
+      "default_for_base": true,
+      "aliases": ["pt-br", "pt"],
+      "target_rules": [
+        "Brazilian Portuguese. Use 'você' for 'you' and 'vocês' for plural."
+      ],
+      "honorifics_adapt": "senhor/senhora, professor, irmão/irmã",
+      "marks": "ãõ",
+      "function_words": ["não", "você", "eu", "isso", "uma", "um", "com", "para", "mas", "está", "ele", "ela", "do", "da", "dos", "das", "no", "na", "em", "é", "o", "os", "as", "que", "de", "e", "meu", "seu", "aqui", "agora", "também", "então", "vamos", "tudo", "nada", "muito", "sim", "foi", "vai", "tem", "sou", "estou"]
+    },
+    {
+      "code": "it",
+      "base": "it",
+      "name": "Italian",
+      "native_name": "Italiano",
+      "default_for_base": true,
+      "aliases": ["it-it"],
+      "target_rules": [
+        "Natural spoken Italian. Use 'tu' or 'Lei' according to the relationship."
+      ],
+      "honorifics_adapt": "signore/signora, professore, fratello/sorella",
+      "function_words": ["il", "che", "non", "di", "è", "e", "la", "un", "una", "per", "sono", "mi", "ti", "ma", "cosa", "questo", "quello", "come", "perché", "anche", "io", "tu", "lui", "lei", "noi", "voi", "gli", "del", "della", "sei", "ho", "hai", "qui", "adesso", "allora", "niente", "tutto", "bene", "dove", "andiamo", "sì"]
+    },
+    {
+      "code": "de",
+      "base": "de",
+      "name": "German",
+      "native_name": "Deutsch",
+      "default_for_base": true,
+      "aliases": ["de-de", "de-at", "de-ch"],
+      "target_rules": [
+        "Natural spoken German. Use 'du' or 'Sie' according to the relationship."
+      ],
+      "honorifics_adapt": "Herr/Frau, Lehrer, Bruder/Schwester",
+      "marks": "äöüß",
+      "function_words": ["der", "die", "das", "und", "ist", "nicht", "ich", "du", "er", "sie", "es", "wir", "ihr", "ein", "eine", "zu", "mit", "auf", "für", "was", "wie", "wo", "warum", "hier", "jetzt", "doch", "auch", "noch", "schon", "mich", "dich", "mir", "dir", "bin", "bist", "sind", "habe", "hast", "kann", "nein", "ja", "aber", "den", "dem"]
+    }
+  ]
+}
