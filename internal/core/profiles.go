@@ -79,6 +79,10 @@ type ProfilesRuntime struct {
 	// imports: the cache layer stores every user's collection under one key).
 	DirectAnilist anilist.AnilistClient
 
+	// relayedMedia is the anime of the relayed playback (0 if unknown), for
+	// the playback attribution. Set by InstallProfilesRuntime.
+	relayedMedia func() int
+
 	lanePlatformRef *util.Ref[platform.Platform]
 	laneWS          *profilews.ProfileWS
 	logger          *zerolog.Logger
@@ -142,8 +146,13 @@ func NewProfilesRuntime(svc *profiles.Service, wsEventManager events.WSEventMana
 	rt.laneWS = profilews.New(wsEventManager, rt.Tags, rt.Lane.OwnerID)
 	rt.laneWS.BroadcastWithoutProfile = true
 
-	// Plugins act on behalf of the profile that owns the playback (or none).
-	plugin.ProfileContext = func() context.Context { return rt.Lane.Context(context.Background()) }
+	// Plugins act on behalf of the profile that owns the playback they react to
+	// (viewer session or relayed lane, profiles_attribution.go), or none.
+	plugin.ProfileContext = func() context.Context {
+		ctx, _ := rt.PlaybackProfileContext(0)
+		return ctx
+	}
+	plugin.ProfileContextFor = rt.PlaybackProfileContext
 	// Phase 2: a debrid stream start uses the auto-select profile of the profile that asked.
 	db_bridge.ProfileAutoSelectCtxHook = func(ctx context.Context) (*anime.AutoSelectProfile, bool) {
 		pid := profiles.IDFromContext(ctx)
@@ -208,6 +217,15 @@ func (a *App) InstallProfilesRuntime() {
 		}
 		return false
 	})
+	rt.relayedMedia = func() int {
+		if a.MediacoreCoordinator == nil {
+			return 0
+		}
+		if st, ok := a.MediacoreCoordinator.GetActivePlaybackState(); ok && st.PlaybackInfo != nil && st.PlaybackInfo.Media != nil {
+			return st.PlaybackInfo.Media.GetID()
+		}
+		return 0
+	}
 	a.installViewerSessions()
 	rt.Lane.SetOnAcquire(func(p *profiles.Profile) {
 		// The playback modules get the collection of the profile that plays.

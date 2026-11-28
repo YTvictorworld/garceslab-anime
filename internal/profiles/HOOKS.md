@@ -7,7 +7,8 @@ Find them with `grep -rn "profiles-hook" --include=*.go .`
 New files (not upstream): `internal/profiles/**`, `internal/core/profiles.go`,
 `internal/handlers/profiles.go`, `internal/handlers/profiles_data.go`,
 `internal/handlers/profiles_test.go`, `internal/handlers/profiles_m2_test.go`,
-`internal/continuity/store.go`, `internal/plugin/profiles.go`.
+`internal/continuity/store.go`, `internal/plugin/profiles.go`, `internal/profiles/attribution.go`,
+`internal/core/profiles_attribution.go`, `internal/handlers/profiles_plugin_attribution_test.go`.
 
 ## M1: profile manager
 
@@ -30,7 +31,8 @@ The router is installed unless the server runs in offline mode (`profilesPlatfor
 | `internal/core/modules.go` | `InitOrRefreshAnilistData` ignores the server account (simulated user); the playback modules (playback manager, video core, mpv core, media core, direct stream, torrent stream, debrid, Nakama, playlist) get `a.playbackPlatformRef()` (the `LanePlatform`: calls without a profile in ctx go to the lane owner); playback manager, video core, mpv core, native player and direct stream get `a.playbackWS()` (`ProfileWS` of the lane owner; broadcast when there is no owner); `a.InstallProfilesRuntime()` at the end of `initModulesOnce` (lane activity check, owner's collection pushed to the playback modules on acquire, per-profile watch history, native auto-watching on `PlaybackLoadedEvent`) |
 | `internal/continuity/manager.go`, `history.go` | Storage goes through `HistoryStore` (`store.go`; default = the upstream file cache bucket). `*Ctx` variants (`GetWatchHistoryCtx`, `GetWatchHistoryItemCtx`, `UpdateWatchHistoryItemCtx`, `DeleteWatchHistoryItemCtx`, `GetSettingsCtx`); the old methods use the background context = lane owner. `GetSettings()` and the external player paths use the per-profile "watch continuity" switch |
 | `internal/database/db_bridge/autoselect_profile.go` | `ProfileAutoSelectHook` (lane owner's auto-select profile during a stream start); `GetGlobalAutoSelectProfile` = the upstream query |
-| `internal/plugin/anilist.go`, `anime.go`, `manga.go`, `scanner.go` | Platform calls use `ProfileContext()` (`plugin/profiles.go`, set by core to the lane owner's context) instead of `context.Background()` |
+| `internal/plugin/anilist.go`, `anime.go`, `manga.go`, `scanner.go` | Platform calls use `ProfileContext()` (`plugin/profiles.go`) instead of `context.Background()`. Since #26 core sets it to the profile that owns the playback (`ProfilesRuntime.PlaybackProfileContext`: viewer sessions + relayed lane, falling back to the lane owner); list writes and `ctx.anime.getAnimeEntry` use `ProfileContextFor(mediaID)` (the owner of that anime's playback) and log a refusal. See `docs/profiles-extensions.md` |
+| `internal/core/modules.go` | The plugins' `OnRefreshAnilistAnimeCollection` refreshes `plugin.ProfileContext()`'s profile (`RefreshAnimeCollectionCtx`) |
 | `internal/library/anime/missing_episodes.go`, `schedule.go` | Caches keyed by profile (`Get/Set…CacheFor(profileID)`); `Clear…` clears every profile |
 | `internal/handlers/*.go` (anilist, anime_collection, anime_entries, auto_downloader, manga, manga_download, metadata, nakama, playlist, scan, torrent_client) | `h.App.GetAnimeCollection(…)` and friends → `GetAnimeCollectionCtx(c.Request().Context(), …)`, `RefreshAnimeCollection()` → `RefreshAnimeCollectionCtx(…)` (`context.WithoutCancel` in goroutines). Server-wide features (scanner, auto-downloader rule cleanup, Nakama host) use `GlobalAnimeCollection` (union of all profiles) |
 | `internal/handlers/anilist.go`, `anime_entries.go` | `anilistStatsCache`, `anilistMissedSequelsCache`, `upcomingEpisodesCache` keyed by profile; stats cleared on refresh |

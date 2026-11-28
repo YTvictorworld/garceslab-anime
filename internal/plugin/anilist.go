@@ -41,16 +41,16 @@ func (a *AppContextImpl) BindAnilist(vm *goja.Runtime, logger *zerolog.Logger, e
 	anilistPlatformRef, ok := a.anilistPlatformRef.Get()
 	if ok {
 		_ = anilistObj.Set("updateEntry", func(mediaID int, status *anilist.MediaListStatus, scoreRaw *int, progress *int, startedAt *anilist.FuzzyDateInput, completedAt *anilist.FuzzyDateInput) error {
-			return anilistPlatformRef.Get().UpdateEntry(ProfileContext(), mediaID, status, scoreRaw, progress, startedAt, completedAt)
+			return anilistPlatformRef.Get().UpdateEntry(listWriteContext(al.logger, "UpdateEntry", mediaID), mediaID, status, scoreRaw, progress, startedAt, completedAt)
 		})
 		_ = anilistObj.Set("updateEntryProgress", func(mediaID int, progress int, totalEpisodes *int) error {
-			return anilistPlatformRef.Get().UpdateEntryProgress(ProfileContext(), mediaID, progress, totalEpisodes)
+			return anilistPlatformRef.Get().UpdateEntryProgress(listWriteContext(al.logger, "UpdateEntryProgress", mediaID), mediaID, progress, totalEpisodes)
 		})
 		_ = anilistObj.Set("updateEntryRepeat", func(mediaID int, repeat int) error {
-			return anilistPlatformRef.Get().UpdateEntryRepeat(ProfileContext(), mediaID, repeat)
+			return anilistPlatformRef.Get().UpdateEntryRepeat(listWriteContext(al.logger, "UpdateEntryRepeat", mediaID), mediaID, repeat)
 		})
 		_ = anilistObj.Set("deleteEntry", func(mediaID int, entryId int) error {
-			return anilistPlatformRef.Get().DeleteEntry(ProfileContext(), mediaID, entryId)
+			return anilistPlatformRef.Get().DeleteEntry(listWriteContext(al.logger, "DeleteEntry", mediaID), mediaID, entryId)
 		})
 		_ = anilistObj.Set("getAnimeCollection", func(bypassCache bool) (*anilist.AnimeCollection, error) {
 			return anilistPlatformRef.Get().GetAnimeCollection(ProfileContext(), bypassCache)
@@ -80,7 +80,13 @@ func (a *AppContextImpl) BindAnilist(vm *goja.Runtime, logger *zerolog.Logger, e
 			return anilistPlatformRef.Get().GetAnimeCollectionWithRelations(ProfileContext())
 		})
 		_ = anilistObj.Set("addMediaToCollection", func(mIds []int) error {
-			return anilistPlatformRef.Get().AddMediaToCollection(ProfileContext(), mIds)
+			// profiles-hook: attributed like a write of the first anime; the platform
+			// refuses it without a profile.
+			mediaID := 0
+			if len(mIds) > 0 {
+				mediaID = mIds[0]
+			}
+			return anilistPlatformRef.Get().AddMediaToCollection(listWriteContext(al.logger, "AddMediaToCollection", mediaID), mIds)
 		})
 		_ = anilistObj.Set("getStudioDetails", func(studioID int) (*anilist.StudioDetails, error) {
 			return anilistPlatformRef.Get().GetStudioDetails(ProfileContext(), studioID)

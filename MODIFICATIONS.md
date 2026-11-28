@@ -234,3 +234,19 @@ AniList account, several playbacks at the same time) will be listed here as they
   `_containers/tv-updates-settings.tsx`, `src/api/hooks/tv_updates.hooks.ts`,
   `src/lib/tv-updates/`); generated API types updated (`codegen/`, with the `tvupdates` package
   prefix in `codegen/internal/generate_structs.go`). See `docs/tv-updates.md`.
+
+## 2026-11 (plugin list writes during direct play, #26)
+
+- **Plugins act for the profile of the playback** (`internal/plugin/profiles.go`,
+  `internal/plugin/anilist.go`, `internal/plugin/anime.go`, `internal/core/profiles.go`,
+  `internal/core/modules.go`, new `internal/core/profiles_attribution.go` and
+  `internal/profiles/attribution.go`): Seanime's plugin `$anilist` list writes
+  (`updateEntry`, `updateEntryProgress`, `updateEntryRepeat`, `deleteEntry`,
+  `addMediaToCollection`) and `ctx.anime.getAnimeEntry` now act for the one profile that plays
+  that anime (a direct-play viewer session or the relayed lane); collection reads and the
+  plugins' collection refresh for the one profile that plays anything. Before, they only used
+  the relayed lane owner, so a plugin's writes during direct play on the TV were all refused
+  with `PROFILE_REQUIRED`, and during a relayed playback of another profile they went to that
+  profile. Without exactly one owner (no playback, a guest, two profiles) writes are still
+  refused, with a log line naming the extension and the reason. See
+  `docs/profiles-extensions.md`.
