@@ -119,7 +119,7 @@
     "react-dom": "^19",
     "react-draggable": "^4.7.0",
     "react-dropzone": "^14.3.8",
-    "react-error-boundary": "^5.0.0",
+    "react-error-boundary": "^6.1.6",
     "react-hook-form": "^7.81.0",
     "react-icons": "^5.7.0",
     "react-remove-scroll-bar": "^2.3.8",
