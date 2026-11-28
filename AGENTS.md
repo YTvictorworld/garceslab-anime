@@ -47,7 +47,14 @@ Start with [docs/README.md](docs/README.md): it links every feature doc.
    is green may you remove `(WIP)` and mark it ready. The `PR ready (WIP rule)` workflow
    (`.github/workflows/pr-ready.yml`, logic in `.github/scripts/pr-ready.sh`) fails otherwise.
    Never tick a box you didn't verify; write "n/a" next to a box that doesn't apply.
-5. Don't push, merge or open PRs unless the maintainer asked you to.
+5. **The PR title is a Conventional Commit** (`type(scope): description`, imperative, English,
+   no `(WIP)` once ready). PRs are **squash-merged** only, so the title becomes the single
+   commit on `main` (GitHub appends ` (#N)`); the `PR ready` check validates it. Allowed
+   types: `feat`, `fix`, `docs`, `test`, `ci`, `build`, `chore`, `refactor`, `perf`, `style`,
+   `revert`, `deps`. Commits inside the PR can be WIP; to resolve conflicts, merge `main` into
+   the branch (no rebase or force-push needed). Details:
+   [CONTRIBUTING.md](CONTRIBUTING.md#merging-squash-only).
+6. Don't push, merge or open PRs unless the maintainer asked you to.
 
 ## Running the checks locally
 
@@ -119,5 +126,6 @@ document a feature).
 - Web: match the surrounding style; user-facing text says "Garceslab Anime", not "Seanime"
   (credits and identifiers stay).
 - Commits: [Conventional Commits](https://www.conventionalcommits.org/) (`feat(profiles): …`,
-  `fix(debrid): …`, `docs: …`, `test: …`), one topic each.
+  `fix(debrid): …`, `docs: …`, `test: …`), one topic each. What reaches `main` is the PR
+  title (squash merge), so that is the one that must be right.
 - Upstream links (Seanime, Seanime Tenji) only in credits and attribution.

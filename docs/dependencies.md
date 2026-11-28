@@ -10,6 +10,9 @@ Actions and the Docker base images are kept up to date by Dependabot
   [CONTRIBUTING.md](../CONTRIBUTING.md)). When an update needs code changes, it gets an issue
   and a pull request of its own that carries the update and the changes, and the Dependabot
   pull request is closed as superseded.
+- Dependabot's titles (`chore(deps): bump …`) are already Conventional Commits, which the
+  *PR ready* check requires because the title becomes the squash commit on `main`
+  ([Merging](../CONTRIBUTING.md#merging-squash-only)).
 - Go modules below 1.0 (`v0.x`) can break their API in a "minor" update, so the minor group
   can need code changes too. chromedp is the example below.
 

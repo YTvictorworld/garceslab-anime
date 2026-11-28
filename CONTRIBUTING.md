@@ -28,6 +28,8 @@ The TV app has its own repository and guide:
    to an existing one (and a line in the [docs index](docs/README.md) for a new doc).
 5. **A PR is "ready" only when every check below passes.** If even one is failing or missing,
    the title starts with **`(WIP)`** and the PR stays a **draft**.
+6. **The PR title is a Conventional Commit** (`type(scope): description`). PRs are
+   **squash-merged**, and the title becomes the commit on `main` ([Merging](#merging-squash-only)).
 
 ## When a PR is ready
 
@@ -36,6 +38,8 @@ box; for one that doesn't apply (e.g. screenshots for a change without UI), writ
 it and tick it.
 
 - [ ] **Linked issue:** `Closes #N` in the description.
+- [ ] **PR title** is a Conventional Commit (`type(scope): description`); it becomes the
+      squash commit on `main` (see [Merging](#merging-squash-only)).
 - [ ] **Tests:** added or updated, with a regression test for a bug fix and tests that lock the
       behaviour of a feature.
 - [ ] **Go checks pass** (see [Running the checks](#running-the-checks)): `go build ./...`,
@@ -58,6 +62,8 @@ runs on every PR and every edit of its title or description. If the title does *
 with `(WIP)` and any of these is true, it fails and labels the PR `wip`:
 
 - no linked issue in the description (`Closes|Fixes|Resolves #N`);
+- the title is not a Conventional Commit (`type(scope): description`, see
+  [Merging](#merging-squash-only)), or has `(WIP)` anywhere but at the start;
 - a checklist box is not ticked;
 - a required CI job (Go, Web, Secrets, Docker image) failed or hasn't finished.
 
@@ -124,11 +130,43 @@ npm run build     # typecheck + production build
 ## Commits and branches
 
 - Branch from `main`: `feature/<name>`, `fix/<name>` or `docs/<name>`.
-- [Conventional Commits](https://www.conventionalcommits.org/) are suggested:
-  `feat(profiles): …`, `fix(directstream): …`, `docs: …`, `test: …`. Explain the why in the
-  body.
+- Commits inside a pull request can be anything: small, messy, "WIP". Only the **PR title**
+  ends up on `main` (see [Merging](#merging-squash-only)). Explain the why in the PR
+  description; it stays linked from the commit on `main`.
 - Never commit secrets, `config.toml`, databases (`*.db`), logs or fixtures with real user data.
   CI runs gitleaks on the whole history.
+
+## Merging (squash only)
+
+Pull requests are merged with **squash merge** only; merge commits and rebase merges are
+disabled in the repository settings. When a PR is merged:
+
+- its commits become **one commit on `main`**: one PR = one commit;
+- that commit's **title is the PR title**, with ` (#N)` appended by GitHub, and its body is the
+  list of the PR's commit messages;
+- the PR's branch is **deleted automatically**;
+- `Closes #N` in the PR description still closes the issue.
+
+So **the PR title must be a [Conventional Commit](https://www.conventionalcommits.org/)**, in
+English, in the imperative, and without `(WIP)` by the time it is merged (a PR whose title
+starts with `(WIP)` isn't ready, and `(WIP)` anywhere else in the title fails the check):
+
+```
+type(scope): description
+```
+
+- `type` is one of `feat`, `fix`, `docs`, `test`, `ci`, `build`, `chore`, `refactor`, `perf`,
+  `style`, `revert`, `deps`; add `!` before the `:` for a breaking change (`feat(api)!: …`).
+- `(scope)` is optional: the area it touches, e.g. `fix(directstream): …`.
+- Examples: `feat(profiles): add a PIN to profiles`, `docs: explain the squash-merge policy`.
+  Dependabot's titles (`chore(deps): bump …`, `build(deps-dev): bump …`) already fit.
+
+The *PR ready (WIP rule)* check fails when the title doesn't have this form, and lists it as
+still missing while the title starts with `(WIP)`.
+
+Because only the title reaches `main`, the commits inside the PR can be small or messy. To bring
+in changes from `main` or to fix a conflict, **merging `main` into your branch is fine**: there
+is no need to rebase or force-push.
 
 ## License and notices
 

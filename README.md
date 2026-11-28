@@ -145,7 +145,8 @@ The container runs as the unprivileged user `seanime` (uid 1000) and keeps its d
 
 - [docs/](docs/README.md): every guide and feature doc, plus the roadmap.
 - [CONTRIBUTING.md](CONTRIBUTING.md): how to propose a change (issue first, tests and docs in
-  every pull request) and how to build and test.
+  every pull request, squash merges with a Conventional Commit PR title) and how to build and
+  test.
 - [DEVELOPMENT_AND_BUILD.md](DEVELOPMENT_AND_BUILD.md): building from source (inherited from
   Seanime).
 - [MODIFICATIONS.md](MODIFICATIONS.md): every change compared with Seanime, with dates.
