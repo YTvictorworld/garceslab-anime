@@ -261,6 +261,22 @@ AniList account, several playbacks at the same time) will be listed here as they
   written back through the sync). Tests in `video-core-subtitle-default.test.ts`; see
   `docs/profiles.md`.
 
+## 2026-11 (track probe: subtitle codecs, #32)
+
+- **Track codecs** (`internal/torrents/trackprobe/probe.go`, new `codec.go`): each probed track
+  records its Matroska track number and `CodecID`, and subtitle tracks a kind (`text` for
+  ASS/SSA/SRT/WebVTT/TextST, `image` for PGS/VobSub/DVB, else `unknown`), to measure how many
+  releases have only image subtitles (which would need OCR before machine translation).
+  Auto-select's choice is unchanged.
+- **Cache v2** (`cache.go`): entries carry `"version": 2`. Entries without a version (v1) are
+  still hits, with `Tracks.CodecsUnknown` set, so nothing is probed again; new probes write v2.
+- **Log line** (`internal/torrents/autoselect/track_select.go`): one INFO line per probe,
+  `trackprobe > Subtitle tracks file=… tracks="en:ass, fr:pgs" audio=…` (file name only, no link).
+- **Report** (`main.go`, new `trackprobe/stats.go`): `seanime trackprobe-stats [--json]` prints a
+  read-only summary of the cache directory instead of starting the server. See
+  `docs/subtitle-autoselect.md`. Tests in `trackprobe/codec_test.go` (synthetic MKV headers)
+  and `autoselect/track_select_test.go`.
+
 ## 2026-11 (subtitle translation, phase F1: evaluation tool, #31)
 
 - **New code only, no Seanime code changed:** `internal/subtranslate/` (language registry

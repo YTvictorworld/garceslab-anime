@@ -355,6 +355,15 @@ func (s *AutoSelect) preferTracks(
 			lastNetwork = time.Now()
 			pc.tracks, pc.link, pc.err = s.probeOne(bctx, perCandidate, o, probe, t, pc.res)
 			if pc.err == nil && pc.tracks != nil {
+				if !pc.tracks.NotMatroska {
+					// One line per probe (cache hits don't log): the file name
+					// only, never the link (debrid links carry tokens).
+					s.logger.Info().
+						Str("file", path.Base(filePath)).
+						Str("tracks", trackprobe.CodecSummary(pc.tracks.Subtitles)).
+						Str("audio", trackprobe.CodecSummary(pc.tracks.Audio)).
+						Msg("trackprobe > Subtitle tracks")
+				}
 				if err := o.Cache.Put(key, pc.tracks); err != nil {
 					s.logger.Debug().Err(err).Msg("autoselect: Could not cache probe result")
 				}
