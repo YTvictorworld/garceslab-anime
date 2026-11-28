@@ -81,7 +81,9 @@ event was broadcast. Now (`internal/debrid/client/stream.go`):
   the viewer sessions use it.
 - Hooks (`OnDebridSkipStreamCheck`, `OnDebridSendStreamToMediaPlayer`) run per stream as
   before. Plugins that listen to `ctx.videoCore` events don't see direct play (nothing
-  plays on the server); the native auto-watching does (step 6 above).
+  plays on the server); the native auto-watching does (step 6 above). A plugin's list
+  writes about the session's anime act for the session's profile
+  ([profiles-extensions.md](profiles-extensions.md)).
 
 ## Events routing
 

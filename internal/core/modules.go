@@ -65,6 +65,10 @@ func (a *App) initModulesOnce() {
 
 	plugin.GlobalAppContext.SetModulesPartial(plugin.AppContextModules{
 		OnRefreshAnilistAnimeCollection: func() {
+			if a.ProfilesRuntime != nil { // profiles-hook: the profile the plugin acts for
+				_, _ = a.RefreshAnimeCollectionCtx(plugin.ProfileContext())
+				return
+			}
 			_, _ = a.RefreshAnimeCollection()
 		},
 		OnRefreshAnilistMangaCollection: func() {

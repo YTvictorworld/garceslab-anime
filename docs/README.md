@@ -21,6 +21,7 @@ It is published only for self-hosting with LG webOS TVs: there is no hosted serv
 |---|---|
 | [profiles.md](profiles.md) | "Who's watching?", avatars, PINs, per-profile data and player preferences, AniList import and JSON export, Recent changes |
 | [profiles-phase3.md](profiles-phase3.md) | Favourites, entry editor, custom lists, stats, private import: endpoints and export format |
+| [profiles-extensions.md](profiles-extensions.md) | Which profile a plugin's list reads and writes act for (the owner of the playback), when they are refused, writing plugins for profiles |
 | [phase2-direct-play.md](phase2-direct-play.md) | Up to three viewers at once: direct play of debrid streams, viewer sessions, "Now watching", limits, tests |
 | [subtitle-autoselect.md](subtitle-autoselect.md) | Auto-select that prefers cached releases with the profile's subtitle language |
 | [title-search.md](title-search.md) | Search as you type with the local title index (anime-offline-database, ODbL) |

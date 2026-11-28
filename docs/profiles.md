@@ -53,6 +53,13 @@ in Recent changes). The server password protects the server.
 Details of favourites, the entry editor, custom lists and stats:
 [profiles-phase3.md](profiles-phase3.md).
 
+## Extensions
+
+Extensions (plugins) are shared by every profile. Their list reads and writes act for the
+profile that owns the playback they react to (the TV's viewer session, or the relayed
+playback); without exactly one owner, writes are refused with `PROFILE_REQUIRED` and never
+go to another profile. See [profiles-extensions.md](profiles-extensions.md).
+
 ## AniList is optional
 
 AniList is used **anonymously** for public metadata (titles, covers, search, airing). A list can
