@@ -1,6 +1,8 @@
 <!--
 Title: start it with "(WIP)" and keep the PR as a draft until EVERY box below is ticked and
 CI is green. The "PR ready (WIP rule)" check enforces this (see CONTRIBUTING.md).
+After "(WIP)", the title is a Conventional Commit, e.g. "fix(scope): what it fixes": PRs are
+squash-merged and the title becomes the commit on main.
 For a box that doesn't apply, write "n/a" next to it and tick it.
 -->
 
@@ -24,6 +26,7 @@ Commands you ran, and what you checked by hand.
 ## Checklist
 
 - [ ] Linked issue: `Closes #N` above.
+- [ ] PR title is a Conventional Commit (`type(scope): description`, imperative, English); it becomes the squash commit on `main`.
 - [ ] Tests added or updated: a regression test that fails before a bug fix and passes after it, or tests that lock a new feature's behaviour.
 - [ ] Go: `scripts/check.sh` passes (`go build ./...`, `go vet`, `go test` on the touched packages and the whole regression suite).
 - [ ] Web (if `seanime-web` changed): `npm test` and `npm run build` pass.

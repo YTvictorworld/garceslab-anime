@@ -32,7 +32,7 @@ It is published only for self-hosting with LG webOS TVs: there is no hosted serv
 
 | Doc | What it covers |
 |---|---|
-| [../CONTRIBUTING.md](../CONTRIBUTING.md) | Issue first, the pull request checklist and the "(WIP)" rule, running the checks |
+| [../CONTRIBUTING.md](../CONTRIBUTING.md) | Issue first, the pull request checklist and the "(WIP)" rule, squash merges and Conventional Commit PR titles, running the checks |
 | [../AGENTS.md](../AGENTS.md) | Guide for AI coding agents: layout, commands, checks, screenshots, privacy |
 | [testing.md](testing.md) | Go tests: the known-failing list, keeping tests deterministic, the playlist / media player flake (#10) |
 | [releasing.md](releasing.md) | Versions (1.0.0 onwards, server and TV together), cutting a release with the workflow, verifying it, rolling back |
