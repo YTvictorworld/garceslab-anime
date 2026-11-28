@@ -2,6 +2,11 @@ import { VideoCore_PlaybackType, VideoCore_VideoPlaybackInfo, VideoCore_VideoSou
 import { atom } from "jotai"
 import { atomWithStorage } from "jotai/utils"
 import { mediaCorePreferencesAtom } from "@/app/(main)/_features/media-core/media-core-preferences"
+import {
+    migrateSubtitleDefault,
+    VC_DEFAULT_SUBTITLE_LANGUAGES,
+    VC_SUBTITLE_DEFAULT_VERSION,
+} from "@/app/(main)/_features/video-core/video-core-subtitle-default"
 
 export type VideoCoreLifecycleState = {
     active: boolean
@@ -18,6 +23,8 @@ export type {
 
 export type VideoCoreSettings = {
     preferredSubtitleLanguage: string
+    /** Garceslab Anime: these settings went through the Spanish-first default migration. */
+    subtitleDefaultVersion?: number
     preferredSubtitleBlacklist: string
     preferredAudioLanguage: string
     subtitleDelay: number // in seconds
@@ -52,7 +59,9 @@ export type VideoCoreSettings = {
 }
 
 export const vc_initialSettings: VideoCoreSettings = {
-    preferredSubtitleLanguage: "en,eng,english",
+    // Garceslab Anime: Spanish first (Seanime: "en,eng,english"), see video-core-subtitle-default.ts.
+    preferredSubtitleLanguage: VC_DEFAULT_SUBTITLE_LANGUAGES,
+    subtitleDefaultVersion: VC_SUBTITLE_DEFAULT_VERSION,
     preferredSubtitleBlacklist: "",
     preferredAudioLanguage: "jpn,jp,jap,japanese",
     subtitleDelay: 0,
@@ -76,7 +85,10 @@ export const vc_settingsRaw = atomWithStorage<Partial<VideoCoreSettings>>("sea-v
 
 export const vc_settings = atom(
     (get) => {
-        const settings = get(vc_settingsRaw)
+        // Garceslab Anime: the previous English-only default reads as the new one; saving
+        // the settings stores it with the marker.
+        const raw = get(vc_settingsRaw)
+        const settings = migrateSubtitleDefault(raw) ?? raw
         return {
             ...vc_initialSettings,
             ...settings,
