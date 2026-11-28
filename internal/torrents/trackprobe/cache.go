@@ -23,10 +23,31 @@ type Cache struct {
 	mu  sync.Mutex
 }
 
+// CacheVersion is the schema of the cache entries.
+//
+//   - v1 (no "version" field): languages, name and forced flag per track.
+//   - v2: also the track number, CodecID and subtitle kind.
+//
+// A v1 entry is still returned by Get, as it was: auto-select only needs the
+// languages, and reading the header again would cost a debrid link and Range
+// requests for nothing. It comes back with Tracks.CodecsUnknown set, so a
+// caller that needs codecs (subtitle translation) can probe the file again
+// and Put the v2 result over it. v1 entries also expire after the TTL.
+const CacheVersion = 2
+
 type cacheEntry struct {
+	Version  int     `json:"version,omitempty"` // 0 = v1
 	Key      string  `json:"key"`
 	ProbedAt int64   `json:"probedAt"`
 	Tracks   *Tracks `json:"tracks"`
+}
+
+// version returns the entry's schema version (entries without one are v1).
+func (e cacheEntry) version() int {
+	if e.Version <= 0 {
+		return 1
+	}
+	return e.Version
 }
 
 // NewCache returns a cache in dir ("" = memory-less no-op cache).
@@ -67,6 +88,9 @@ func (c *Cache) Get(key string) (*Tracks, bool) {
 		_ = os.Remove(p)
 		return nil, false
 	}
+	// v1 entries have no codecs. An entry newer than this build (after a
+	// downgrade) is read with the fields this build knows.
+	e.Tracks.CodecsUnknown = e.version() < 2
 	return e.Tracks, true
 }
 
@@ -80,7 +104,12 @@ func (c *Cache) Put(key string, tracks *Tracks) error {
 	if err := os.MkdirAll(c.dir, 0o700); err != nil {
 		return err
 	}
-	b, err := json.Marshal(cacheEntry{Key: key, ProbedAt: c.now().Unix(), Tracks: tracks})
+	version := CacheVersion
+	if tracks.CodecsUnknown {
+		// Tracks that came from a v1 entry must not be passed off as v2.
+		version = 1
+	}
+	b, err := json.Marshal(cacheEntry{Version: version, Key: key, ProbedAt: c.now().Unix(), Tracks: tracks})
 	if err != nil {
 		return err
 	}

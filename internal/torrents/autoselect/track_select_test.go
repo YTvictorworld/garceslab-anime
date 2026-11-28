@@ -376,3 +376,73 @@ func TestPreferTracks_Pacing(t *testing.T) {
 		assert.GreaterOrEqual(t, linker.times[i].Sub(linker.times[i-1]), 140*time.Millisecond)
 	}
 }
+
+func TestPreferTracks_LogsSubtitleCodecsPerProbe(t *testing.T) {
+	pf := newProbeFixture(
+		[2]string{"aaa", "[SubsPlease] Show - 01 (1080p).mkv"},
+		[2]string{"bbb", "[Erai-raws] Show - 01 [1080p][MultiSub].mkv"},
+	)
+	linker := newFakeLinker(t, map[string]string{"aaa": "eng-fre.mkv", "bbb": "multisub.mkv"})
+	s, logs := newLoggedAutoSelect()
+	o := pf.options(linker, spanishSubs)
+	o.Cache = trackprobe.NewCache(t.TempDir(), 0)
+
+	pf.run(s, o)
+	out := logs.String()
+	assert.Equal(t, 2, strings.Count(out, `"message":"trackprobe > Subtitle tracks"`), "one line per probe")
+	assert.Contains(t, out, `"level":"info","file":"ep01.mkv","tracks":"en:srt, fr:srt","audio":"ja:aac"`)
+	assert.Contains(t, out, `"tracks":"en:ass, es:ass, es:ass, pt:ass, fr:ass, de:ass, it:ass, ar:ass, ru:ass"`)
+	assert.NotContains(t, out, "secret")
+	assert.NotContains(t, out, "127.0.0.1")
+	assert.NotContains(t, out, "/aaa/", "the file name only, not its path in the torrent")
+
+	pf.run(s, o)
+	assert.Equal(t, 2, strings.Count(logs.String(), "trackprobe > Subtitle tracks"), "cache hits are not probes")
+}
+
+// Entries cached before codecs were recorded (v1) must keep auto-select's
+// behaviour: same choice, and no new probe of the file.
+func TestPreferTracks_V1CacheEntriesBehaveAsBefore(t *testing.T) {
+	run := func(cache *trackprobe.Cache) (*Result, *fakeLinker) {
+		pf := newProbeFixture(
+			[2]string{"aaa", "[SubsPlease] Show - 01 (1080p).mkv"},
+			[2]string{"bbb", "[Erai-raws] Show - 01 [1080p][MultiSub].mkv"},
+		)
+		linker := newFakeLinker(t, map[string]string{"aaa": "eng-fre.mkv", "bbb": "multisub.mkv"})
+		s, _ := newLoggedAutoSelect()
+		o := pf.options(linker, spanishSubs)
+		o.Cache = cache
+		return pf.run(s, o), linker
+	}
+
+	// v1 entries as the previous build wrote them: no "version", no codecs.
+	dir := t.TempDir()
+	cache := trackprobe.NewCache(dir, 0)
+	v1 := map[string]*trackprobe.Tracks{
+		"aaa": {Subtitles: []trackprobe.Track{{Languages: []string{"en"}}, {Languages: []string{"fr"}}}},
+		"bbb": {Subtitles: []trackprobe.Track{{Languages: []string{"en"}}, {Languages: []string{"es"}, Name: "Spanish (Latin America)"}}},
+	}
+	for hash, tr := range v1 {
+		tr.CodecsUnknown = true
+		require.NoError(t, cache.Put(trackprobe.Key("fake", hash, "/"+hash+"/ep01.mkv"), tr))
+	}
+	files, err := filepath.Glob(filepath.Join(dir, "*.json"))
+	require.NoError(t, err)
+	require.Len(t, files, 2)
+	for _, f := range files {
+		b, err := os.ReadFile(f)
+		require.NoError(t, err)
+		b = bytes.Replace(b, []byte(`"version":1,`), nil, 1)
+		require.NotContains(t, string(b), "version")
+		require.NoError(t, os.WriteFile(f, b, 0o600))
+	}
+
+	res, linker := run(cache)
+	assert.Equal(t, "bbb", res.OriginalTorrent.InfoHash, "same pick as from v2 entries")
+	assert.Zero(t, linker.callCount(), "v1 entries are hits: nothing is probed again")
+
+	// The same choice from fresh probes (v2).
+	res, linker = run(trackprobe.NewCache(t.TempDir(), 0))
+	assert.Equal(t, "bbb", res.OriginalTorrent.InfoHash)
+	assert.Equal(t, 2, linker.callCount())
+}
