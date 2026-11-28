@@ -44,10 +44,14 @@ lower="$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]')"
 
 ctx="${LLAMA_CTX:-8192}"
 extra=()
+jinja=(--jinja)
 case "$lower" in
 *translategemma*)
-    # Trained with a 2K context: 2K per slot.
+    # Trained with a 2K context: 2K per slot. Its Jinja chat template only accepts
+    # structured content and makes llama-server refuse to start with --jinja; the
+    # eval tool sends its prompts to /completion in Gemma's turn format anyway.
     ctx="${LLAMA_CTX:-$((2048 * slots))}"
+    jinja=(--no-jinja --chat-template gemma)
     ;;
 *qwen3*instruct-2507*)
     # No thinking mode in Instruct-2507.
@@ -64,7 +68,7 @@ esac
 flags=(-m "$model" --alias "$name"
     -ngl "$ngl" -c "$ctx" -np "$slots"
     -fa on --cache-type-k q8_0 --cache-type-v q8_0
-    -b 2048 -ub 512 --jinja
+    -b 2048 -ub 512 "${jinja[@]}"
     --temp 0.2 --top-p 0.9 --seed 42
     --host "$host" --port "$port" --no-webui --metrics)
 if [ -n "${LLAMA_DEVICE:-}" ]; then
@@ -73,7 +77,7 @@ fi
 
 # Fail early on a llama-server build that doesn't know a flag.
 help="$("$server" --help 2>&1 || true)"
-for f in --flash-attn --cache-type-k --parallel --jinja --metrics --no-webui --alias; do
+for f in --flash-attn --cache-type-k --parallel --jinja --chat-template --metrics --no-webui --alias; do
     if ! grep -q -- "$f" <<<"$help"; then
         echo "llama-server at $server doesn't support $f; update llama.cpp" >&2
         exit 1

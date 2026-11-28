@@ -52,7 +52,7 @@ LLAMA_SERVER=~/llama.cpp/build/bin/llama-server LLAMA_DEVICE=Vulkan1 \
 ```
 
 The script listens on `127.0.0.1:8080` and adapts a few flags per model: TranslateGemma gets
-2K of context per slot (its trained context) and hybrid Qwen3 / Qwen3.5 models get
+2K of context per slot (its trained context) and no Jinja template, and hybrid Qwen3 / Qwen3.5 models get
 `--reasoning off`. Other settings are environment variables (`LLAMA_CTX`, `LLAMA_SLOTS`,
 `LLAMA_NGL`, `LLAMA_PORT`…, see the script's header); extra arguments go to llama-server. The
 default context is 8192 (4K per slot): with a 4 GB GPU and the Vulkan backend the plan's 16384
@@ -298,7 +298,9 @@ The same file has **model hints**, matched on the model name and the GGUF file n
   per request with its own prompt (the one its chat template builds, plus a sentence about
   the tags), validated the same way. Its chat template only accepts structured content
   (`source_lang_code`, `target_lang_code`), so the prompt goes to llama-server's native
-  `/completion` endpoint wrapped in Gemma's turn format (`raw_template: "gemma"`).
+  `/completion` endpoint wrapped in Gemma's turn format (`raw_template: "gemma"`). With
+  `--jinja` llama-server refuses to start with that template, so the launcher starts
+  TranslateGemma with `--no-jinja --chat-template gemma`.
 - **Qwen3 / Qwen3.5 hybrid models** think by default, which wastes tokens and breaks the JSON:
   requests carry `chat_template_kwargs: {"enable_thinking": false}`, any `<think>` block is
   stripped, and the launcher passes `--reasoning off --reasoning-budget 0`. The budget matters:
