@@ -126,6 +126,10 @@ func (m *Anime) getAnimeEntry(call goja.FunctionCall) goja.Value {
 	}
 
 	go func() {
+		// profiles-hook: the entry (and its list data) of the profile that owns the
+		// playback of this anime.
+		profileCtx, _ := ProfileContextFor(int(mediaId))
+
 		// Get all the local files
 		lfs, _, err := db_bridge.GetLocalFiles(database)
 		if err != nil {
@@ -137,7 +141,7 @@ func (m *Anime) getAnimeEntry(call goja.FunctionCall) goja.Value {
 		}
 
 		// Get the user's anilist collection
-		animeCollection, err := anilistPlatformRef.Get().GetAnimeCollection(ProfileContext(), false)
+		animeCollection, err := anilistPlatformRef.Get().GetAnimeCollection(profileCtx, false)
 		if err != nil {
 			m.scheduler.ScheduleAsync(func() error {
 				_ = reject(m.vm.ToValue(err.Error()))
@@ -155,7 +159,7 @@ func (m *Anime) getAnimeEntry(call goja.FunctionCall) goja.Value {
 		}
 
 		// Create a new media entry
-		entry, err := anime.NewEntry(ProfileContext(), &anime.NewEntryOptions{
+		entry, err := anime.NewEntry(profileCtx, &anime.NewEntryOptions{
 			MediaId:             int(mediaId),
 			LocalFiles:          lfs,
 			AnimeCollection:     animeCollection,
