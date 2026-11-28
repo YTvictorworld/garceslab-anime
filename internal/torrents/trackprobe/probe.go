@@ -32,6 +32,13 @@ type (
 		Languages []string `json:"languages,omitempty"` // canonical keys, see Normalize
 		Name      string   `json:"name,omitempty"`
 		Forced    bool     `json:"forced,omitempty"`
+		// Number is the Matroska TrackNumber (0 in cache entries older than v2).
+		Number uint64 `json:"number,omitempty"`
+		// CodecID is the Matroska CodecID ("S_TEXT/ASS", "S_HDMV/PGS", "A_AAC", …);
+		// empty when the file has none or the cache entry is older than v2.
+		CodecID string `json:"codecId,omitempty"`
+		// Kind is set on subtitle tracks only (text, image or unknown).
+		Kind Kind `json:"kind,omitempty"`
 	}
 
 	// Tracks is the result of a probe.
@@ -40,6 +47,10 @@ type (
 		Subtitles []Track `json:"subtitles,omitempty"`
 		// NotMatroska: the file isn't an MKV (e.g. MP4), so its tracks are unknown.
 		NotMatroska bool `json:"notMatroska,omitempty"`
+		// CodecsUnknown: read from a cache entry older than v2, which kept only
+		// languages, names and the forced flag (Number, CodecID and Kind are
+		// empty). Not stored: the entry's version says it.
+		CodecsUnknown bool `json:"-"`
 	}
 
 	// Options for ProbeURL. Zero values use the defaults.
@@ -242,11 +253,14 @@ func parseTracks(ebmlRaw, tracksRaw []byte) (*Tracks, error) {
 			Languages: TrackLanguages(ti.Language, ti.LanguageIETF, ti.Name),
 			Name:      strings.TrimSpace(ti.Name),
 			Forced:    ti.Forced,
+			Number:    uint64(ti.Number),
+			CodecID:   strings.TrimSpace(ti.CodecID),
 		}
 		switch ti.Type {
 		case matroska.TypeAudio:
 			out.Audio = append(out.Audio, t)
 		case matroska.TypeSubtitle:
+			t.Kind = SubtitleKind(t.CodecID)
 			out.Subtitles = append(out.Subtitles, t)
 		}
 	}
