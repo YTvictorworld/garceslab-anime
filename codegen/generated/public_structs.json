@@ -47065,6 +47065,15 @@
         "comments": []
       },
       {
+        "name": "ErrorCode",
+        "jsonName": "errorCode",
+        "goType": "string",
+        "typescriptType": "string",
+        "required": false,
+        "public": true,
+        "comments": []
+      },
+      {
         "name": "Data",
         "jsonName": "data",
         "goType": "R",

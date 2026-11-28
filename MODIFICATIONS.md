@@ -48,6 +48,12 @@ AniList account, several playbacks at the same time) will be listed here as they
 
 ## 2026-11 (episode tags)
 
+- **Auto-select failure classification** (`internal/debrid/client/finder.go`,
+  `internal/handlers/response.go`, `internal/handlers/routes.go`): preserve the upstream
+  auto-select sentinel errors through the debrid finder and expose stable `NO_SOURCES` and
+  `NO_MATCHING_FILE` API codes with HTTP 422. This adapts Seanime's generic stream error path so
+  clients can distinguish unavailable content from a provider failure.
+
 - **Canon / filler / recap episode tags** (`internal/episodetags`, `internal/core/episode_tags.go`,
   `internal/handlers/anime_episode_tags.go`, route in `internal/handlers/routes.go`, public route
   in `internal/profiles/public_routes.go`): `GET /api/v1/anime/episode-tags/{id}` returns

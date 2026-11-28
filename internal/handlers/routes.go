@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"seanime/internal/core"
 	"seanime/internal/profiles"
+	"seanime/internal/torrents/autoselect"
 	util "seanime/internal/util/proxies"
 	"strings"
 	"time"
@@ -653,6 +654,9 @@ func statusCodeForError(err error) int {
 
 	if _, ok := errors.AsType[*http.MaxBytesError](err); ok {
 		return http.StatusRequestEntityTooLarge
+	}
+	if errors.Is(err, autoselect.ErrNoTorrentsFound) || errors.Is(err, autoselect.ErrNoFileFound) {
+		return http.StatusUnprocessableEntity
 	}
 
 	if strings.EqualFold(strings.TrimSpace(err.Error()), "UNAUTHENTICATED") {

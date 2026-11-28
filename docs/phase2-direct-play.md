@@ -116,6 +116,13 @@ event was broadcast. Now (`internal/debrid/client/stream.go`):
 
 ## Limits
 
+Auto-select failures have stable API error codes: `NO_SOURCES` when no release is available
+and `NO_MATCHING_FILE` when releases exist but none contains the requested episode. Both return
+HTTP 422 (the request is valid, but cannot be fulfilled with the available content), so clients
+can show an availability message instead of treating the result as a Debrid outage. These
+non-transient codes are a server contract; TV clients should not retry them. Other failures keep
+the existing generic error response and status handling.
+
 - **TorBox:** on the Essential plan, cached downloads don't use the active download slots,
   so three viewers of cached releases are fine; an uncached release waits for TorBox to
   download it. Each device downloads from TorBox's CDN itself.
